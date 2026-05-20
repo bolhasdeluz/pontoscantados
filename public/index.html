@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pontos Cantados</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b14;
+    --surface: #171423;
+    --surface2: #1e1a2e;
+    --border: rgba(180,140,80,0.18);
+    --gold: #c9963c;
+    --gold-light: #e8bf72;
+    --gold-dim: rgba(201,150,60,0.12);
+    --text: #e8dcc8;
+    --text-dim: rgba(232,220,200,0.55);
+    --red: #b84040;
+    --red-dim: rgba(184,64,64,0.12);
+    --highlight: #2a1f0e;
+    --highlight-border: rgba(201,150,60,0.5);
+    --shadow: 0 4px 32px rgba(0,0,0,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 17px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(180deg, #110e1c 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 24px 22px;
+    text-align: center;
+    position: relative;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header-ornament {
+    font-size: 18px;
+    color: var(--gold-dim);
+    letter-spacing: 12px;
+    margin-bottom: 6px;
+    color: var(--gold);
+    opacity: 0.4;
+  }
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 5vw, 34px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--gold-light);
+    text-shadow: 0 0 40px rgba(201,150,60,0.3);
+  }
+  .header-obs {
+    font-size: 11px;
+    color: rgba(232,220,200,0.28);
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+  }
+
+  /* CONTROLS */
+  .controls {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px 10px 38px;
+    border-radius: 6px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--gold); }
+  .search-wrap::before {
+    content: '✦';
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    opacity: 0.5;
+    font-size: 13px;
+  }
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.active {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+  .btn-add {
+    background: var(--gold);
+    border: none;
+    color: #0d0b14;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  /* MAIN GRID */
+  .main {
+    max-width: 900px;
+    margin: 20px auto 60px;
+    padding: 0 16px;
+    display: grid;
+    gap: 14px;
+  }
+
+  /* SESSÃO BANNER */
+  .sessao-banner {
+    background: linear-gradient(135deg, #1a1105 0%, #231808 100%);
+    border: 1px solid var(--highlight-border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .sessao-banner .flame { font-size: 16px; animation: flicker 2s ease-in-out infinite alternate; }
+  @keyframes flicker {
+    0% { opacity:0.8; transform:scale(1); }
+    100% { opacity:1; transform:scale(1.05); }
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.25s;
+    animation: fadeIn 0.35s ease both;
+  }
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .card:hover { border-color: rgba(201,150,60,0.35); box-shadow: 0 6px 30px rgba(0,0,0,0.4); }
+  .card.destaque {
+    border-color: var(--highlight-border);
+    background: linear-gradient(135deg, #1a1206 0%, #1e1a2e 100%);
+    box-shadow: 0 0 0 1px rgba(201,150,60,0.08), 0 4px 24px rgba(201,150,60,0.08);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    gap: 12px;
+  }
+  .card-title-wrap { flex: 1; min-width: 0; }
+  .destaque-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,150,60,0.3);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gold-light);
+    line-height: 1.3;
+  }
+  .card-meta {
+    margin-top: 5px;
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.4; flex-shrink: 0; }
+
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all 0.18s;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .icon-btn.star { color: var(--gold); border-color: rgba(201,150,60,0.35); background: var(--gold-dim); }
+  .icon-btn.del:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+  /* BODY EXPAND */
+  .card-body { padding: 0 18px 16px; }
+  .toggle-lyrics {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.75;
+    transition: opacity 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .toggle-lyrics:hover { opacity: 1; }
+  .lyrics-text {
+    display: none;
+    margin-top: 12px;
+    padding: 16px;
+    background: var(--bg);
+    border-left: 2px solid rgba(201,150,60,0.25);
+    border-radius: 0 6px 6px 0;
+    white-space: pre-wrap;
+    line-height: 1.85;
+    font-size: 16px;
+    color: var(--text);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .lyrics-text.open { display: block; }
+  .yt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: rgba(184,64,64,0.12);
+    border: 1px solid rgba(184,64,64,0.3);
+    color: #e07070;
+    padding: 7px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .yt-btn:hover { background: rgba(184,64,64,0.2); border-color: rgba(184,64,64,0.6); }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+  .empty-icon { font-size: 36px; opacity: 0.3; margin-bottom: 14px; }
+  .empty p { font-size: 15px; }
+
+  /* MODAL */
+  .overlay {
+    display: none;
+    position: fixed; inset:0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--gold);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px 24px;
+    position: relative;
+  }
+  .modal h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: var(--gold-light);
+    margin-bottom: 22px;
+    letter-spacing: 0.06em;
+  }
+  .form-row { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=url], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type=text]:focus, input[type=url]:focus,
+  textarea:focus, select:focus { border-color: var(--gold); }
+  textarea { resize: vertical; min-height: 110px; line-height: 1.7; }
+  select option { background: #1e1a2e; }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .check-row:hover { border-color: var(--gold); }
+  .check-row input[type=checkbox] {
+    width: 16px; height: 16px; cursor: pointer;
+    accent-color: var(--gold);
+  }
+  .check-label {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 9px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--red); color: var(--red); }
+  .btn-save {
+    background: var(--gold);
+    border: none;
+    color: #0d0b14;
+    padding: 9px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { background: var(--gold-light); }
+  .btn-close-modal {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-close-modal:hover { border-color: var(--red); color: var(--red); }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 60px; color: var(--text-dim); }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    padding: 11px 18px;
+    border-radius: 7px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .cat-badge {
+    display: inline-block;
+    background: rgba(124,92,219,0.12);
+    border: 1px solid rgba(124,92,219,0.25);
+    color: #a88bf4;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .count-info {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+    padding: 8px 0 4px;
+  }
+
+  @media (max-width: 480px) {
+    .controls { gap: 8px; }
+    .filter-btn { padding: 9px 11px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-ornament">✦ ✦ ✦</div>
+  <h1>Pontos Cantados</h1>
+  <div class="header-sub">Portal do Terreiro</div>
+  <div class="header-obs">lembre de adicionar somente pontos que já foram ensinados pelos guias em uma sessão</div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Buscar ponto, guia..." oninput="renderCards()">
+  </div>
+  <button class="filter-btn" id="filterAll" onclick="setFilter('all')" >Todos</button>
+  <button class="filter-btn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Próxima Sessão</button>
+  <button class="filter-btn" id="filterGuia" onclick="setFilter('guia')">Nossos Guias</button>
+  <button class="btn-add" onclick="openModal()">+ Novo Ponto</button>
+</div>
+
+<div class="main" id="mainGrid">
+  <div class="loading"><div class="spinner"></div>Carregando pontos...</div>
+</div>
+
+<div class="count-info" id="countInfo"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="btn-close-modal" onclick="closeModal()">✕</button>
+    <h2 id="modalTitle">Novo Ponto Cantado</h2>
+    <input type="hidden" id="editId">
+
+    <div class="form-row">
+      <label>Nome do Ponto *</label>
+      <input type="text" id="fNome" placeholder="ex: Ponto de Oxalá...">
+    </div>
+    <div class="form-row">
+      <label>Linha de Trabalho</label>
+      <select id="fLinha">
+        <option value="">— Selecionar categoria —</option>
+        <option value="Quimbanda">Quimbanda</option>
+        <option value="Pretos Velhos">Pretos Velhos</option>
+        <option value="Crianças">Crianças</option>
+        <option value="Ciganos">Ciganos</option>
+        <option value="Caboclos">Caboclos</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Que tipo de ponto é esse?</label>
+      <input type="text" id="fTipo" placeholder="ex: ponto de abertura, de firmeza, de despedida...">
+    </div>
+    <div class="form-row">
+      <label>Letra / Texto</label>
+      <textarea id="fLetra" placeholder="Cole aqui a letra do ponto..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Link do YouTube</label>
+      <input type="url" id="fYt" placeholder="https://youtube.com/...">
+    </div>
+    <div class="form-row">
+      <label>É de um Guia Nosso?</label>
+      <label class="check-row">
+        <input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()">
+        <span class="check-label">Sim, pertence a um guia do terreiro</span>
+      </label>
+    </div>
+    <div class="form-row" id="guiaField" style="display:none">
+      <label>Qual Guia</label>
+      <input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa...">
+    </div>
+    <div class="form-row">
+      <label>Postado por</label>
+      <input type="text" id="fPostadoPor" placeholder="Seu nome...">
+    </div>
+    <div class="form-row">
+      <label>Destaque</label>
+      <label class="check-row">
+        <input type="checkbox" id="fDestaque">
+        <span class="check-label">🕯️ Aprender para a próxima sessão</span>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="savePonto()">Salvar Ponto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let pontos = [];
+  let currentFilter = 'all';
+
+  const API = '/api/pontos';
+
+  window.setFilter = (f) => {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('filter' + f.charAt(0).toUpperCase() + f.slice(1)).classList.add('active');
+    renderCards();
+  };
+
+  async function load() {
+    try {
+      const res = await fetch(API);
+      pontos = await res.json();
+      renderCards();
+    } catch(e) {
+      document.getElementById('mainGrid').innerHTML =
+        `<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar. Tente recarregar a página.</p></div>`;
+    }
+  }
+
+  window.renderCards = () => {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = pontos.filter(p => {
+      const match = !search ||
+        (p.nome||'').toLowerCase().includes(search) ||
+        (p.guia||'').toLowerCase().includes(search) ||
+        (p.letra||'').toLowerCase().includes(search) ||
+        (p.postadoPor||'').toLowerCase().includes(search);
+      if (!match) return false;
+      if (currentFilter === 'sessao') return p.destaque;
+      if (currentFilter === 'guia') return p.isGuia;
+      return true;
+    });
+
+    document.getElementById('countInfo').textContent =
+      filtered.length === 0 ? '' :
+      filtered.length === 1 ? '1 ponto encontrado' :
+      `${filtered.length} pontos encontrados`;
+
+    if (filtered.length === 0) {
+      document.getElementById('mainGrid').innerHTML =
+        `<div class="empty"><div class="empty-icon">🕯️</div><p>Nenhum ponto encontrado.</p></div>`;
+      return;
+    }
+
+    const dest = filtered.filter(p => p.destaque);
+    const outros = filtered.filter(p => !p.destaque);
+    const ordered = [...dest, ...outros];
+
+    let html = '';
+    if (dest.length > 0 && currentFilter !== 'sessao') {
+      html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length>1?'s':''}</div>`;
+    }
+
+    ordered.forEach(p => {
+      html += `
+      <div class="card${p.destaque?' destaque':''}">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            ${p.destaque ? `<div class="destaque-tag">🕯️ Próxima Sessão</div>` : ''}
+            <div class="card-title">${esc(p.nome)}</div>
+            <div class="card-meta">
+              ${p.linha ? `<span class="meta-item"><span class="cat-badge">${esc(p.linha)}</span></span>` : ''}
+              ${p.tipo ? `<span class="meta-item" style="color:var(--text-dim);font-style:italic">${esc(p.tipo)}</span>` : ''}
+              ${p.isGuia && p.guia ? `<span class="meta-item"><span class="meta-dot"></span>${esc(p.guia)}</span>` : ''}
+              ${p.postadoPor ? `<span class="meta-item" style="color:rgba(232,220,200,0.4)">por ${esc(p.postadoPor)}</span>` : ''}
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn ${p.destaque?'star':''}" title="${p.destaque?'Remover destaque':'Colocar em destaque'}"
+              onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
+            <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
+            <button class="icon-btn del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
+          </div>
+        </div>
+        <div class="card-body">
+          ${p.letra ? `<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button>
+            <div class="lyrics-text">${esc(p.letra).replace(/\n/g, "<br>")}</div>` : ''}
+          ${p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
+        </div>
+      </div>`;
+    });
+
+    document.getElementById('mainGrid').innerHTML = html;
+  };
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  window.toggleLyrics = (btn) => {
+    const el = btn.nextElementSibling;
+    const open = el.classList.toggle('open');
+    btn.textContent = open ? '▾ Ocultar letra' : '▸ Ver letra';
+  };
+
+  window.toggleDestaque = async (id, cur) => {
+    const p = pontos.find(x=>x.id===id);
+    if (!p) return;
+    await fetch(API, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id, destaque: !cur })
+    });
+    p.destaque = !cur;
+    renderCards();
+    toast(!cur ? '🕯️ Colocado em destaque!' : 'Destaque removido');
+  };
+
+  window.deletePonto = async (id) => {
+    if (!confirm('Excluir este ponto?')) return;
+    await fetch(`${API}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    pontos = pontos.filter(x=>x.id!==id);
+    renderCards();
+    toast('Ponto excluído');
+  };
+
+  window.openModal = () => {
+    document.getElementById('modalTitle').textContent = 'Novo Ponto Cantado';
+    document.getElementById('editId').value = '';
+    document.getElementById('fNome').value = '';
+    document.getElementById('fLetra').value = '';
+    document.getElementById('fYt').value = '';
+    document.getElementById('fIsGuia').checked = false;
+    document.getElementById('fGuia').value = '';
+    document.getElementById('fPostadoPor').value = '';
+    document.getElementById('fLinha').value = '';
+    document.getElementById('fTipo').value = '';
+    document.getElementById('fDestaque').checked = false;
+    document.getElementById('guiaField').style.display = 'none';
+    document.getElementById('overlay').classList.add('open');
+  };
+
+  window.openEdit = (id) => {
+    const p = pontos.find(x=>x.id===id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = 'Editar Ponto';
+    document.getElementById('editId').value = id;
+    document.getElementById('fNome').value = p.nome||'';
+    document.getElementById('fLetra').value = p.letra||'';
+    document.getElementById('fYt').value = p.yt||'';
+    document.getElementById('fIsGuia').checked = !!p.isGuia;
+    document.getElementById('fGuia').value = p.guia||'';
+    document.getElementById('fPostadoPor').value = p.postadoPor||'';
+    document.getElementById('fLinha').value = p.linha||'';
+    document.getElementById('fTipo').value = p.tipo||'';
+    document.getElementById('fDestaque').checked = !!p.destaque;
+    document.getElementById('guiaField').style.display = p.isGuia ? 'block' : 'none';
+    document.getElementById('overlay').classList.add('open');
+  };
+
+  window.closeModal = () => document.getElementById('overlay').classList.remove('open');
+
+  window.toggleGuiaField = () => {
+    document.getElementById('guiaField').style.display =
+      document.getElementById('fIsGuia').checked ? 'block' : 'none';
+  };
+
+  window.savePonto = async () => {
+    const nome = document.getElementById('fNome').value.trim();
+    if (!nome) { alert('Informe o nome do ponto.'); return; }
+
+    const data = {
+      nome,
+      linha: document.getElementById('fLinha').value,
+      tipo: document.getElementById('fTipo').value.trim(),
+      letra: document.getElementById('fLetra').value.trim(),
+      yt: document.getElementById('fYt').value.trim(),
+      isGuia: document.getElementById('fIsGuia').checked,
+      guia: document.getElementById('fIsGuia').checked ? document.getElementById('fGuia').value.trim() : '',
+      postadoPor: document.getElementById('fPostadoPor').value.trim(),
+      destaque: document.getElementById('fDestaque').checked,
+    };
+
+    const editId = document.getElementById('editId').value;
+    if (editId) {
+      const res = await fetch(API, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id: editId, ...data })
+      });
+      const updated = await res.json();
+      const idx = pontos.findIndex(x=>x.id===editId);
+      if (idx>=0) pontos[idx] = updated;
+      toast('Ponto atualizado!');
+    } else {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      const novo = await res.json();
+      pontos.unshift(novo);
+      toast('Ponto salvo!');
+    }
+
+    closeModal();
+    renderCards();
+  };
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('overlay')) closeModal();
+  });
+
+  load();
+</script>
+</body>
+</html>
