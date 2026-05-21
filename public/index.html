@@ -6,7 +6,7 @@
 <title>Pontos Cantados</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:transparent;--surface:#ffffff;--border:rgba(196,57,107,0.15);--gold:#c4396b;--gold-light:#e8688a;--gold-dim:rgba(196,57,107,0.08);--text:#2a1a22;--text-dim:rgba(80,30,50,0.5);--red:#b84040;--red-dim:rgba(184,64,64,0.08)}
+:root{--bg:#fff5f7;--surface:#ffffff;--border:rgba(196,57,107,0.15);--gold:#c4396b;--gold-light:#e8688a;--gold-dim:rgba(196,57,107,0.08);--text:#2a1a22;--text-dim:rgba(80,30,50,0.5);--red:#b84040;--red-dim:rgba(184,64,64,0.08)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:17px;min-height:100vh;display:flex;flex-direction:column}
 header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14px 16px;position:sticky;top:0;z-index:500;box-shadow:0 2px 20px rgba(180,60,90,.25)}
@@ -23,7 +23,7 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .hbtn:hover{background:rgba(255,255,255,.25)}
 .badge-admin{background:rgba(255,255,255,.22);border-radius:20px;color:#fff;font-size:.68rem;padding:2px 6px}
 .cb{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:0 16px;position:sticky;top:56px;z-index:400;box-shadow:0 2px 8px rgba(180,60,90,.06)}
-.ci{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:8px;overflow:hidden;padding:8px 0;flex-wrap:nowrap}
+.ci{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.ci::-webkit-scrollbar{display:none}
 .filter-select{background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;color:var(--text);cursor:pointer;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.05em;padding:6px 26px 6px 10px;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' fill='none' stroke='%238a6070' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;transition:border-color .18s;flex-shrink:0}
 .filter-select:focus{border-color:var(--gold)}
 .filter-btn{background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:20px;color:var(--text-dim);cursor:pointer;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.06em;padding:5px 12px;transition:all .18s;white-space:nowrap;flex-shrink:0}
@@ -39,7 +39,10 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .card:hover{border-color:rgba(196,57,107,.3);box-shadow:0 6px 30px rgba(196,57,107,.12)}
 .card.destaque{box-shadow:0 2px 16px rgba(180,60,90,.08),0 0 0 2px #e8c86080}.card.destaque:hover{box-shadow:0 6px 30px rgba(196,57,107,.12),0 0 0 2px #d4a83080}
-.card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 18px 12px;gap:12px}
+.card-top-bar{background:linear-gradient(135deg,#fde8ed,#fce8ef);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card.destaque .card-top-bar{background:linear-gradient(135deg,#fffbe8,#fff5d0)}
+.card.destaque .card-top-bar .destaque-tag{margin-bottom:0}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 18px 10px;gap:12px}
 .card-title-wrap{flex:1;min-width:0}
 .destaque-tag{background:linear-gradient(135deg,#8c5a00,#c88c00);border-radius:8px;color:#fff8e0;font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;padding:4px 10px;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;margin-bottom:8px;letter-spacing:.04em}
 .card-title{font-family:'Cinzel',serif;font-size:16px;font-weight:600;color:#b02d5a;line-height:1.3}
@@ -270,22 +273,25 @@ window.renderCards = () => {
 };
 function cardHtml(p){
   const ytId=extractYtId(p.yt);
+  const topBar=`<div class="card-top-bar">
+    ${p.destaque?`<div class="destaque-tag">🕯️ Próxima Sessão</div>`:''}
+    ${p.linha?`<span class="cat-badge">${esc(p.linha)}</span>`:''}
+    <div class="card-actions" style="margin-left:auto">
+      <button class="icon-btn ${p.destaque?'star':''}" title="Destaque" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
+      <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
+      <button class="icon-btn del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
+    </div>
+  </div>`;
   return `<div class="card${p.destaque?' destaque':''}">
+    ${topBar}
     <div class="card-header">
       <div class="card-title-wrap">
-        ${p.destaque?`<div class="destaque-tag">🕯️ Próxima Sessão</div>`:''}
         <div class="card-title">${esc(p.nome)}</div>
         <div class="card-meta">
-          ${p.linha?`<span class="meta-item"><span class="cat-badge">${esc(p.linha)}</span></span>`:''}
           ${p.tipo?`<span class="meta-item" style="font-style:italic">${esc(p.tipo)}</span>`:''}
           ${p.isGuia&&p.guia?`<span class="meta-item"><span class="meta-dot"></span>${esc(p.guia)}</span>`:''}
           ${p.postadoPor?`<span class="meta-item" style="color:rgba(80,30,50,.4)">por ${esc(p.postadoPor)}</span>`:''}
         </div>
-      </div>
-      <div class="card-actions">
-        <button class="icon-btn ${p.destaque?'star':''}" title="Destaque" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
-        <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
-        <button class="icon-btn del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
       </div>
     </div>
     <div class="card-body">
