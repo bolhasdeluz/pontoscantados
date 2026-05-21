@@ -33,7 +33,7 @@
 
   /* HEADER */
   header {
-    background: linear-gradient(180deg, #110e1c 0%, transparent 100%);
+    background: linear-gradient(180deg, #fce8ef 0%, transparent 100%);
     border-bottom: 1px solid var(--border);
     padding: 28px 24px 22px;
     text-align: center;
@@ -78,7 +78,7 @@
   }
   .header-obs {
     font-size: 11px;
-    color: rgba(232,220,200,0.28);
+    color: rgba(80,30,50,0.35);
     font-family: 'Crimson Pro', serif;
     font-style: italic;
     margin-top: 8px;
@@ -146,7 +146,7 @@
     transition: border-color 0.2s;
   }
   .filter-select:focus, .filter-select:hover { border-color: var(--gold); color: var(--gold); }
-  .filter-select option { background: #1e1a2e; }
+  .filter-select option { background: #ffffff; color: #2a1a22; }
   .filter-btn {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -272,7 +272,7 @@
   .card:hover { border-color: rgba(201,150,60,0.35); box-shadow: 0 6px 30px rgba(0,0,0,0.4); }
   .card.destaque {
     border-color: var(--highlight-border);
-    background: linear-gradient(135deg, #1a1206 0%, #1e1a2e 100%);
+    background: linear-gradient(135deg, #fff0f4 0%, #fff8fa 100%);
     box-shadow: 0 0 0 1px rgba(201,150,60,0.08), 0 4px 24px rgba(201,150,60,0.08);
   }
 
@@ -408,10 +408,11 @@
   }
   .overlay.open { display: flex; }
   .modal {
-    background: var(--surface2);
+    background: #ffffff;
     border: 1px solid var(--border);
     border-top: 2px solid var(--gold);
     border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(196,57,107,0.12);
     width: 100%;
     max-width: 560px;
     max-height: 90vh;
@@ -451,7 +452,7 @@
   input[type=text]:focus, input[type=url]:focus,
   textarea:focus, select:focus { border-color: var(--gold); }
   textarea { resize: vertical; min-height: 110px; line-height: 1.7; }
-  select option { background: #1e1a2e; }
+  select option { background: #ffffff; color: #2a1a22; }
 
   .check-row {
     display: flex;
@@ -526,7 +527,7 @@
   .loading { text-align: center; padding: 60px; color: var(--text-dim); }
   .spinner {
     width: 24px; height: 24px;
-    border: 2px solid var(--border);
+    border: 2px solid rgba(196,57,107,0.15);
     border-top-color: var(--gold);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -538,9 +539,10 @@
   .toast {
     position: fixed;
     bottom: 24px; right: 24px;
-    background: var(--surface2);
+    background: #ffffff;
     border: 1px solid var(--gold);
-    color: var(--gold-light);
+    color: var(--gold);
+    box-shadow: 0 4px 20px rgba(196,57,107,0.15);
     padding: 11px 18px;
     border-radius: 7px;
     font-family: 'Cinzel', serif;
@@ -556,9 +558,9 @@
 
   .cat-badge {
     display: inline-block;
-    background: rgba(124,92,219,0.12);
-    border: 1px solid rgba(124,92,219,0.25);
-    color: #a88bf4;
+    background: rgba(196,57,107,0.08);
+    border: 1px solid rgba(196,57,107,0.25);
+    color: var(--gold);
     font-family: 'Cinzel', serif;
     font-size: 8px;
     letter-spacing: 0.1em;
@@ -591,7 +593,7 @@
     transition: border-color 0.2s;
   }
   .filter-select:focus, .filter-select:hover { border-color: var(--gold); color: var(--gold); }
-  .filter-select option { background: #1e1a2e; }
+  .filter-select option { background: #ffffff; color: #2a1a22; }
   .filter-btn { padding: 9px 11px; font-size: 10px; }
   }
 </style>
