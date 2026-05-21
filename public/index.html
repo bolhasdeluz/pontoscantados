@@ -324,6 +324,39 @@
   .yt-btn:hover { background: rgba(184,64,64,0.2); border-color: rgba(184,64,64,0.6); }
 
   /* EMPTY STATE */
+  .yt-player-wrap {
+    margin-top: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    height: 36px;
+    display: none;
+  }
+  .yt-player-wrap.open { display: block; }
+  .yt-player-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .yt-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: rgba(184,64,64,0.08);
+    border: 1px solid rgba(184,64,64,0.3);
+    color: #c0392b;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .yt-toggle-btn:hover { background: rgba(184,64,64,0.15); border-color: rgba(184,64,64,0.6); }
   .empty {
     text-align: center;
     padding: 60px 20px;
@@ -635,6 +668,24 @@
 
   const API = '/api/pontos';
 
+
+  function extractYtId(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  window.togglePlayer = (btn) => {
+    const wrap = btn.nextElementSibling;
+    const isOpen = wrap.classList.toggle('open');
+    btn.textContent = isOpen ? '⏹ Fechar player' : '▶ Tocar aqui';
+    if (!isOpen) {
+      // stop video by resetting src
+      const iframe = wrap.querySelector('iframe');
+      if (iframe) iframe.src = iframe.src;
+    }
+  };
+
   window.setFilter = (f) => {
     currentFilter = f;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -713,7 +764,13 @@
         <div class="card-body">
           ${p.letra ? `<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button>
             <div class="lyrics-text">${esc(p.letra).replace(/\n/g, "<br>")}</div>` : ''}
-          ${p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
+          ${p.yt && extractYtId(p.yt) ? `
+            <button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button>
+            <div class="yt-player-wrap">
+              <iframe src="https://www.youtube.com/embed/${extractYtId(p.yt)}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            <a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>
+          ` : p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
         </div>
       </div>`;
     });
