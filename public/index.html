@@ -4,383 +4,932 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pontos Cantados</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff5f7;--surface:#ffffff;--border:rgba(196,57,107,0.15);--gold:#c4396b;--gold-light:#e8688a;--gold-dim:rgba(196,57,107,0.08);--text:#2a1a22;--text-dim:rgba(80,30,50,0.5);--red:#b84040;--red-dim:rgba(184,64,64,0.08)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column}
-header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14px 16px;position:sticky;top:0;z-index:500;box-shadow:0 2px 20px rgba(180,60,90,.25)}
-.hi{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;overflow:hidden}
-header h1{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:#fff;letter-spacing:-.01em;white-space:nowrap}
-header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
-.hr{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.sw{position:relative}
-.sw svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.5);pointer-events:none}
-#searchInput{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-family:'Crimson Pro',serif;font-size:.9rem;padding:7px 10px 7px 30px;outline:none;width:160px;transition:all .2s}
-#searchInput::placeholder{color:rgba(255,255,255,.45)}
-#searchInput:focus{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.6);width:185px}
-.hbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:10px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 11px;display:flex;align-items:center;gap:5px;transition:background .18s;white-space:nowrap}
-.hbtn:hover{background:rgba(255,255,255,.25)}
-.badge-admin{background:rgba(255,255,255,.22);border-radius:20px;color:#fff;font-size:.68rem;padding:2px 6px}
-.cb{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:0 16px;position:sticky;top:56px;z-index:400;box-shadow:0 2px 8px rgba(180,60,90,.06)}
-.ci{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.ci::-webkit-scrollbar{display:none}
-.filter-select{background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;letter-spacing:0;padding:6px 26px 6px 10px;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' fill='none' stroke='%238a6070' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;transition:border-color .18s;flex-shrink:0}
-.filter-select:focus{border-color:var(--gold)}
-.filter-btn{background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:20px;color:var(--text-dim);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;padding:5px 12px;transition:all .18s;white-space:nowrap;flex-shrink:0}
-.filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
-.layout-btns{display:flex;gap:2px;background:#f5eaed;border-radius:8px;padding:3px;margin-left:auto;flex-shrink:0}
-.layout-btn{background:none;border:none;border-radius:6px;color:var(--text-dim);cursor:pointer;padding:5px 8px;transition:all .18s;display:flex;align-items:center;font-size:.82rem}
-.layout-btn.active{background:#fff;color:var(--gold);box-shadow:0 1px 4px rgba(180,60,90,.12)}
-.main{max-width:900px;margin:20px auto 80px;padding:0 16px;display:grid;gap:14px}
-.main.layout-list{display:flex;flex-direction:column;gap:0}
-.list-item-row{background:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f5e0e5;transition:background .15s;cursor:pointer;min-width:0}
-.list-item-row:first-child{border-radius:12px 12px 0 0}
-.list-item-row:last-child{border-radius:0 0 12px 12px;border-bottom:none}
-.list-item-row:hover{background:#fff8f9}
-.list-item-row.destaque{background:linear-gradient(135deg,#fffbe8,#fff8e0);border-left:3px solid #c8a000}
-.list-item-row.destaque:hover{background:linear-gradient(135deg,#fff8d8,#fff5d0)}
-.li-main{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;gap:2px}
-.li-top{display:flex;align-items:center;gap:6px;min-width:0}
-.li-name{font-weight:600;font-size:.85rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-.li-meta{color:var(--text-dim);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.li-actions{display:flex;gap:5px;align-items:center;flex-shrink:0}
-.sessao-banner{background:linear-gradient(135deg,#fffbe8,#fff5d0);border:1px solid #e8c860;border-left:3px solid #c8a000;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.04em;color:#8c5a00;font-weight:700}
-.sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
-@keyframes flicker{0%{opacity:.8;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}
-.card{background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(180,60,90,.07);overflow:hidden;transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column;animation:fadeIn .3s ease both}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(180,60,90,.13)}
-.card.destaque{box-shadow:0 2px 16px rgba(180,60,90,.08),0 0 0 2px #e8c86080}.card.destaque:hover{box-shadow:0 6px 30px rgba(196,57,107,.12),0 0 0 2px #d4a83080}
-.card-top-bar{background:linear-gradient(135deg,#fde8ed,#fce8ef);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.card.destaque .card-top-bar{background:linear-gradient(135deg,#fffbe8,#fff5d0)}
-.card.destaque .card-top-bar .destaque-tag{margin-bottom:0}
-.card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 18px 10px;gap:12px}
-.card-title-wrap{flex:1;min-width:0}
-.destaque-tag{background:linear-gradient(135deg,#8c5a00,#c88c00);border-radius:8px;color:#fff8e0;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;padding:4px 10px;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;letter-spacing:.01em}
-.card-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.25}
-.card-meta{margin-top:4px;font-size:.78rem;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:4px 10px}
-.meta-item{display:flex;align-items:center;gap:4px}
-.meta-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:.4;flex-shrink:0}
-.cat-badge{display:inline-block;background:#fce8ef;border-radius:20px;color:#d4607a;font-size:.67rem;font-weight:500;letter-spacing:.04em;padding:3px 9px;white-space:nowrap;text-transform:uppercase}
-.card-actions{display:flex;gap:6px;flex-shrink:0}
-.icon-btn{background:none;border:1px solid var(--border);color:var(--text-dim);width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .18s}
-.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
-.icon-btn.star{color:var(--gold);border-color:rgba(196,57,107,.3);background:var(--gold-dim)}
-.icon-btn.del:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
-.admin-mode .icon-btn{display:flex}
-.card-body{padding:0 16px 14px}
-.toggle-lyrics{background:none;border:none;color:var(--gold);font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;opacity:.8;transition:opacity .2s}
-.toggle-lyrics:hover{opacity:1}
-.lyrics-text{display:none;margin-top:10px;padding:14px;border-left:2px solid rgba(196,57,107,.2);border-radius:0 6px 6px 0;white-space:pre-wrap;line-height:1.85;font-size:15px;color:var(--text);font-style:italic;font-weight:300;font-family:'Crimson Pro',Georgia,serif}
-.lyrics-text.open{display:block}
-.yt-toggle-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:var(--red-dim);border:1px solid rgba(184,64,64,.3);color:#c0392b;padding:7px 14px;border-radius:5px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.yt-toggle-btn:hover{background:rgba(184,64,64,.15)}
-.yt-player-wrap{margin-top:12px;border-radius:8px;overflow:hidden;background:#000;aspect-ratio:16/5;display:none}
-.yt-player-wrap.open{display:block}
-.yt-player-wrap iframe{width:100%;height:100%;border:none;display:block}
-.yt-btn{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:var(--red-dim);border:1px solid rgba(184,64,64,.3);color:#e07070;padding:7px 14px;border-radius:5px;text-decoration:none;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
-.yt-btn:hover{background:rgba(184,64,64,.2)}
-.empty{text-align:center;padding:60px 20px;color:var(--text-dim)}
-.empty-icon{font-size:36px;opacity:.3;margin-bottom:14px}
-.count-info{text-align:center;font-size:12px;color:var(--text-dim);font-family:'Cinzel',serif;letter-spacing:.08em;padding:4px 0 8px}
-/* list mode */
-.list-section-header{font-size:.72rem;font-weight:700;color:#9a7000;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px 4px;display:flex;align-items:center;gap:6px}
-.list-section-divider{height:1px;background:#f0d8de;margin:6px 0}
-.list-card-click{cursor:pointer}
-/* golden list row for destaque */
-.card.destaque.list-row{background:linear-gradient(135deg,#fffbe8,#fff8e0);border-left:3px solid #c8a000;box-shadow:none}
-/* overlays */
-.overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:100;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
-.overlay.open{display:flex}
-.modal{background:#fff;border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;box-shadow:0 8px 40px rgba(196,57,107,.15);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:28px 24px;position:relative}
-.modal h2{font-family:'Cinzel',serif;font-size:18px;color:#b02d5a;margin-bottom:22px;letter-spacing:.06em}
-.form-row{margin-bottom:16px}
-label{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
-input[type=text],input[type=url],textarea,select{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:16px;outline:none;transition:border-color .2s}
-input[type=text]:focus,input[type=url]:focus,textarea:focus,select:focus{border-color:var(--gold)}
-textarea{resize:vertical;min-height:110px;line-height:1.7}
-select option{background:#fff;color:#2a1a22}
-.check-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .2s}
-.check-row:hover{border-color:var(--gold)}
-.check-row input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--gold)}
-.check-label{font-size:14px;color:var(--text)}
-.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
-.btn-cancel{background:none;border:1px solid var(--border);color:var(--text-dim);padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;transition:all .2s}
-.btn-cancel:hover{border-color:var(--red);color:var(--red)}
-.btn-save{background:var(--gold);border:none;color:#fff;padding:9px 24px;border-radius:6px;cursor:pointer;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;font-weight:700;transition:all .2s}
-.btn-save:hover{background:var(--gold-light)}
-.btn-close-modal{position:absolute;top:16px;right:16px;background:none;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.btn-close-modal:hover{border-color:var(--red);color:var(--red)}
-.detail-lyrics{white-space:pre-wrap;line-height:1.85;font-size:16px;color:var(--text);font-style:italic;font-weight:300;padding:14px;border-left:2px solid rgba(196,57,107,.2);border-radius:0 6px 6px 0}
-.pw{display:flex;flex-direction:column;align-items:center;gap:16px;padding:6px 0}
-.pw p{color:var(--text-dim);font-size:.9rem;text-align:center}
-#pin-input{background:transparent;border:2px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.3em;outline:none;padding:11px 14px;text-align:center;width:100%;transition:border-color .18s}
-#pin-input:focus{border-color:var(--gold)}
-#pin-error{color:var(--red);font-size:.79rem;display:none}
-#admin-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#c0405a,#d4607a);padding:10px 20px;align-items:center;justify-content:center;gap:9px;z-index:600;box-shadow:0 -4px 18px rgba(180,60,90,.25);flex-wrap:wrap}
-.loading{text-align:center;padding:60px;color:var(--text-dim)}
-.spinner{width:24px;height:24px;border:2px solid rgba(196,57,107,.15);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:#fff;border:1px solid var(--gold);color:var(--gold);box-shadow:0 4px 20px rgba(196,57,107,.15);padding:11px 18px;border-radius:7px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;z-index:700;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:600px){header{padding:10px 12px}header p{display:none}#searchInput{width:130px}.filter-btn{padding:4px 9px;font-size:.65rem}}
+  :root {
+    --bg: transparent;
+    --surface: #ffffff;
+    --surface2: #fff5f8;
+    --border: rgba(196,57,107,0.15);
+    --gold: #c4396b;
+    --gold-light: #e8688a;
+    --gold-dim: rgba(196,57,107,0.08);
+    --text: #2a1a22;
+    --text-dim: rgba(80,30,50,0.5);
+    --red: #b84040;
+    --red-dim: rgba(184,64,64,0.08);
+    --highlight: #2a1f0e;
+    --highlight-border: rgba(196,57,107,0.4);
+    --shadow: 0 4px 32px rgba(0,0,0,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: transparent;
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 17px;
+    min-height: 100vh;
+  }
+
+  /* CONTROLS */
+  .controls {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px 10px 38px;
+    border-radius: 6px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--gold); }
+  .search-wrap::before {
+    content: '✦';
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    opacity: 0.5;
+    font-size: 13px;
+  }
+  .filter-select {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-select:focus, .filter-select:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-select option { background: #ffffff; color: #2a1a22; }
+  .filter-btn {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: #c4396b; color: #c4396b; background: #ffffff; }
+  .filter-btn.active {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: #b02d5a;
+  }
+  .btn-view {
+    background: rgba(255,255,255,0.85);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-view:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-view.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-light); }
+
+  /* LIST VIEW */
+  .main.list-view { gap: 2px; }
+  .main.list-view .card {
+    border-radius: 6px;
+  }
+  .main.list-view .card-header {
+    padding: 8px 14px;
+    align-items: center;
+  }
+  .main.list-view .destaque-tag { display: none; }
+  .main.list-view .card-body { display: none; }
+  .main.list-view .card-title { font-size: 13px; }
+  .main.list-view .card-meta { margin-top: 1px; }
+  .main.list-view .sessao-banner { padding: 8px 14px; }
+  .btn-export {
+    background: rgba(255,255,255,0.85);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-export:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-add {
+    background: #c4396b;
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: #c4396b; color: #ffffff; }
+
+  /* MAIN GRID */
+  .main {
+    max-width: 900px;
+    margin: 20px auto 60px;
+    padding: 0 16px;
+    display: grid;
+    gap: 14px;
+  }
+
+  /* SESSÃO BANNER */
+  .sessao-banner {
+    background: #ffffff;
+    border: 1px solid rgba(196,57,107,0.3);
+    border-radius: 8px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .sessao-banner .flame { font-size: 16px; animation: flicker 2s ease-in-out infinite alternate; }
+  @keyframes flicker {
+    0% { opacity:0.8; transform:scale(1); }
+    100% { opacity:1; transform:scale(1.05); }
+  }
+
+  /* CARD */
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.25s;
+    animation: fadeIn 0.35s ease both;
+  }
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .card:hover { border-color: rgba(196,57,107,0.3); box-shadow: 0 6px 30px rgba(0,0,0,0.4); }
+  .card.destaque {
+    border-color: var(--highlight-border);
+    background: #fff5f8;
+    box-shadow: 0 0 0 1px rgba(196,57,107,0.06), 0 4px 24px rgba(196,57,107,0.06);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    gap: 12px;
+  }
+  .card-title-wrap { flex: 1; min-width: 0; }
+  .destaque-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(196,57,107,0.25);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #b02d5a;
+    line-height: 1.3;
+  }
+  .card-meta {
+    margin-top: 5px;
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.4; flex-shrink: 0; }
+
+  .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all 0.18s;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .icon-btn.star { color: var(--gold); border-color: rgba(196,57,107,0.3); background: var(--gold-dim); }
+  .icon-btn.del:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+  /* BODY EXPAND */
+  .card-body { padding: 0 18px 16px; }
+  .toggle-lyrics {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.75;
+    transition: opacity 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .toggle-lyrics:hover { opacity: 1; }
+  .lyrics-text {
+    display: none;
+    margin-top: 12px;
+    padding: 16px;
+    background: transparent;
+    border-left: 2px solid rgba(196,57,107,0.2);
+    border-radius: 0 6px 6px 0;
+    white-space: pre-wrap;
+    line-height: 1.85;
+    font-size: 16px;
+    color: var(--text);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .lyrics-text.open { display: block; }
+  .yt-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: rgba(184,64,64,0.08);
+    border: 1px solid rgba(184,64,64,0.3);
+    color: #e07070;
+    padding: 7px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .yt-btn:hover { background: rgba(184,64,64,0.2); border-color: rgba(184,64,64,0.6); }
+
+  /* EMPTY STATE */
+  .yt-player-wrap {
+    margin-top: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 16/5;
+    display: none;
+  }
+  .yt-player-wrap.open { display: block; }
+  .yt-player-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .yt-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: rgba(184,64,64,0.08);
+    border: 1px solid rgba(184,64,64,0.3);
+    color: #c0392b;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .yt-toggle-btn:hover { background: rgba(184,64,64,0.15); border-color: rgba(184,64,64,0.6); }
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+  .empty-icon { font-size: 36px; opacity: 0.3; margin-bottom: 14px; }
+  .empty p { font-size: 15px; }
+
+  /* MODAL */
+  .overlay {
+    display: none;
+    position: fixed; inset:0;
+    background: rgba(40,10,20,0.45);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gold);
+    border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(196,57,107,0.15);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px 24px;
+    position: relative;
+  }
+  .modal h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: #b02d5a;
+    margin-bottom: 22px;
+    letter-spacing: 0.06em;
+  }
+  .form-row { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=url], textarea, select {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type=text]:focus, input[type=url]:focus,
+  textarea:focus, select:focus { border-color: var(--gold); }
+  textarea { resize: vertical; min-height: 110px; line-height: 1.7; }
+  select option { background: #ffffff; color: #2a1a22; }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .check-row:hover { border-color: var(--gold); }
+  .check-row input[type=checkbox] {
+    width: 16px; height: 16px; cursor: pointer;
+    accent-color: var(--gold);
+  }
+  .check-label {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .btn-cancel {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 9px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--red); color: var(--red); }
+  .btn-save {
+    background: var(--gold);
+    border: none;
+    color: #ffffff;
+    padding: 9px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { background: var(--gold-light); }
+  .btn-close-modal {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-close-modal:hover { border-color: var(--red); color: var(--red); }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 60px; color: var(--text-dim); }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid rgba(196,57,107,0.15);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: #ffffff;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    box-shadow: 0 4px 20px rgba(196,57,107,0.15);
+    padding: 11px 18px;
+    border-radius: 7px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .cat-badge {
+    display: inline-block;
+    background: rgba(196,57,107,0.08);
+    border: 1px solid rgba(196,57,107,0.25);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+  .count-info {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+    padding: 8px 0 4px;
+  }
+
+  @media (max-width: 480px) {
+    .controls { gap: 8px; }
+    .filter-select {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-select:focus, .filter-select:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-select option { background: #ffffff; color: #2a1a22; }
+  .filter-btn { padding: 9px 11px; font-size: 10px; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="hi">
-    <div>
-      <h1>Pontos Cantados</h1>
-      <p id="subtitle">Bolhas de Luz</p>
-    </div>
-    <div class="hr">
-      <div class="sw">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCards()">
-      </div>
-      <button class="hbtn" id="btn-admin">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span>Admin</span>
-        <span class="badge-admin" id="admin-badge" style="display:none">✓</span>
-      </button>
-    </div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Buscar ponto, guia..." oninput="renderCards()">
   </div>
-</header>
-<div class="cb">
-  <div class="ci">
-    <select class="filter-select" id="filterLinha" onchange="renderCards()">
-      <option value="">Todas as linhas</option>
-      <option value="Quimbanda">Quimbanda</option>
-      <option value="Pretos Velhos">Pretos Velhos</option>
-      <option value="Crianças">Crianças</option>
-      <option value="Ciganos">Ciganos</option>
-      <option value="Caboclos">Caboclos</option>
-    </select>
-    <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Todos</button>
-    <button class="filter-btn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
-    <button class="filter-btn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
-    <div class="layout-btns">
-      <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      </button>
-      <button class="layout-btn" id="btn-list" onclick="setLayout('list')" title="Lista">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      </button>
-    </div>
-  </div>
+  <select class="filter-select" id="filterLinha" onchange="renderCards()">
+    <option value="">Todas as linhas</option>
+    <option value="Quimbanda">Quimbanda</option>
+    <option value="Pretos Velhos">Pretos Velhos</option>
+    <option value="Crianças">Crianças</option>
+    <option value="Ciganos">Ciganos</option>
+    <option value="Caboclos">Caboclos</option>
+  </select>
+  <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Todos</button>
+  <button class="filter-btn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
+  <button class="filter-btn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
+  <button class="btn-view" id="btnView" onclick="toggleView()" title="Alternar visualização">☰ Lista</button>
+  <button class="btn-export" onclick="exportarJSON()" title="Baixar backup">⬇ Backup</button>
+  <button class="btn-add" onclick="openModal()">+ Novo</button>
 </div>
-<div class="main" id="mainGrid"><div class="loading"><div class="spinner"></div>Carregando pontos...</div></div>
+
+<div class="main" id="mainGrid">
+  <div class="loading"><div class="spinner"></div>Carregando pontos...</div>
+</div>
+
 <div class="count-info" id="countInfo"></div>
-<div id="admin-bar">
-  <button class="hbtn" onclick="openModal()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo ponto</button>
-  <button class="hbtn" onclick="exportarJSON()" style="background:rgba(255,255,255,.12)"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup</button>
-  <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
-</div>
-<div class="toast" id="toast"></div>
-<!-- SENHA -->
-<div class="overlay" id="ov-senha">
-  <div class="modal" style="max-width:340px">
-    <button class="btn-close-modal" onclick="fecharModal('ov-senha')">✕</button>
-    <h2 style="text-align:center;margin-bottom:0">Área Admin</h2>
-    <div class="pw">
-      <svg width="36" height="36" fill="none" stroke="var(--gold)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      <p>Digite a senha para editar os pontos</p>
-      <input type="password" id="pin-input" placeholder="••••••" autocomplete="current-password"/>
-      <span id="pin-error">Senha incorreta.</span>
-    </div>
-    <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn-save" onclick="verificarSenha()">Entrar</button></div>
-  </div>
-</div>
-<!-- EDITAR/NOVO -->
+
+<!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <button class="btn-close-modal" onclick="closeModal()">✕</button>
     <h2 id="modalTitle">Novo Ponto Cantado</h2>
     <input type="hidden" id="editId">
-    <div class="form-row"><label>Nome do Ponto *</label><input type="text" id="fNome" placeholder="ex: Ponto de Oxalá..."></div>
-    <div class="form-row"><label>Linha de Trabalho</label><select id="fLinha"><option value="">— Selecionar —</option><option value="Quimbanda">Quimbanda</option><option value="Pretos Velhos">Pretos Velhos</option><option value="Crianças">Crianças</option><option value="Ciganos">Ciganos</option><option value="Caboclos">Caboclos</option></select></div>
-    <div class="form-row"><label>Tipo do ponto</label><input type="text" id="fTipo" placeholder="ex: abertura, firmeza, despedida..."></div>
-    <div class="form-row"><label>Letra / Texto</label><textarea id="fLetra" placeholder="Cole aqui a letra do ponto..."></textarea></div>
-    <div class="form-row"><label>Link do YouTube</label><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
-    <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
-    <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa..."></div>
-    <div class="form-row"><label>Postado por</label><input type="text" id="fPostadoPor" placeholder="Seu nome..."></div>
-    <div class="form-row"><label>Destaque</label><label class="check-row"><input type="checkbox" id="fDestaque"><span class="check-label">🕯️ Aprender para a próxima sessão</span></label></div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="savePonto()">Salvar Ponto</button></div>
-  </div>
-</div>
-<!-- DETALHE -->
-<div class="overlay" id="ov-detalhe">
-  <div class="modal" style="max-width:560px">
-    <button class="btn-close-modal" onclick="fecharModal('ov-detalhe')">✕</button>
-    <div id="detalhe-body" style="display:flex;flex-direction:column;gap:14px"></div>
-  </div>
-</div>
-<script>
-const ADMIN_PASS = 'admin123';
-let adminMode = false;
-let currentLayout = 'cards';
-let pontos = [];
-let currentFilter = 'all';
-const API = '/api/pontos';
 
-document.getElementById('btn-admin').addEventListener('click', () => {
-  if (adminMode) { sairAdmin(); return; }
-  abrirModal('ov-senha');
-  setTimeout(() => document.getElementById('pin-input').focus(), 100);
-});
-document.getElementById('pin-input').addEventListener('keydown', e => { if(e.key==='Enter') verificarSenha(); });
-function verificarSenha() {
-  if (document.getElementById('pin-input').value === ADMIN_PASS) {
-    fecharModal('ov-senha'); document.getElementById('pin-input').value=''; document.getElementById('pin-error').style.display='none'; ativarAdmin();
-  } else { document.getElementById('pin-error').style.display='block'; document.getElementById('pin-input').select(); }
-}
-function ativarAdmin() { adminMode=true; document.body.classList.add('admin-mode'); document.getElementById('admin-badge').style.display=''; document.getElementById('admin-bar').style.display='flex'; document.getElementById('subtitle').textContent='✏️ Modo edição ativo'; }
-function sairAdmin() { adminMode=false; document.body.classList.remove('admin-mode'); document.getElementById('admin-badge').style.display='none'; document.getElementById('admin-bar').style.display='none'; document.getElementById('subtitle').textContent='Bolhas de Luz'; }
-function abrirModal(id) { document.getElementById(id).classList.add('open'); }
-function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
-function setLayout(l) {
-  currentLayout=l;
-  document.getElementById('btn-cards').classList.toggle('active',l==='cards');
-  document.getElementById('btn-list').classList.toggle('active',l==='list');
-  const grid=document.getElementById('mainGrid');
-  grid.classList.toggle('layout-list',l==='list');
-  renderCards();
-}
-function extractYtId(url) {
-  if(!url) return null;
-  const m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
-  return m?m[1]:null;
-}
-async function load() {
-  try { const res=await fetch(API); pontos=await res.json(); renderCards(); }
-  catch { document.getElementById('mainGrid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar.</p></div>'; }
-}
-window.setFilter = f => {
-  currentFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  const map={all:'filterAll',sessao:'filterSessao',guia:'filterGuia'};
-  if(map[f]) document.getElementById(map[f]).classList.add('active');
-  renderCards();
-};
-window.renderCards = () => {
-  const search=document.getElementById('searchInput').value.toLowerCase();
-  const linhaFilter=document.getElementById('filterLinha').value;
-  const filtered=pontos.filter(p=>{
-    const match=!search||(p.nome||'').toLowerCase().includes(search)||(p.guia||'').toLowerCase().includes(search)||(p.letra||'').toLowerCase().includes(search)||(p.postadoPor||'').toLowerCase().includes(search);
-    if(!match) return false;
-    if(linhaFilter&&(p.linha||'')!==linhaFilter) return false;
-    if(currentFilter==='sessao') return p.destaque;
-    if(currentFilter==='guia') return p.isGuia;
-    return true;
-  });
-  document.getElementById('countInfo').textContent=filtered.length===0?'':filtered.length===1?'1 ponto encontrado':`${filtered.length} pontos encontrados`;
-  const grid=document.getElementById('mainGrid');
-  if(!filtered.length){grid.innerHTML='<div class="empty"><div class="empty-icon">🕯️</div><p>Nenhum ponto encontrado.</p></div>';return;}
-  const dest=filtered.filter(p=>p.destaque);
-  const outros=filtered.filter(p=>!p.destaque);
-  if(currentLayout==='list'){renderList(dest,outros,grid);return;}
-  let html='';
-  if(dest.length&&currentFilter!=='sessao') html+=`<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length>1?'s':''}</div>`;
-  [...dest,...outros].forEach(p=>{ html+=cardHtml(p); });
-  grid.innerHTML=html;
-};
-function cardHtml(p){
-  const ytId=extractYtId(p.yt);
-  const topBar=`<div class="card-top-bar">
-    ${p.destaque?`<div class="destaque-tag">🕯️ Aprender para a Próxima Sessão</div>`:''}
-    ${p.linha?`<span class="cat-badge">${esc(p.linha)}</span>`:''}
-    <div class="card-actions" style="margin-left:auto">
-      <button class="icon-btn ${p.destaque?'star':''}" title="Destaque" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
-      <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
-      <button class="icon-btn del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
+    <div class="form-row">
+      <label>Nome do Ponto *</label>
+      <input type="text" id="fNome" placeholder="ex: Ponto de Oxalá...">
     </div>
-  </div>`;
-  return `<div class="card${p.destaque?' destaque':''}">
-    ${topBar}
-    <div class="card-header">
-      <div class="card-title-wrap">
-        <div class="card-title">${esc(p.nome)}</div>
-        <div class="card-meta">
-          ${p.tipo?`<span class="meta-item" style="font-style:italic">${esc(p.tipo)}</span>`:''}
-          ${p.isGuia&&p.guia?`<span class="meta-item"><span class="meta-dot"></span>${esc(p.guia)}</span>`:''}
-          ${p.postadoPor?`<span class="meta-item" style="color:rgba(80,30,50,.4)">por ${esc(p.postadoPor)}</span>`:''}
-        </div>
-      </div>
+    <div class="form-row">
+      <label>Linha de Trabalho</label>
+      <select id="fLinha">
+        <option value="">— Selecionar categoria —</option>
+        <option value="Quimbanda">Quimbanda</option>
+        <option value="Pretos Velhos">Pretos Velhos</option>
+        <option value="Crianças">Crianças</option>
+        <option value="Ciganos">Ciganos</option>
+        <option value="Caboclos">Caboclos</option>
+      </select>
     </div>
-    <div class="card-body">
-      ${p.letra?`<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-      ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
+    <div class="form-row">
+      <label>Que tipo de ponto é esse?</label>
+      <input type="text" id="fTipo" placeholder="ex: ponto de abertura, de firmeza, de despedida...">
     </div>
-  </div>`;
-}
-function renderList(dest,outros,grid){
-  grid.innerHTML='';
-  const wrapper=document.createElement('div');
-  wrapper.style.cssText='background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(180,60,90,.07)';
-  if(dest.length){
-    const hdr=document.createElement('div');
-    hdr.className='list-section-header';
-    hdr.innerHTML='✦ Aprender para a Próxima Sessão';
-    wrapper.appendChild(hdr);
-    dest.forEach((p,i)=>wrapper.appendChild(makeListItem(p,i)));
+    <div class="form-row">
+      <label>Letra / Texto</label>
+      <textarea id="fLetra" placeholder="Cole aqui a letra do ponto..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Link do YouTube</label>
+      <input type="url" id="fYt" placeholder="https://youtube.com/...">
+    </div>
+    <div class="form-row">
+      <label>É de um Guia Nosso?</label>
+      <label class="check-row">
+        <input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()">
+        <span class="check-label">Sim, pertence a um guia do terreiro</span>
+      </label>
+    </div>
+    <div class="form-row" id="guiaField" style="display:none">
+      <label>Qual Guia</label>
+      <input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa...">
+    </div>
+    <div class="form-row">
+      <label>Postado por</label>
+      <input type="text" id="fPostadoPor" placeholder="Seu nome...">
+    </div>
+    <div class="form-row">
+      <label>Destaque</label>
+      <label class="check-row">
+        <input type="checkbox" id="fDestaque">
+        <span class="check-label">🕯️ Aprender para a próxima sessão</span>
+      </label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="savePonto()">Salvar Ponto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let pontos = [];
+  let currentFilter = 'all';
+
+  const API = '/api/pontos';
+
+
+  function extractYtId(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    return m ? m[1] : null;
   }
-  if(dest.length&&outros.length){const sep=document.createElement('div');sep.className='list-section-divider';wrapper.appendChild(sep);}
-  outros.forEach((p,i)=>wrapper.appendChild(makeListItem(p,dest.length+i)));
-  grid.appendChild(wrapper);
-}
-function makeListItem(p,i){
-  const div=document.createElement('div');
-  div.className='list-item-row'+(p.destaque?' destaque':'');
-  div.style.animationDelay=(i*.02)+'s';
-  div.innerHTML=`
-    <div class="li-main">
-      <div class="li-top">
-        <span class="li-name">${esc(p.nome)}</span>
-        ${p.linha?`<span class="cat-badge" style="flex-shrink:0">${esc(p.linha)}</span>`:''}
-        ${p.destaque?`<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>`:''}
-      </div>
-      <div class="li-meta">${p.tipo?esc(p.tipo):''}${p.isGuia&&p.guia?(p.tipo?' · ':'')+esc(p.guia):''}</div>
-    </div>
-    <div class="li-actions">
-      <button class="icon-btn ${p.destaque?'star':''}" title="Destaque" onclick="event.stopPropagation();toggleDestaque('${p.id}',${p.destaque})">★</button>
-      <button class="icon-btn" title="Editar" onclick="event.stopPropagation();openEdit('${p.id}')">✎</button>
-      <button class="icon-btn del" title="Excluir" onclick="event.stopPropagation();deletePonto('${p.id}')">✕</button>
-    </div>`;
-  div.addEventListener('click',()=>abrirDetalhe(p.id));
-  return div;
-}
-function abrirDetalhe(id){
-  const p=pontos.find(x=>x.id===id); if(!p) return;
-  const ytId=extractYtId(p.yt);
-  document.getElementById('detalhe-body').innerHTML=`
-    <div>
-      ${p.destaque?`<div class="destaque-tag" style="display:inline-flex;margin-bottom:8px">🕯️ Próxima Sessão</div>`:''}
-      <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;color:#b02d5a;font-weight:600">${esc(p.nome)}</h2>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      ${p.linha?`<span class="cat-badge">${esc(p.linha)}</span>`:''}
-      ${p.tipo?`<span style="color:var(--text-dim);font-style:italic;font-size:14px">${esc(p.tipo)}</span>`:''}
-      ${p.isGuia&&p.guia?`<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>`:''}
-    </div>
-    ${p.letra?`<div class="detail-lyrics">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-    ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
-    ${p.postadoPor?`<p style="color:rgba(80,30,50,.4);font-size:13px;font-style:italic">por ${esc(p.postadoPor)}</p>`:''}`;
-  abrirModal('ov-detalhe');
-}
-window.toggleLyrics=btn=>{const el=btn.nextElementSibling;const open=el.classList.toggle('open');btn.textContent=open?'▾ Ocultar letra':'▸ Ver letra';};
-window.togglePlayer=btn=>{const wrap=btn.nextElementSibling;const isOpen=wrap.classList.toggle('open');btn.textContent=isOpen?'⏹ Fechar player':'▶ Tocar aqui';if(!isOpen){const iframe=wrap.querySelector('iframe');if(iframe)iframe.src=iframe.src;}};
-window.toggleDestaque=async(id,cur)=>{const p=pontos.find(x=>x.id===id);if(!p)return;await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,destaque:!cur})});p.destaque=!cur;renderCards();toast(!cur?'🕯️ Colocado em destaque!':'Destaque removido');};
-window.deletePonto=async id=>{if(!confirm('Excluir este ponto?'))return;await fetch(`${API}?id=${encodeURIComponent(id)}`,{method:'DELETE'});pontos=pontos.filter(x=>x.id!==id);renderCards();toast('Ponto excluído');};
-window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Ponto Cantado';document.getElementById('editId').value='';['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo'].forEach(id=>document.getElementById(id).value='');document.getElementById('fLinha').value='';document.getElementById('fIsGuia').checked=false;document.getElementById('fDestaque').checked=false;document.getElementById('guiaField').style.display='none';abrirModal('overlay');};
-window.openEdit=id=>{const p=pontos.find(x=>x.id===id);if(!p)return;document.getElementById('modalTitle').textContent='Editar Ponto';document.getElementById('editId').value=id;document.getElementById('fNome').value=p.nome||'';document.getElementById('fLetra').value=p.letra||'';document.getElementById('fYt').value=p.yt||'';document.getElementById('fIsGuia').checked=!!p.isGuia;document.getElementById('fGuia').value=p.guia||'';document.getElementById('fPostadoPor').value=p.postadoPor||'';document.getElementById('fLinha').value=p.linha||'';document.getElementById('fTipo').value=p.tipo||'';document.getElementById('fDestaque').checked=!!p.destaque;document.getElementById('guiaField').style.display=p.isGuia?'block':'none';abrirModal('overlay');};
-window.closeModal=()=>fecharModal('overlay');
-window.toggleGuiaField=()=>{document.getElementById('guiaField').style.display=document.getElementById('fIsGuia').checked?'block':'none';};
-window.savePonto=async()=>{const nome=document.getElementById('fNome').value.trim();if(!nome){alert('Informe o nome do ponto.');return;}const data={nome,linha:document.getElementById('fLinha').value,tipo:document.getElementById('fTipo').value.trim(),letra:document.getElementById('fLetra').value.trim(),yt:document.getElementById('fYt').value.trim(),isGuia:document.getElementById('fIsGuia').checked,guia:document.getElementById('fIsGuia').checked?document.getElementById('fGuia').value.trim():'',postadoPor:document.getElementById('fPostadoPor').value.trim(),destaque:document.getElementById('fDestaque').checked};const editId=document.getElementById('editId').value;if(editId){const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:editId,...data})});const updated=await res.json();const idx=pontos.findIndex(x=>x.id===editId);if(idx>=0)pontos[idx]=updated;toast('Ponto atualizado!');}else{const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const novo=await res.json();pontos.unshift(novo);toast('Ponto salvo!');}closeModal();renderCards();};
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);}
-window.exportarJSON=()=>{if(!pontos.length){toast('Nenhum ponto para exportar');return;}const blob=new Blob([JSON.stringify(pontos,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`pontos-cantados-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);toast('Backup baixado!');};
-load();
+
+  window.togglePlayer = (btn) => {
+    const wrap = btn.nextElementSibling;
+    const isOpen = wrap.classList.toggle('open');
+    btn.textContent = isOpen ? '⏹ Fechar player' : '▶ Tocar aqui';
+    if (!isOpen) {
+      // stop video by resetting src
+      const iframe = wrap.querySelector('iframe');
+      if (iframe) iframe.src = iframe.src;
+    }
+  };
+
+  window.setFilter = (f) => {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('filter' + f.charAt(0).toUpperCase() + f.slice(1)).classList.add('active');
+    renderCards();
+  };
+
+  async function load() {
+    try {
+      const res = await fetch(API);
+      pontos = await res.json();
+      renderCards();
+    } catch(e) {
+      document.getElementById('mainGrid').innerHTML =
+        `<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar. Tente recarregar a página.</p></div>`;
+    }
+  }
+
+  window.renderCards = () => {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const linhaFilter = document.getElementById('filterLinha').value;
+    let filtered = pontos.filter(p => {
+      const match = !search ||
+        (p.nome||'').toLowerCase().includes(search) ||
+        (p.guia||'').toLowerCase().includes(search) ||
+        (p.letra||'').toLowerCase().includes(search) ||
+        (p.postadoPor||'').toLowerCase().includes(search);
+      if (!match) return false;
+      if (linhaFilter && (p.linha||'') !== linhaFilter) return false;
+      if (currentFilter === 'sessao') return p.destaque;
+      if (currentFilter === 'guia') return p.isGuia;
+      return true;
+    });
+
+    document.getElementById('countInfo').textContent =
+      filtered.length === 0 ? '' :
+      filtered.length === 1 ? '1 ponto encontrado' :
+      `${filtered.length} pontos encontrados`;
+
+    if (filtered.length === 0) {
+      document.getElementById('mainGrid').innerHTML =
+        `<div class="empty"><div class="empty-icon">🕯️</div><p>Nenhum ponto encontrado.</p></div>`;
+      return;
+    }
+
+    const dest = filtered.filter(p => p.destaque);
+    const outros = filtered.filter(p => !p.destaque);
+    const ordered = [...dest, ...outros];
+
+    let html = '';
+    if (dest.length > 0 && currentFilter !== 'sessao') {
+      html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length>1?'s':''}</div>`;
+    }
+
+    ordered.forEach(p => {
+      html += `
+      <div class="card${p.destaque?' destaque':''}">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            ${p.destaque ? `<div class="destaque-tag">🕯️ Próxima Sessão</div>` : ''}
+            <div class="card-title">${esc(p.nome)}</div>
+            <div class="card-meta">
+              ${p.linha ? `<span class="meta-item"><span class="cat-badge">${esc(p.linha)}</span></span>` : ''}
+              ${p.tipo ? `<span class="meta-item" style="color:var(--text-dim);font-style:italic">${esc(p.tipo)}</span>` : ''}
+              ${p.isGuia && p.guia ? `<span class="meta-item"><span class="meta-dot"></span>${esc(p.guia)}</span>` : ''}
+              ${p.postadoPor ? `<span class="meta-item" style="color:rgba(80,30,50,0.4)">por ${esc(p.postadoPor)}</span>` : ''}
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="icon-btn ${p.destaque?'star':''}" title="${p.destaque?'Remover destaque':'Colocar em destaque'}"
+              onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
+            <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
+            <button class="icon-btn del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
+          </div>
+        </div>
+        <div class="card-body">
+          ${p.letra ? `<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button>
+            <div class="lyrics-text">${esc(p.letra).replace(/\n/g, "<br>")}</div>` : ''}
+          ${p.yt && extractYtId(p.yt) ? `
+            <button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button>
+            <div class="yt-player-wrap">
+              <iframe src="https://www.youtube.com/embed/${extractYtId(p.yt)}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            <a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>
+          ` : p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
+        </div>
+      </div>`;
+    });
+
+    document.getElementById('mainGrid').innerHTML = html;
+  };
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  window.toggleLyrics = (btn) => {
+    const el = btn.nextElementSibling;
+    const open = el.classList.toggle('open');
+    btn.textContent = open ? '▾ Ocultar letra' : '▸ Ver letra';
+  };
+
+  window.toggleDestaque = async (id, cur) => {
+    const p = pontos.find(x=>x.id===id);
+    if (!p) return;
+    await fetch(API, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id, destaque: !cur })
+    });
+    p.destaque = !cur;
+    renderCards();
+    toast(!cur ? '🕯️ Colocado em destaque!' : 'Destaque removido');
+  };
+
+  window.deletePonto = async (id) => {
+    if (!confirm('Excluir este ponto?')) return;
+    await fetch(`${API}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    pontos = pontos.filter(x=>x.id!==id);
+    renderCards();
+    toast('Ponto excluído');
+  };
+
+  window.openModal = () => {
+    document.getElementById('modalTitle').textContent = 'Novo Ponto Cantado';
+    document.getElementById('editId').value = '';
+    document.getElementById('fNome').value = '';
+    document.getElementById('fLetra').value = '';
+    document.getElementById('fYt').value = '';
+    document.getElementById('fIsGuia').checked = false;
+    document.getElementById('fGuia').value = '';
+    document.getElementById('fPostadoPor').value = '';
+    document.getElementById('fLinha').value = '';
+    document.getElementById('fTipo').value = '';
+    document.getElementById('fDestaque').checked = false;
+    document.getElementById('guiaField').style.display = 'none';
+    document.getElementById('overlay').classList.add('open');
+  };
+
+  window.openEdit = (id) => {
+    const p = pontos.find(x=>x.id===id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = 'Editar Ponto';
+    document.getElementById('editId').value = id;
+    document.getElementById('fNome').value = p.nome||'';
+    document.getElementById('fLetra').value = p.letra||'';
+    document.getElementById('fYt').value = p.yt||'';
+    document.getElementById('fIsGuia').checked = !!p.isGuia;
+    document.getElementById('fGuia').value = p.guia||'';
+    document.getElementById('fPostadoPor').value = p.postadoPor||'';
+    document.getElementById('fLinha').value = p.linha||'';
+    document.getElementById('fTipo').value = p.tipo||'';
+    document.getElementById('fDestaque').checked = !!p.destaque;
+    document.getElementById('guiaField').style.display = p.isGuia ? 'block' : 'none';
+    document.getElementById('overlay').classList.add('open');
+  };
+
+  window.closeModal = () => document.getElementById('overlay').classList.remove('open');
+
+  window.toggleGuiaField = () => {
+    document.getElementById('guiaField').style.display =
+      document.getElementById('fIsGuia').checked ? 'block' : 'none';
+  };
+
+  window.savePonto = async () => {
+    const nome = document.getElementById('fNome').value.trim();
+    if (!nome) { alert('Informe o nome do ponto.'); return; }
+
+    const data = {
+      nome,
+      linha: document.getElementById('fLinha').value,
+      tipo: document.getElementById('fTipo').value.trim(),
+      letra: document.getElementById('fLetra').value.trim(),
+      yt: document.getElementById('fYt').value.trim(),
+      isGuia: document.getElementById('fIsGuia').checked,
+      guia: document.getElementById('fIsGuia').checked ? document.getElementById('fGuia').value.trim() : '',
+      postadoPor: document.getElementById('fPostadoPor').value.trim(),
+      destaque: document.getElementById('fDestaque').checked,
+    };
+
+    const editId = document.getElementById('editId').value;
+    if (editId) {
+      const res = await fetch(API, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id: editId, ...data })
+      });
+      const updated = await res.json();
+      const idx = pontos.findIndex(x=>x.id===editId);
+      if (idx>=0) pontos[idx] = updated;
+      toast('Ponto atualizado!');
+    } else {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      const novo = await res.json();
+      pontos.unshift(novo);
+      toast('Ponto salvo!');
+    }
+
+    closeModal();
+    renderCards();
+  };
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('overlay')) closeModal();
+  });
+
+
+
+  let isListView = false;
+  window.toggleView = () => {
+    isListView = !isListView;
+    const grid = document.getElementById('mainGrid');
+    const btn = document.getElementById('btnView');
+    grid.classList.toggle('list-view', isListView);
+    btn.classList.toggle('active', isListView);
+    btn.textContent = isListView ? '⊞ Cards' : '☰ Lista';
+  };
+
+  window.exportarJSON = () => {
+    if (pontos.length === 0) { toast('Nenhum ponto para exportar'); return; }
+    const data = JSON.stringify(pontos, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pontos-cantados-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Backup baixado!');
+  };
+
+  load();
 </script>
 </body>
 </html>
