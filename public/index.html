@@ -31,69 +31,6 @@
     min-height: 100vh;
   }
 
-  /* HEADER */
-  header {
-    background: linear-gradient(180deg, #fce8ef 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 28px 24px 22px;
-    text-align: center;
-    position: relative;
-  }
-  header::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  }
-  .btn-back {
-    display: inline-block;
-    margin-bottom: 14px;
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 20px;
-    transition: all 0.2s;
-  }
-  .btn-back:hover { border-color: var(--gold); color: var(--gold); }
-  .header-ornament {
-    font-size: 18px;
-    color: var(--gold-dim);
-    letter-spacing: 12px;
-    margin-bottom: 6px;
-    color: var(--gold);
-    opacity: 0.4;
-  }
-  h1 {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(22px, 5vw, 34px);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--gold-light);
-    text-shadow: 0 0 40px rgba(201,150,60,0.3);
-  }
-  .header-obs {
-    font-size: 11px;
-    color: rgba(80,30,50,0.35);
-    font-family: 'Crimson Pro', serif;
-    font-style: italic;
-    margin-top: 8px;
-    letter-spacing: 0.02em;
-  }
-  .header-sub {
-    font-size: 13px;
-    color: var(--text-dim);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 4px;
-    font-family: 'Cinzel', serif;
-    font-weight: 400;
-  }
-
   /* CONTROLS */
   .controls {
     max-width: 900px;
@@ -410,9 +347,9 @@
   .modal {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-top: 2px solid var(--gold);
+    border-top: 3px solid var(--gold);
     border-radius: 12px;
-    box-shadow: 0 8px 40px rgba(196,57,107,0.12);
+    box-shadow: 0 8px 40px rgba(196,57,107,0.15);
     width: 100%;
     max-width: 560px;
     max-height: 90vh;
@@ -599,14 +536,6 @@
 </style>
 </head>
 <body>
-
-<header>
-  <a href="https://www.bolhasdeluz.com/" class="btn-back">← Voltar ao site do terreiro</a>
-  <div class="header-ornament">✦ ✦ ✦</div>
-  <h1>Pontos Cantados</h1>
-  <div class="header-sub">Terreiro de Umbanda e Quimbanda Bolhas de Luz</div>
-  <div class="header-obs">lembre de adicionar somente pontos que já foram ensinados pelos guias em uma sessão</div>
-</header>
 
 <div class="controls">
   <div class="search-wrap">
