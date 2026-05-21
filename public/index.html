@@ -7,24 +7,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0b14;
-    --surface: #171423;
-    --surface2: #1e1a2e;
-    --border: rgba(180,140,80,0.18);
-    --gold: #c9963c;
-    --gold-light: #e8bf72;
-    --gold-dim: rgba(201,150,60,0.12);
-    --text: #e8dcc8;
-    --text-dim: rgba(232,220,200,0.55);
+    --bg: transparent;
+    --surface: #ffffff;
+    --surface2: #fff5f8;
+    --border: rgba(196,57,107,0.15);
+    --gold: #c4396b;
+    --gold-light: #e8688a;
+    --gold-dim: rgba(196,57,107,0.08);
+    --text: #2a1a22;
+    --text-dim: rgba(80,30,50,0.5);
     --red: #b84040;
-    --red-dim: rgba(184,64,64,0.12);
+    --red-dim: rgba(184,64,64,0.08);
     --highlight: #2a1f0e;
-    --highlight-border: rgba(201,150,60,0.5);
+    --highlight-border: rgba(196,57,107,0.4);
     --shadow: 0 4px 32px rgba(0,0,0,0.5);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background: var(--bg);
+    background: transparent;
     color: var(--text);
     font-family: 'Crimson Pro', Georgia, serif;
     font-size: 17px;
@@ -48,7 +48,7 @@
   }
   .search-wrap input {
     width: 100%;
-    background: var(--surface);
+    background: #ffffff;
     border: 1px solid var(--border);
     color: var(--text);
     padding: 10px 14px 10px 38px;
@@ -70,7 +70,7 @@
     font-size: 13px;
   }
   .filter-select {
-    background: var(--surface);
+    background: #ffffff;
     border: 1px solid var(--border);
     color: var(--text-dim);
     padding: 10px 12px;
@@ -85,7 +85,7 @@
   .filter-select:focus, .filter-select:hover { border-color: var(--gold); color: var(--gold); }
   .filter-select option { background: #ffffff; color: #2a1a22; }
   .filter-btn {
-    background: var(--surface);
+    background: #ffffff;
     border: 1px solid var(--border);
     color: var(--text-dim);
     padding: 10px 16px;
@@ -150,7 +150,7 @@
   .btn-add {
     background: var(--gold);
     border: none;
-    color: #0d0b14;
+    color: transparent;
     padding: 10px 20px;
     border-radius: 6px;
     cursor: pointer;
@@ -174,7 +174,7 @@
 
   /* SESSÃO BANNER */
   .sessao-banner {
-    background: linear-gradient(135deg, #1a1105 0%, #231808 100%);
+    background: linear-gradient(135deg, #1a1105 0%, #ffe8f0 100%);
     border: 1px solid var(--highlight-border);
     border-radius: 8px;
     padding: 12px 18px;
@@ -195,7 +195,7 @@
 
   /* CARD */
   .card {
-    background: var(--surface);
+    background: #ffffff;
     border: 1px solid var(--border);
     border-radius: 10px;
     overflow: hidden;
@@ -206,11 +206,11 @@
     from { opacity:0; transform:translateY(8px); }
     to { opacity:1; transform:translateY(0); }
   }
-  .card:hover { border-color: rgba(201,150,60,0.35); box-shadow: 0 6px 30px rgba(0,0,0,0.4); }
+  .card:hover { border-color: rgba(196,57,107,0.3); box-shadow: 0 6px 30px rgba(0,0,0,0.4); }
   .card.destaque {
     border-color: var(--highlight-border);
     background: linear-gradient(135deg, #fff0f4 0%, #fff8fa 100%);
-    box-shadow: 0 0 0 1px rgba(201,150,60,0.08), 0 4px 24px rgba(201,150,60,0.08);
+    box-shadow: 0 0 0 1px rgba(196,57,107,0.06), 0 4px 24px rgba(196,57,107,0.06);
   }
 
   .card-header {
@@ -226,7 +226,7 @@
     align-items: center;
     gap: 5px;
     background: var(--gold-dim);
-    border: 1px solid rgba(201,150,60,0.3);
+    border: 1px solid rgba(196,57,107,0.25);
     color: var(--gold);
     font-family: 'Cinzel', serif;
     font-size: 9px;
@@ -268,7 +268,7 @@
     transition: all 0.18s;
   }
   .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
-  .icon-btn.star { color: var(--gold); border-color: rgba(201,150,60,0.35); background: var(--gold-dim); }
+  .icon-btn.star { color: var(--gold); border-color: rgba(196,57,107,0.3); background: var(--gold-dim); }
   .icon-btn.del:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
 
   /* BODY EXPAND */
@@ -293,8 +293,8 @@
     display: none;
     margin-top: 12px;
     padding: 16px;
-    background: var(--bg);
-    border-left: 2px solid rgba(201,150,60,0.25);
+    background: transparent;
+    border-left: 2px solid rgba(196,57,107,0.2);
     border-radius: 0 6px 6px 0;
     white-space: pre-wrap;
     line-height: 1.85;
@@ -309,7 +309,7 @@
     align-items: center;
     gap: 6px;
     margin-top: 12px;
-    background: rgba(184,64,64,0.12);
+    background: rgba(184,64,64,0.08);
     border: 1px solid rgba(184,64,64,0.3);
     color: #e07070;
     padding: 7px 14px;
@@ -336,7 +336,7 @@
   .overlay {
     display: none;
     position: fixed; inset:0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(40,10,20,0.45);
     z-index: 100;
     align-items: center;
     justify-content: center;
@@ -376,7 +376,7 @@
   }
   input[type=text], input[type=url], textarea, select {
     width: 100%;
-    background: var(--bg);
+    background: transparent;
     border: 1px solid var(--border);
     color: var(--text);
     padding: 10px 12px;
@@ -396,7 +396,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: var(--bg);
+    background: transparent;
     border: 1px solid var(--border);
     border-radius: 6px;
     cursor: pointer;
@@ -434,7 +434,7 @@
   .btn-save {
     background: var(--gold);
     border: none;
-    color: #0d0b14;
+    color: transparent;
     padding: 9px 24px;
     border-radius: 6px;
     cursor: pointer;
@@ -517,7 +517,7 @@
   @media (max-width: 480px) {
     .controls { gap: 8px; }
     .filter-select {
-    background: var(--surface);
+    background: #ffffff;
     border: 1px solid var(--border);
     color: var(--text-dim);
     padding: 10px 12px;
@@ -700,7 +700,7 @@
               ${p.linha ? `<span class="meta-item"><span class="cat-badge">${esc(p.linha)}</span></span>` : ''}
               ${p.tipo ? `<span class="meta-item" style="color:var(--text-dim);font-style:italic">${esc(p.tipo)}</span>` : ''}
               ${p.isGuia && p.guia ? `<span class="meta-item"><span class="meta-dot"></span>${esc(p.guia)}</span>` : ''}
-              ${p.postadoPor ? `<span class="meta-item" style="color:rgba(232,220,200,0.4)">por ${esc(p.postadoPor)}</span>` : ''}
+              ${p.postadoPor ? `<span class="meta-item" style="color:rgba(80,30,50,0.4)">por ${esc(p.postadoPor)}</span>` : ''}
             </div>
           </div>
           <div class="card-actions">
