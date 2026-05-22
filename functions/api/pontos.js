@@ -1,10 +1,30 @@
 // Cloudflare Pages Function: /api/pontos
 // CRUD de pontos cantados via KV (PONTOS_KV)
+// Env var: RESEND_KEY
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Content-Type': 'application/json',
 };
+
+async function sendEmail(env, subject, html) {
+  if (!env.RESEND_KEY) return;
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Bolhas de Luz <onboarding@resend.dev>',
+        to: ['bolhasdeluz@gmail.com'],
+        subject,
+        html,
+      }),
+    });
+  } catch {}
+}
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -41,6 +61,8 @@ export async function onRequest(context) {
       const ponto = {
         id,
         nome: body.nome || '',
+        linha: body.linha || '',
+        tipo: body.tipo || '',
         letra: body.letra || '',
         yt: body.yt || '',
         isGuia: !!body.isGuia,
@@ -50,6 +72,18 @@ export async function onRequest(context) {
         criadoEm: Date.now(),
       };
       await KV.put(id, JSON.stringify(ponto));
+
+      // notificação por email
+      await sendEmail(env,
+        `🕯️ Novo ponto adicionado: ${ponto.nome}`,
+        `<h2 style="color:#c4396b">Novo Ponto Cantado</h2>
+         <p><b>Nome:</b> ${ponto.nome}</p>
+         ${ponto.linha ? `<p><b>Linha:</b> ${ponto.linha}</p>` : ''}
+         ${ponto.tipo ? `<p><b>Tipo:</b> ${ponto.tipo}</p>` : ''}
+         ${ponto.isGuia && ponto.guia ? `<p><b>Guia:</b> ${ponto.guia}</p>` : ''}
+         <p><b>Adicionado por:</b> ${ponto.postadoPor || 'Anônimo'}</p>`
+      );
+
       return json(ponto);
     }
 
