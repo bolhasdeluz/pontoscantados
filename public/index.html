@@ -22,8 +22,10 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .hbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:10px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 11px;display:flex;align-items:center;gap:5px;transition:background .18s;white-space:nowrap}
 .hbtn:hover{background:rgba(255,255,255,.25)}
 .badge-admin{background:rgba(255,255,255,.22);border-radius:20px;color:#fff;font-size:.68rem;padding:2px 6px}
-.cb{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:0 16px;position:sticky;top:56px;z-index:400;box-shadow:0 2px 8px rgba(180,60,90,.06)}
-.ci{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ci::-webkit-scrollbar{display:none}
+.cb{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:0 12px;position:sticky;top:56px;z-index:400;box-shadow:0 2px 8px rgba(180,60,90,.06)}
+.ci{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 0}
+.ci-filters{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;scrollbar-width:none;min-width:0}
+.ci-filters::-webkit-scrollbar{display:none}
 .layout-btns{display:flex;gap:2px;background:#f5eaed;border-radius:8px;padding:3px;flex-shrink:0}
 .filter-select{background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;letter-spacing:0;padding:6px 26px 6px 10px;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' fill='none' stroke='%238a6070' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;transition:border-color .18s;flex-shrink:0}
 .filter-select:focus{border-color:var(--gold)}
@@ -145,14 +147,6 @@ select option{background:#fff;color:#2a1a22}
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         + Novo
       </button>
-      <div class="layout-btns" style="background:rgba(255,255,255,.15);border-radius:8px;padding:3px;gap:2px;display:flex">
-        <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards" style="color:#fff;padding:5px 8px">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        </button>
-        <button class="layout-btn" id="btn-list" onclick="setLayout('list')" title="Lista" style="color:#fff;padding:5px 8px">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </button>
-      </div>
       <button class="hbtn" id="btn-admin">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         <span>Admin</span>
@@ -163,17 +157,19 @@ select option{background:#fff;color:#2a1a22}
 </header>
 <div class="cb">
   <div class="ci">
-    <select class="filter-select" id="filterLinha" onchange="renderCards()">
-      <option value="">Todas as linhas</option>
-      <option value="Quimbanda">Quimbanda</option>
-      <option value="Pretos Velhos">Pretos Velhos</option>
-      <option value="Crianças">Crianças</option>
-      <option value="Ciganos">Ciganos</option>
-      <option value="Caboclos">Caboclos</option>
-    </select>
-    <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Todos</button>
-    <button class="filter-btn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
-    <button class="filter-btn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
+    <div class="ci-filters">
+      <select class="filter-select" id="filterLinha" onchange="renderCards()">
+        <option value="">Todas as linhas</option>
+        <option value="Quimbanda">Quimbanda</option>
+        <option value="Pretos Velhos">Pretos Velhos</option>
+        <option value="Crianças">Crianças</option>
+        <option value="Ciganos">Ciganos</option>
+        <option value="Caboclos">Caboclos</option>
+      </select>
+      <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Todos</button>
+      <button class="filter-btn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
+      <button class="filter-btn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
+    </div>
     <div class="layout-btns">
       <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
