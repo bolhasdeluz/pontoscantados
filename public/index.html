@@ -9,7 +9,11 @@
 :root{--bg:#fff5f7;--surface:#ffffff;--border:rgba(196,57,107,0.15);--gold:#c4396b;--gold-light:#e8688a;--gold-dim:rgba(196,57,107,0.08);--text:#2a1a22;--text-dim:rgba(80,30,50,0.5);--red:#b84040;--red-dim:rgba(184,64,64,0.08)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column}
-header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14px 16px;position:sticky;top:0;z-index:500;box-shadow:0 2px 20px rgba(180,60,90,.25)}
+header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:12px 16px 10px;position:sticky;top:0;z-index:500;box-shadow:0 2px 20px rgba(180,60,90,.25)}
+.header-row2{display:flex;gap:6px;align-items:center;margin-top:9px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.header-row2::-webkit-scrollbar{display:none}
+.hfbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.85);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;padding:5px 13px;transition:all .18s;white-space:nowrap;flex-shrink:0}
+.hfbtn:hover,.hfbtn.active{background:rgba(255,255,255,.9);color:var(--gold);border-color:rgba(255,255,255,.9)}
 .hi{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;overflow:hidden}
 header h1{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:#fff;letter-spacing:-.01em;white-space:nowrap}
 header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
@@ -22,7 +26,7 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .hbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:10px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 11px;display:flex;align-items:center;gap:5px;transition:background .18s;white-space:nowrap}
 .hbtn:hover{background:rgba(255,255,255,.25)}
 .badge-admin{background:rgba(255,255,255,.22);border-radius:20px;color:#fff;font-size:.68rem;padding:2px 6px}
-.cb{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:0 12px;position:sticky;top:56px;z-index:400;box-shadow:0 2px 8px rgba(180,60,90,.06)}
+.cb{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:0 12px;position:sticky;top:90px;z-index:400;box-shadow:0 2px 8px rgba(180,60,90,.06)}
 .ci{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:8px 0}
 .ci-filters{display:flex;align-items:center;gap:6px;flex:1;overflow-x:auto;scrollbar-width:none;min-width:0}
 .ci-filters::-webkit-scrollbar{display:none}
@@ -150,6 +154,12 @@ select option{background:#fff;color:#2a1a22}
       </button>
     </div>
   </div>
+  <div class="header-row2">
+    <button class="hfbtn active" id="filterAll" onclick="setFilter('all')">Todos</button>
+    <button class="hfbtn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
+    <button class="hfbtn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
+    <button class="hfbtn" id="filterNoGuia" onclick="setFilter('noguia')">Sem guias</button>
+  </div>
 </header>
 <div class="cb">
   <div class="ci">
@@ -162,9 +172,6 @@ select option{background:#fff;color:#2a1a22}
         <option value="Ciganos">Ciganos</option>
         <option value="Caboclos">Caboclos</option>
       </select>
-      <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">Todos</button>
-      <button class="filter-btn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
-      <button class="filter-btn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
     </div>
     <div class="layout-btns">
       <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards">
@@ -281,6 +288,7 @@ window.renderCards = () => {
     if(linhaFilter&&(p.linha||'')!==linhaFilter) return false;
     if(currentFilter==='sessao') return p.destaque;
     if(currentFilter==='guia') return p.isGuia;
+    if(currentFilter==='noguia') return !p.isGuia;
     return true;
   });
   document.getElementById('countInfo').textContent=filtered.length===0?'':filtered.length===1?'1 ponto encontrado':`${filtered.length} pontos encontrados`;
