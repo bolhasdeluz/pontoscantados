@@ -207,7 +207,6 @@ select option{background:#fff;color:#2a1a22}
   <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
 </div>
 <div class="toast" id="toast"></div>
-<!-- SENHA -->
 <div class="overlay" id="ov-senha">
   <div class="modal" style="max-width:340px">
     <button class="btn-close-modal" onclick="fecharModal('ov-senha')">✕</button>
@@ -221,7 +220,6 @@ select option{background:#fff;color:#2a1a22}
     <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn-save" onclick="verificarSenha()">Entrar</button></div>
   </div>
 </div>
-<!-- EDITAR/NOVO -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <button class="btn-close-modal" onclick="closeModal()">✕</button>
@@ -256,7 +254,6 @@ select option{background:#fff;color:#2a1a22}
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="savePonto()">Salvar Ponto</button></div>
   </div>
 </div>
-<!-- DETALHE -->
 <div class="overlay" id="ov-detalhe">
   <div class="modal" style="max-width:560px">
     <button class="btn-close-modal" onclick="fecharModal('ov-detalhe')">✕</button>
@@ -456,13 +453,27 @@ window.openEdit=id=>{const p=pontos.find(x=>x.id===id||String(x.id)===String(id)
   abrirModal('overlay');};
 window.closeModal=()=>fecharModal('overlay');
 window.toggleGuiaField=()=>{document.getElementById('guiaField').style.display=document.getElementById('fIsGuia').checked?'block':'none';};
+
+window.previewAudio = function(input) {
+  const file = input.files[0];
+  if (file) {
+    document.getElementById('audioFileName').textContent = file.name;
+    const urlEl = document.getElementById('audioCurrentUrl');
+    urlEl.textContent = '🎵 Áudio selecionado: ' + file.name;
+    urlEl.style.display = 'block';
+    urlEl.dataset.url = URL.createObjectURL(file);
+  }
+};
+
+async function uploadAudioToR2(file) {
+  return URL.createObjectURL(file);
+}
+
 window.savePonto=async()=>{
   const nome=document.getElementById('fNome').value.trim();
   if(!nome){alert('Informe o nome do ponto.');return;}
   const editId=document.getElementById('editId').value;
   let audioUrl=document.getElementById('audioCurrentUrl').dataset.url||'';
-  const audioFile=document.getElementById('fAudioFile').files[0];
-  if(audioFile){toast('⏳ Enviando áudio...');const uploaded=await uploadAudioToR2(audioFile);if(uploaded)audioUrl=uploaded;}
   const data={
     nome,
     linha:document.getElementById('fLinha').value,
@@ -489,7 +500,7 @@ window.savePonto=async()=>{
   }
   closeModal();renderCards();
 };
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);}
 window.exportarJSON=()=>{if(!pontos.length){toast('Nenhum ponto para exportar');return;}const blob=new Blob([JSON.stringify(pontos,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`pontos-cantados-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);toast('Backup baixado!');};
 load();
