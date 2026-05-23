@@ -436,7 +436,10 @@ function checkAudioEnd(el) {
 
 function marcarTempo(inputId, idx, campo) {
   const player = document.getElementById('edit-audio-player');
-  if (!player || !player.src) { alert('Nenhum áudio carregado — edite um ponto com áudio primeiro.'); return; }
+  if (!player || !player.src || player.readyState < 1) {
+    alert('Aguarde o áudio carregar antes de marcar.');
+    return;
+  }
   const t = player.currentTime;
   const m = Math.floor(t / 60);
   const s = Math.floor(t % 60);
@@ -471,6 +474,11 @@ async function previewAudio(input) {
     urlEl.dataset.url = uploaded;
     urlEl.style.display = 'block';
     document.getElementById('seg-area').style.display = 'block';
+    // show preview player
+    const prev = document.getElementById('edit-audio-preview');
+    const player = document.getElementById('edit-audio-player');
+    player.src = uploaded;
+    prev.style.display = 'block';
   } else {
     document.getElementById('audioFileName').textContent = '❌ Falhou — tente outro arquivo';
     document.getElementById('seg-area').style.display = 'none';
