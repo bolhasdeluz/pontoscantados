@@ -38,7 +38,8 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .layout-btns{display:flex;gap:2px;background:#f5eaed;border-radius:8px;padding:3px;margin-left:auto;flex-shrink:0}
 .layout-btn{background:none;border:none;border-radius:6px;color:var(--text-dim);cursor:pointer;padding:5px 8px;transition:all .18s;display:flex;align-items:center;font-size:.82rem}
 .layout-btn.active{background:#fff;color:var(--gold);box-shadow:0 1px 4px rgba(180,60,90,.12)}
-.main{max-width:900px;margin:20px auto 80px;padding:0 16px;display:grid;gap:14px}
+.main{max-width:900px;margin:20px auto 0;padding:0 16px;display:grid;gap:14px}
+.bottom-space{height:40vh;min-height:120px}
 .main.layout-list{display:flex;flex-direction:column;gap:0}
 .list-item-row{background:#fff;padding:10px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f5e0e5;transition:background .15s;cursor:pointer;min-width:0}
 .list-item-row:first-child{border-radius:12px 12px 0 0}
@@ -201,6 +202,7 @@ select option{background:#fff;color:#2a1a22}
 </div>
 <div class="main" id="mainGrid"><div class="loading"><div class="spinner"></div>Carregando pontos...</div></div>
 <div class="count-info" id="countInfo"></div>
+<div class="bottom-space"></div>
 <div id="admin-bar">
   <span style="color:rgba(255,255,255,.7);font-size:.78rem">Modo Admin — ★ e ✕ liberados</span>
   <button class="hbtn" onclick="exportarJSON()" style="background:rgba(255,255,255,.12)"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup</button>
@@ -231,24 +233,18 @@ select option{background:#fff;color:#2a1a22}
     <div class="form-row"><label>Linha de Trabalho</label><select id="fLinha"><option value="">— Selecionar —</option><option value="Quimbanda">Quimbanda</option><option value="Pretos Velhos">Pretos Velhos</option><option value="Crianças">Crianças</option><option value="Ciganos">Ciganos</option><option value="Caboclos">Caboclos</option></select></div>
     <div class="form-row"><label>Tipo do ponto</label><input type="text" id="fTipo" placeholder="ex: abertura, firmeza, despedida..."></div>
     <div class="form-row"><label>Letra / Texto</label><textarea id="fLetra" placeholder="Cole aqui a letra do ponto..."></textarea></div>
+    <div class="form-row"><label>Link do YouTube (opcional)</label><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
     <div class="form-row">
-      <label>Referência</label>
-      <div style="display:flex;gap:6px;margin-bottom:10px">
-        <button type="button" id="tab-yt" onclick="setMediaTab('yt')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer">▶ YouTube</button>
-        <button type="button" id="tab-audio" onclick="setMediaTab('audio')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid rgba(196,57,107,.3);background:transparent;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer">🎙️ Áudio gravado</button>
+      <label>Áudio gravado — opcional (🎙️ Nossos Pontos)</label>
+      <div class="upload-area" onclick="document.getElementById('fAudioFile').click()">
+        <input type="file" id="fAudioFile" accept="audio/*" onchange="previewAudio(this)">
+        <label class="upload-label">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M9.5 11.5l2.5-2.5 2.5 2.5"/><path d="M12 9v6"/></svg>
+          <span id="audioFileName">Toque para escolher um áudio do iPhone</span>
+        </label>
+        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
       </div>
-      <div id="media-yt"><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
-      <div id="media-audio" style="display:none">
-        <div class="upload-area" onclick="document.getElementById('fAudioFile').click()">
-          <input type="file" id="fAudioFile" accept="audio/*" onchange="previewAudio(this)">
-          <label class="upload-label">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M9.5 11.5l2.5-2.5 2.5 2.5"/><path d="M12 9v6"/></svg>
-            <span id="audioFileName">Toque para escolher um áudio do iPhone</span>
-          </label>
-          <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
-        </div>
-        <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
-      </div>
+      <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
     </div>
     <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
     <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa..."></div>
@@ -444,7 +440,6 @@ window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Po
   document.getElementById('audioCurrentUrl').textContent='';document.getElementById('audioCurrentUrl').dataset.url='';document.getElementById('audioCurrentUrl').style.display='none';
   document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
   document.getElementById('fAudioFile').value='';
-  setMediaTab('yt');
   abrirModal('overlay');};
 window.openEdit=id=>{const p=pontos.find(x=>x.id===id||String(x.id)===String(id));if(!p)return;document.getElementById('modalTitle').textContent='Editar Ponto';document.getElementById('editId').value=id;document.getElementById('fNome').value=p.nome||'';document.getElementById('fLetra').value=p.letra||'';document.getElementById('fYt').value=p.yt||'';document.getElementById('fIsGuia').checked=!!p.isGuia;document.getElementById('fGuia').value=p.guia||'';document.getElementById('fPostadoPor').value=p.postadoPor||'';document.getElementById('fLinha').value=p.linha||'';document.getElementById('fTipo').value=p.tipo||'';document.getElementById('guiaField').style.display=p.isGuia?'block':'none';
   const urlEl=document.getElementById('audioCurrentUrl');
@@ -452,7 +447,6 @@ window.openEdit=id=>{const p=pontos.find(x=>x.id===id||String(x.id)===String(id)
   else{urlEl.textContent='';urlEl.dataset.url='';urlEl.style.display='none';}
   document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
   document.getElementById('fAudioFile').value='';
-  setMediaTab(p.audioUrl?'audio':'yt');
   abrirModal('overlay');};
 window.closeModal=()=>fecharModal('overlay');
 window.toggleGuiaField=()=>{document.getElementById('guiaField').style.display=document.getElementById('fIsGuia').checked?'block':'none';};
@@ -468,7 +462,7 @@ window.savePonto=async()=>{
     linha:document.getElementById('fLinha').value,
     tipo:document.getElementById('fTipo').value.trim(),
     letra:document.getElementById('fLetra').value.trim(),
-    yt:audioUrl?'':document.getElementById('fYt').value.trim(),
+    yt:document.getElementById('fYt').value.trim(),
     audioUrl,
     isGuia:document.getElementById('fIsGuia').checked,
     guia:document.getElementById('fIsGuia').checked?document.getElementById('fGuia').value.trim():'',
