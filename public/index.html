@@ -57,6 +57,21 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 
 
 
+
+/* ── APRENDER / LOTE ── */
+.aprender-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#e8f4f0,#d4ede6);border:1px solid #b8ddd4;border-radius:20px;color:#2a7a60;font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:600;letter-spacing:.03em;padding:2px 9px;text-transform:uppercase;white-space:nowrap}
+.card-check{position:absolute;top:10px;left:10px;display:none;z-index:2}
+.card-check input{width:18px;height:18px;accent-color:var(--gold);cursor:pointer}
+.card.selectable{position:relative}
+.card.selecionado{box-shadow:0 0 0 2px var(--gold),0 4px 16px rgba(196,57,107,.1)}
+.admin-mode .card-check{display:block}
+.batch-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#2a7a60,#3a9a78);padding:10px 16px;align-items:center;justify-content:center;gap:8px;z-index:700;box-shadow:0 -4px 18px rgba(0,0,0,.2);flex-wrap:wrap}
+.batch-bar.open{display:flex}
+.batch-info{color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;margin-right:4px}
+.batch-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:8px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;padding:7px 12px;transition:all .18s;white-space:nowrap}
+.batch-btn:hover{background:rgba(255,255,255,.35)}
+.batch-btn.danger{background:rgba(184,64,64,.4);border-color:rgba(184,64,64,.6)}
+.batch-btn.cancel{background:rgba(0,0,0,.2)}
 /* ── CUSTOM AUDIO PLAYER ── */
 .cplayer{background:linear-gradient(135deg,#fff0f4,#fde8ed);border:1px solid rgba(196,57,107,.15);border-radius:10px;padding:10px 12px;margin-top:8px}
 .cplayer-time{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);font-family:monospace;margin-bottom:6px}
@@ -120,6 +135,7 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .icon-btn{background:none;border:1px solid var(--border);color:var(--text-dim);width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .18s}
 .icon-btn.admin-only{display:none}
 .admin-mode .icon-btn.admin-only{display:flex}
+.admin-mode .card-check-input.admin-only{display:block!important}
 .icon-btn:hover{border-color:var(--gold);color:var(--gold)}
 .icon-btn.star{color:var(--gold);border-color:rgba(196,57,107,.3);background:var(--gold-dim)}
 .icon-btn.del:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
@@ -207,6 +223,7 @@ select option{background:#fff;color:#2a1a22}
     <button class="hfbtn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
     <button class="hfbtn" id="filterNoGuia" onclick="setFilter('noguia')">Sem guias</button>
     <button class="hfbtn" id="filterNossos" onclick="setFilter('nossos')">🎙️ Nossos Pontos</button>
+    <button class="hfbtn" id="filterAprender" onclick="setFilter('aprender')">📚 Aprender</button>
   </div>
 </header>
 <div class="cb">
@@ -633,6 +650,7 @@ window.renderCards = () => {
     if(currentFilter==='guia') return p.isGuia;
     if(currentFilter==='noguia') return !p.isGuia;
     if(currentFilter==='nossos') return !!p.audioUrl;
+    if(currentFilter==='aprender') return !!p.aprender;
     return true;
   });
   document.getElementById('countInfo').textContent=filtered.length===0?'':filtered.length===1?'1 ponto encontrado':`${filtered.length} pontos encontrados`;
@@ -652,7 +670,9 @@ function cardHtml(p){
     ${p.destaque?`<div class="destaque-tag">🕯️ Aprender para a Próxima Sessão</div>`:''}
     ${p.linha?`<span class="cat-badge">${esc(p.linha)}</span>`:''}
     <div class="card-actions" style="margin-left:auto">
-      <button class="icon-btn admin-only ${p.destaque?'star':''}" title="Destaque" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
+      <input type="checkbox" class="card-check-input admin-only" style="display:none;width:16px;height:16px;accent-color:var(--gold);cursor:pointer;margin-right:2px" onchange="toggleSelecao('${p.id}',this.checked)" onclick="event.stopPropagation()">
+      <button class="icon-btn admin-only ${p.aprender?'':''}${p.aprender?' style=\"color:#2a7a60;border-color:#b8ddd4;background:#e8f4f0\"':''}" title="Aprender" onclick="toggleAprender('${p.id}',${!!p.aprender})">📚</button>
+      <button class="icon-btn admin-only ${p.destaque?'star':''}" title="Sessão" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
       <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
       <button class="icon-btn admin-only del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
     </div>
@@ -706,6 +726,7 @@ function makeListItem(p,i){
         <span class="li-name">${esc(p.nome)}</span>
         ${p.linha?`<span class="cat-badge" style="flex-shrink:0">${esc(p.linha)}</span>`:''}
     ${p.audioUrl?`<span class="nossos-badge">🎙️ Nosso</span>`:''}
+    ${p.aprender?`<span class="aprender-badge">📚 Aprender</span>`:''}
         ${p.destaque?`<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>`:''}
       </div>
       <div class="li-meta">${p.tipo?esc(p.tipo):''}${p.isGuia&&p.guia?(p.tipo?' · ':'')+esc(p.guia):''}</div>
@@ -852,6 +873,16 @@ function mostrarErro(contexto, err) {
 
 load();
 </script>
+<!-- BATCH BAR -->
+<div class="batch-bar" id="batch-bar">
+  <span class="batch-info" id="batch-count">0 selecionados</span>
+  <button class="batch-btn" onclick="batchAprender()">📚 Aprender</button>
+  <button class="batch-btn" onclick="batchSessao()">🕯️ Sessão</button>
+  <button class="batch-btn" onclick="batchLinha()">📂 Linha</button>
+  <button class="batch-btn danger" onclick="batchExcluir()">✕ Excluir</button>
+  <button class="batch-btn cancel" onclick="limparSelecao()">Cancelar</button>
+</div>
+
 <!-- MODAL ERRO -->
 <div class="overlay" id="ov-erro">
   <div class="modal" style="max-width:400px">
