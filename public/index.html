@@ -240,7 +240,7 @@ select option{background:#fff;color:#2a1a22}
       <div id="media-yt"><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
       <div id="media-audio" style="display:none">
         <div class="upload-area" onclick="document.getElementById('fAudioFile').click()">
-          <input type="file" id="fAudioFile" accept="audio/*" onchange="previewAudio(this)">
+          <input type="file" id="fAudioFile" onchange="previewAudio(this)">
           <label class="upload-label">
             <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M9.5 11.5l2.5-2.5 2.5 2.5"/><path d="M12 9v6"/></svg>
             <span id="audioFileName">Toque para escolher um áudio do iPhone</span>
