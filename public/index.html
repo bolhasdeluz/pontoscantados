@@ -56,9 +56,8 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
 
 /* ── ÁUDIO / NOSSOS PONTOS ── */
-.audio-player{margin-top:10px;width:100%}
-.audio-player audio{width:100%;border-radius:8px;accent-color:var(--gold);outline:none}
-.audio-player audio::-webkit-media-controls-panel{background:#fff5f8}
+.audio-player{margin-top:10px;width:100%;background:linear-gradient(135deg,#fff0f4,#fde8ed);border-radius:10px;padding:8px;border:1px solid rgba(196,57,107,.15)}
+.audio-player audio{width:100%;border-radius:6px;accent-color:#c4396b;outline:none;height:36px}
 .upload-area{border:2px dashed rgba(196,57,107,.3);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:#fdf5f7}
 .upload-area:hover{border-color:var(--gold);background:#fffbe8}
 .upload-area input{display:none}
@@ -395,8 +394,7 @@ function cardHtml(p){
     </div>
     <div class="card-body">
       ${p.letra?`<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none"><source src="${p.audioUrl}"><span style="font-size:.8rem;color:var(--text-dim)">Áudio não suportado</span></audio></div>`:''}
-      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
+      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none"><source src="${p.audioUrl}"></audio></div>`:''}
     ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     </div>
   </div>`;
