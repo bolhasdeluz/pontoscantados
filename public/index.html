@@ -53,6 +53,18 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .li-actions{display:flex;gap:5px;align-items:center;flex-shrink:0}
 .sessao-banner{background:linear-gradient(135deg,#fffbe8,#fff5d0);border:1px solid #e8c860;border-left:3px solid #c8a000;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.04em;color:#8c5a00;font-weight:700}
 .sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
+
+/* ── ÁUDIO / NOSSOS PONTOS ── */
+.audio-player{margin-top:10px;width:100%}
+.audio-player audio{width:100%;border-radius:8px;accent-color:var(--gold);outline:none}
+.audio-player audio::-webkit-media-controls-panel{background:#fff5f8}
+.upload-area{border:2px dashed rgba(196,57,107,.3);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:#fdf5f7}
+.upload-area:hover{border-color:var(--gold);background:#fffbe8}
+.upload-area input{display:none}
+.upload-label{font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--text-dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
+.upload-progress{height:4px;background:#f0d0d8;border-radius:4px;margin-top:8px;overflow:hidden;display:none}
+.upload-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),#e8688a);border-radius:4px;width:0;transition:width .3s}
+.nossos-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(196,57,107,.08);border:1px solid rgba(196,57,107,.25);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:500;letter-spacing:.04em;padding:2px 9px;border-radius:20px;text-transform:uppercase}
 @keyframes flicker{0%{opacity:.8;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}
 .card{background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(180,60,90,.07);overflow:hidden;transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column;animation:fadeIn .3s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -159,6 +171,7 @@ select option{background:#fff;color:#2a1a22}
     <button class="hfbtn" id="filterSessao" onclick="setFilter('sessao')">🕯️ Sessão</button>
     <button class="hfbtn" id="filterGuia" onclick="setFilter('guia')">Guias</button>
     <button class="hfbtn" id="filterNoGuia" onclick="setFilter('noguia')">Sem guias</button>
+    <button class="hfbtn" id="filterNossos" onclick="setFilter('nossos')">🎙️ Nossos Pontos</button>
   </div>
 </header>
 <div class="cb">
@@ -219,6 +232,18 @@ select option{background:#fff;color:#2a1a22}
     <div class="form-row"><label>Tipo do ponto</label><input type="text" id="fTipo" placeholder="ex: abertura, firmeza, despedida..."></div>
     <div class="form-row"><label>Letra / Texto</label><textarea id="fLetra" placeholder="Cole aqui a letra do ponto..."></textarea></div>
     <div class="form-row"><label>Link do YouTube</label><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
+    <div class="form-row" id="audioUploadArea">
+      <label>Áudio gravado (Nossos Pontos)</label>
+      <div class="upload-area" onclick="document.getElementById('fAudioFile').click()">
+        <input type="file" id="fAudioFile" accept="audio/*" onchange="previewAudio(this)">
+        <label class="upload-label">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M9.5 11.5l2.5-2.5 2.5 2.5"/><path d="M12 9v6"/></svg>
+          <span id="audioFileName">Toque para escolher um áudio do iPhone</span>
+        </label>
+        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+      </div>
+      <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
+    </div>
     <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
     <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa..."></div>
     <div class="form-row"><label>Postado por</label><input type="text" id="fPostadoPor" placeholder="Seu nome..."></div>
@@ -289,6 +314,7 @@ window.renderCards = () => {
     if(currentFilter==='sessao') return p.destaque;
     if(currentFilter==='guia') return p.isGuia;
     if(currentFilter==='noguia') return !p.isGuia;
+    if(currentFilter==='nossos') return !!p.audioUrl;
     return true;
   });
   document.getElementById('countInfo').textContent=filtered.length===0?'':filtered.length===1?'1 ponto encontrado':`${filtered.length} pontos encontrados`;
@@ -327,7 +353,9 @@ function cardHtml(p){
     </div>
     <div class="card-body">
       ${p.letra?`<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-      ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
+      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none"><source src="${p.audioUrl}"><span style="font-size:.8rem;color:var(--text-dim)">Áudio não suportado</span></audio></div>`:''}
+      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
+    ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     </div>
   </div>`;
 }
@@ -355,6 +383,7 @@ function makeListItem(p,i){
       <div class="li-top">
         <span class="li-name">${esc(p.nome)}</span>
         ${p.linha?`<span class="cat-badge" style="flex-shrink:0">${esc(p.linha)}</span>`:''}
+    ${p.audioUrl?`<span class="nossos-badge">🎙️ Nosso</span>`:''}
         ${p.destaque?`<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>`:''}
       </div>
       <div class="li-meta">${p.tipo?esc(p.tipo):''}${p.isGuia&&p.guia?(p.tipo?' · ':'')+esc(p.guia):''}</div>
@@ -381,6 +410,7 @@ function abrirDetalhe(id){
       ${p.isGuia&&p.guia?`<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>`:''}
     </div>
     ${p.letra?`<div class="detail-lyrics">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
+    ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
     ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     ${p.postadoPor?`<p style="color:rgba(80,30,50,.4);font-size:13px;font-style:italic">por ${esc(p.postadoPor)}</p>`:''}`;
   abrirModal('ov-detalhe');
@@ -389,11 +419,26 @@ window.toggleLyrics=btn=>{const el=btn.nextElementSibling;const open=el.classLis
 window.togglePlayer=btn=>{const wrap=btn.nextElementSibling;const isOpen=wrap.classList.toggle('open');btn.textContent=isOpen?'⏹ Fechar player':'▶ Tocar aqui';if(!isOpen){const iframe=wrap.querySelector('iframe');if(iframe)iframe.src=iframe.src;}};
 window.toggleDestaque=async(id,cur)=>{const p=pontos.find(x=>x.id===id);if(!p)return;await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,destaque:!cur})});p.destaque=!cur;renderCards();toast(!cur?'🕯️ Colocado em destaque!':'Destaque removido');};
 window.deletePonto=async id=>{if(!confirm('Excluir este ponto?'))return;await fetch(`${API}?id=${encodeURIComponent(id)}`,{method:'DELETE'});pontos=pontos.filter(x=>x.id!==id);renderCards();toast('Ponto excluído');};
-window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Ponto Cantado';document.getElementById('editId').value='';['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo'].forEach(id=>document.getElementById(id).value='');document.getElementById('fLinha').value='';document.getElementById('fIsGuia').checked=false;document.getElementById('guiaField').style.display='none';abrirModal('overlay');};
-window.openEdit=id=>{const p=pontos.find(x=>x.id===id||String(x.id)===String(id));if(!p)return;document.getElementById('modalTitle').textContent='Editar Ponto';document.getElementById('editId').value=id;document.getElementById('fNome').value=p.nome||'';document.getElementById('fLetra').value=p.letra||'';document.getElementById('fYt').value=p.yt||'';document.getElementById('fIsGuia').checked=!!p.isGuia;document.getElementById('fGuia').value=p.guia||'';document.getElementById('fPostadoPor').value=p.postadoPor||'';document.getElementById('fLinha').value=p.linha||'';document.getElementById('fTipo').value=p.tipo||'';document.getElementById('guiaField').style.display=p.isGuia?'block':'none';abrirModal('overlay');};
+window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Ponto Cantado';document.getElementById('editId').value='';['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo'].forEach(id=>document.getElementById(id).value='');document.getElementById('fLinha').value='';document.getElementById('fIsGuia').checked=false;document.getElementById('guiaField').style.display='none';
+  document.getElementById('audioCurrentUrl').textContent='';document.getElementById('audioCurrentUrl').dataset.url='';document.getElementById('audioCurrentUrl').style.display='none';
+  document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
+  document.getElementById('fAudioFile').value='';
+  abrirModal('overlay');};
+window.openEdit=id=>{const p=pontos.find(x=>x.id===id||String(x.id)===String(id));if(!p)return;document.getElementById('modalTitle').textContent='Editar Ponto';document.getElementById('editId').value=id;document.getElementById('fNome').value=p.nome||'';document.getElementById('fLetra').value=p.letra||'';document.getElementById('fYt').value=p.yt||'';document.getElementById('fIsGuia').checked=!!p.isGuia;document.getElementById('fGuia').value=p.guia||'';document.getElementById('fPostadoPor').value=p.postadoPor||'';document.getElementById('fLinha').value=p.linha||'';document.getElementById('fTipo').value=p.tipo||'';document.getElementById('guiaField').style.display=p.isGuia?'block':'none';
+  const urlEl=document.getElementById('audioCurrentUrl');
+  if(p.audioUrl){urlEl.textContent='🎵 Áudio atual: '+p.audioUrl.split('/').pop();urlEl.dataset.url=p.audioUrl;urlEl.style.display='block';}
+  else{urlEl.textContent='';urlEl.dataset.url='';urlEl.style.display='none';}
+  document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
+  document.getElementById('fAudioFile').value='';
+  abrirModal('overlay');};
 window.closeModal=()=>fecharModal('overlay');
 window.toggleGuiaField=()=>{document.getElementById('guiaField').style.display=document.getElementById('fIsGuia').checked?'block':'none';};
-window.savePonto=async()=>{const nome=document.getElementById('fNome').value.trim();if(!nome){alert('Informe o nome do ponto.');return;}const data={nome,linha:document.getElementById('fLinha').value,tipo:document.getElementById('fTipo').value.trim(),letra:document.getElementById('fLetra').value.trim(),yt:document.getElementById('fYt').value.trim(),isGuia:document.getElementById('fIsGuia').checked,guia:document.getElementById('fIsGuia').checked?document.getElementById('fGuia').value.trim():'',postadoPor:document.getElementById('fPostadoPor').value.trim(),destaque: editId ? (pontos.find(x=>x.id===editId)||{}).destaque||false : false};const editId=document.getElementById('editId').value;if(editId){const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:editId,...data})});const updated=await res.json();const idx=pontos.findIndex(x=>x.id===editId);if(idx>=0)pontos[idx]=updated;toast('Ponto atualizado!');}else{const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const novo=await res.json();pontos.unshift(novo);toast('Ponto salvo!');}closeModal();renderCards();};
+window.savePonto=async()=>{const nome=document.getElementById('fNome').value.trim();if(!nome){alert('Informe o nome do ponto.');return;}
+  // handle audio upload
+  let audioUrl = document.getElementById('audioCurrentUrl').dataset.url || '';
+  const audioFile = document.getElementById('fAudioFile').files[0];
+  if(audioFile){ toast('⏳ Enviando áudio...'); const uploaded = await uploadAudioToR2(audioFile); if(uploaded) audioUrl = uploaded; }
+  const data={nome,linha:document.getElementById('fLinha').value,tipo:document.getElementById('fTipo').value.trim(),letra:document.getElementById('fLetra').value.trim(),yt:document.getElementById('fYt').value.trim(),isGuia:document.getElementById('fIsGuia').checked,guia:document.getElementById('fIsGuia').checked?document.getElementById('fGuia').value.trim():'',postadoPor:document.getElementById('fPostadoPor').value.trim(),destaque: editId ? (pontos.find(x=>x.id===editId)||{}).destaque||false : false,audioUrl};const editId=document.getElementById('editId').value;if(editId){const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:editId,...data})});const updated=await res.json();const idx=pontos.findIndex(x=>x.id===editId);if(idx>=0)pontos[idx]=updated;toast('Ponto atualizado!');}else{const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const novo=await res.json();pontos.unshift(novo);toast('Ponto salvo!');}closeModal();renderCards();};
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);}
 window.exportarJSON=()=>{if(!pontos.length){toast('Nenhum ponto para exportar');return;}const blob=new Blob([JSON.stringify(pontos,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`pontos-cantados-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);toast('Backup baixado!');};
