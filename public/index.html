@@ -117,8 +117,8 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .modal h2{font-family:'Cinzel',serif;font-size:18px;color:#b02d5a;margin-bottom:22px;letter-spacing:.06em}
 .form-row{margin-bottom:16px}
 label{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
-input[type=text],input[type=url],textarea,select{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:16px;outline:none;transition:border-color .2s}
-input[type=text]:focus,input[type=url]:focus,textarea:focus,select:focus{border-color:var(--gold)}
+input[type=text],input[type=url],input[type=date],textarea,select{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:16px;outline:none;transition:border-color .2s}
+input[type=text]:focus,input[type=url]:focus,input[type=date]:focus,textarea:focus,select:focus{border-color:var(--gold)}
 textarea{resize:vertical;min-height:110px;line-height:1.7}
 select option{background:#fff;color:#2a1a22}
 .check-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .2s}
@@ -246,6 +246,11 @@ select option{background:#fff;color:#2a1a22}
           <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
         </div>
         <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
+        
+        <div id="dataGravacaoContainer" style="display:none;margin-top:12px">
+          <label>Data que foi gravado</label>
+          <input type="date" id="fDataGravacao">
+        </div>
       </div>
     </div>
     <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
@@ -333,6 +338,14 @@ window.renderCards = () => {
 };
 function cardHtml(p){
   const ytId=extractYtId(p.yt);
+  
+  // FORMATAÇÃO VISUAL DA DATA NO META DO CARD
+  let dataMeta = '';
+  if(p.dataGravacao) {
+    const [ano, mes, dia] = p.dataGravacao.split('-');
+    dataMeta = `<span class="meta-item"><span class="meta-dot"></span>Gravado em ${dia}/${mes}/${ano}</span>`;
+  }
+
   const topBar=`<div class="card-top-bar">
     ${p.destaque?`<div class="destaque-tag">🕯️ Aprender para a Próxima Sessão</div>`:''}
     ${p.linha?`<span class="cat-badge">${esc(p.linha)}</span>`:''}
@@ -351,6 +364,7 @@ function cardHtml(p){
         <div class="card-meta">
           ${p.tipo?`<span class="meta-item" style="font-style:italic">${esc(p.tipo)}</span>`:''}
           ${p.isGuia&&p.guia?`<span class="meta-item"><span class="meta-dot"></span>${esc(p.guia)}</span>`:''}
+          ${dataMeta}
           ${p.postadoPor?`<span class="meta-item" style="color:rgba(80,30,50,.4)">por ${esc(p.postadoPor)}</span>`:''}
         </div>
       </div>
@@ -380,6 +394,12 @@ function renderList(dest,outros,grid){
   grid.appendChild(wrapper);
 }
 function makeListItem(p,i){
+  let dataTxt = '';
+  if(p.dataGravacao) {
+    const [ano, mes, dia] = p.dataGravacao.split('-');
+    dataTxt = ` · Gravado em ${dia}/${mes}/${ano}`;
+  }
+
   const div=document.createElement('div');
   div.className='list-item-row'+(p.destaque?' destaque':'');
   div.style.animationDelay=(i*.02)+'s';
@@ -391,7 +411,7 @@ function makeListItem(p,i){
     ${p.audioUrl?`<span class="nossos-badge">🎙️ Nosso</span>`:''}
         ${p.destaque?`<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>`:''}
       </div>
-      <div class="li-meta">${p.tipo?esc(p.tipo):''}${p.isGuia&&p.guia?(p.tipo?' · ':'')+esc(p.guia):''}</div>
+      <div class="li-meta">${p.tipo?esc(p.tipo):''}${p.isGuia&&p.guia?(p.tipo?' · ':'')+esc(p.guia):''}${dataTxt}</div>
     </div>
     <div class="li-actions">
       <button class="icon-btn admin-only ${p.destaque?'star':''}" title="Destaque" onclick="event.stopPropagation();toggleDestaque('${p.id}',${p.destaque})">★</button>
@@ -404,6 +424,13 @@ function makeListItem(p,i){
 function abrirDetalhe(id){
   const p=pontos.find(x=>x.id===id); if(!p) return;
   const ytId=extractYtId(p.yt);
+  
+  let dataLinha = '';
+  if(p.dataGravacao) {
+    const [ano, mes, dia] = p.dataGravacao.split('-');
+    dataLinha = `<span style="font-size:14px;color:var(--text-dim)">📅 Gravado em ${dia}/${mes}/${ano}</span>`;
+  }
+
   document.getElementById('detalhe-body').innerHTML=`
     <div>
       ${p.destaque?`<div class="destaque-tag" style="display:inline-flex;margin-bottom:8px">🕯️ Próxima Sessão</div>`:''}
@@ -413,6 +440,7 @@ function abrirDetalhe(id){
       ${p.linha?`<span class="cat-badge">${esc(p.linha)}</span>`:''}
       ${p.tipo?`<span style="color:var(--text-dim);font-style:italic;font-size:14px">${esc(p.tipo)}</span>`:''}
       ${p.isGuia&&p.guia?`<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>`:''}
+      ${dataLinha}
     </div>
     ${p.letra?`<div class="detail-lyrics">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
     ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
@@ -432,22 +460,37 @@ window.setMediaTab=function(tab){
   tAu.style.background=isYt?'transparent':'var(--gold)';
   tAu.style.color=isYt?'var(--text-dim)':'#fff';
   tAu.style.borderColor=isYt?'rgba(196,57,107,.3)':'var(--gold)';
-  if(isYt){document.getElementById('fAudioFile').value='';document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';}
+  
+  if(isYt){
+    document.getElementById('fAudioFile').value='';
+    document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
+    document.getElementById('dataGravacaoContainer').style.display = 'none';
+    document.getElementById('fDataGravacao').value = '';
+  }
 };
 window.toggleLyrics=btn=>{const el=btn.nextElementSibling;const open=el.classList.toggle('open');btn.textContent=open?'▾ Ocultar letra':'▸ Ver letra';};
 window.togglePlayer=btn=>{const wrap=btn.nextElementSibling;const isOpen=wrap.classList.toggle('open');btn.textContent=isOpen?'⏹ Fechar player':'▶ Tocar aqui';if(!isOpen){const iframe=wrap.querySelector('iframe');if(iframe)iframe.src=iframe.src;}};
 window.toggleDestaque=async(id,cur)=>{const p=pontos.find(x=>x.id===id);if(!p)return;await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,destaque:!cur})});p.destaque=!cur;renderCards();toast(!cur?'🕯️ Colocado em destaque!':'Destaque removido');};
 window.deletePonto=async id=>{if(!confirm('Excluir este ponto?'))return;await fetch(`${API}?id=${encodeURIComponent(id)}`,{method:'DELETE'});pontos=pontos.filter(x=>x.id!==id);renderCards();toast('Ponto excluído');};
-window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Ponto Cantado';document.getElementById('editId').value='';['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo'].forEach(id=>document.getElementById(id).value='');document.getElementById('fLinha').value='';document.getElementById('fIsGuia').checked=false;document.getElementById('guiaField').style.display='none';
+window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Ponto Cantado';document.getElementById('editId').value='';['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo','fDataGravacao'].forEach(id=>document.getElementById(id).value='');document.getElementById('fLinha').value='';document.getElementById('fIsGuia').checked=false;document.getElementById('guiaField').style.display='none';
   document.getElementById('audioCurrentUrl').textContent='';document.getElementById('audioCurrentUrl').dataset.url='';document.getElementById('audioCurrentUrl').style.display='none';
   document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
   document.getElementById('fAudioFile').value='';
+  document.getElementById('dataGravacaoContainer').style.display = 'none';
   setMediaTab('yt');
   abrirModal('overlay');};
 window.openEdit=id=>{const p=pontos.find(x=>x.id===id||String(x.id)===String(id));if(!p)return;document.getElementById('modalTitle').textContent='Editar Ponto';document.getElementById('editId').value=id;document.getElementById('fNome').value=p.nome||'';document.getElementById('fLetra').value=p.letra||'';document.getElementById('fYt').value=p.yt||'';document.getElementById('fIsGuia').checked=!!p.isGuia;document.getElementById('fGuia').value=p.guia||'';document.getElementById('fPostadoPor').value=p.postadoPor||'';document.getElementById('fLinha').value=p.linha||'';document.getElementById('fTipo').value=p.tipo||'';document.getElementById('guiaField').style.display=p.isGuia?'block':'none';
+  document.getElementById('fDataGravacao').value = p.dataGravacao || '';
+  
   const urlEl=document.getElementById('audioCurrentUrl');
-  if(p.audioUrl){urlEl.textContent='🎵 Áudio atual: '+p.audioUrl.split('/').pop();urlEl.dataset.url=p.audioUrl;urlEl.style.display='block';}
-  else{urlEl.textContent='';urlEl.dataset.url='';urlEl.style.display='none';}
+  if(p.audioUrl){
+    urlEl.textContent='🎵 Áudio atual: '+p.audioUrl.split('/').pop();urlEl.dataset.url=p.audioUrl;urlEl.style.display='block';
+    document.getElementById('dataGravacaoContainer').style.display = 'block';
+  }
+  else{
+    urlEl.textContent='';urlEl.dataset.url='';urlEl.style.display='none';
+    document.getElementById('dataGravacaoContainer').style.display = 'none';
+  }
   document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
   document.getElementById('fAudioFile').value='';
   setMediaTab(p.audioUrl?'audio':'yt');
@@ -463,6 +506,9 @@ window.previewAudio = function(input) {
     urlEl.textContent = '🎵 Áudio selecionado: ' + file.name;
     urlEl.style.display = 'block';
     urlEl.dataset.url = URL.createObjectURL(file);
+    
+    // MOSTRA O CAMPO DE DATA ASSIM QUE O ARQUIVO É SELECIONADO
+    document.getElementById('dataGravacaoContainer').style.display = 'block';
   }
 };
 
@@ -483,6 +529,7 @@ window.savePonto=async()=>{
     letra:document.getElementById('fLetra').value.trim(),
     yt:audioUrl?'':document.getElementById('fYt').value.trim(),
     audioUrl,
+    dataGravacao: audioUrl ? document.getElementById('fDataGravacao').value : '', // CAPTURA A DATA
     isGuia:document.getElementById('fIsGuia').checked,
     guia:document.getElementById('fIsGuia').checked?document.getElementById('fGuia').value.trim():'',
     postadoPor:document.getElementById('fPostadoPor').value.trim(),
