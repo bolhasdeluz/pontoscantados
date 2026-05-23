@@ -75,6 +75,9 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .seg-del:hover{color:#e05555}
 .btn-add-seg{background:transparent;border:1.5px dashed rgba(196,57,107,.3);border-radius:8px;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;padding:8px;width:100%;transition:all .18s;margin-top:2px}
 .btn-add-seg:hover{background:var(--gold-dim);border-color:var(--gold)}
+.btn-mark{background:rgba(196,57,107,.08);border:1px solid rgba(196,57,107,.25);border-radius:6px;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;padding:5px 8px;white-space:nowrap;transition:all .18s}
+.btn-mark:hover{background:var(--gold);color:#fff}
+.btn-add-seg:hover{background:var(--gold-dim);border-color:var(--gold)}
 /* ── ÁUDIO / NOSSOS PONTOS ── */
 .audio-player{margin-top:10px;width:100%;background:linear-gradient(135deg,#fff0f4,#fde8ed);border-radius:10px;padding:8px;border:1px solid rgba(196,57,107,.15)}
 .audio-player audio{width:100%;border-radius:6px;accent-color:#c4396b;outline:none;height:36px}
@@ -382,8 +385,14 @@ function renderSegmentos() {
         <button class="seg-del" onclick="removerSegmento(${i})" title="Remover">×</button>
       </div>
       <div class="seg-row-times">
-        <input class="seg-time" type="text" placeholder="Início (ex: 0:30)" value="${esc(s.inicio)}" oninput="segmentos[${i}].inicio=this.value">
-        <input class="seg-time" type="text" placeholder="Fim (ex: 1:45)" value="${esc(s.fim)}" oninput="segmentos[${i}].fim=this.value">
+        <div style="display:flex;gap:4px;align-items:center">
+          <input class="seg-time" id="seg-inicio-${i}" type="text" placeholder="0:00" value="${esc(s.inicio)}" oninput="segmentos[${i}].inicio=this.value" style="flex:1">
+          <button class="btn-mark" onclick="marcarTempo('seg-inicio-${i}',${i},'inicio')" title="Capturar posição atual do player">📍</button>
+        </div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <input class="seg-time" id="seg-fim-${i}" type="text" placeholder="0:00" value="${esc(s.fim)}" oninput="segmentos[${i}].fim=this.value" style="flex:1">
+          <button class="btn-mark" onclick="marcarTempo('seg-fim-${i}',${i},'fim')" title="Capturar posição atual do player">📍</button>
+        </div>
       </div>`;
     el.appendChild(div);
   });
@@ -423,6 +432,22 @@ function checkAudioEnd(el) {
     const start = parseFloat(el.dataset.start);
     el.currentTime = isNaN(start) ? 0 : start;
   }
+}
+
+function marcarTempo(inputId, idx, campo) {
+  const player = document.getElementById('edit-audio-player');
+  if (!player || !player.src) { alert('Nenhum áudio carregado — edite um ponto com áudio primeiro.'); return; }
+  const t = player.currentTime;
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  const str = m + ':' + (s < 10 ? '0' : '') + s;
+  document.getElementById(inputId).value = str;
+  segmentos[idx][campo] = str;
+  // flash green feedback
+  const el = document.getElementById(inputId);
+  el.style.borderColor = '#2a7a60';
+  el.style.background = '#e8f4f0';
+  setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 800);
 }
 
 function parseTime(str) {
