@@ -391,11 +391,17 @@ function cpToggle(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
   if (a.paused) {
-    // iOS: must set currentTime after play() resolves
-    if (start != null && (a.currentTime < start - 0.3 || a.currentTime < 0.1)) {
-      a.currentTime = start;
+    const p = a.play();
+    if (p !== undefined) {
+      p.then(() => {
+        // iOS: só pode setar currentTime depois que play() resolve
+        if (start != null && a.currentTime < start - 0.1) {
+          a.currentTime = start;
+        }
+      }).catch(e => console.warn('play error:', e));
+    } else {
+      if (start != null && a.currentTime < start - 0.1) a.currentTime = start;
     }
-    a.play();
     document.getElementById(pid+'-playbtn').textContent = '⏸';
   } else {
     a.pause();
