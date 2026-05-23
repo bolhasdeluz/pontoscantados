@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: /api/pontos
 // CRUD de pontos cantados via KV (PONTOS_KV)
-// Env var: RESEND_KEY
+// Env vars: RESEND_KEY, R2_TOKEN
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -12,16 +12,8 @@ async function sendEmail(env, subject, html) {
   try {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.RESEND_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Bolhas de Luz <onboarding@resend.dev>',
-        to: ['bolhasdeluz@gmail.com'],
-        subject,
-        html,
-      }),
+      headers: { 'Authorization': `Bearer ${env.RESEND_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'Bolhas de Luz <onboarding@resend.dev>', to: ['bolhasdeluz@gmail.com'], subject, html }),
     });
   } catch {}
 }
@@ -34,27 +26,26 @@ export async function onRequest(context) {
   }
 
   const KV = env.PONTOS_KV;
-  if (!KV) {
-    return json({ error: 'KV não configurado.' }, 500);
-  }
-
   const url = new URL(request.url);
   const method = request.method;
+  const path = url.pathname;
+
+  // GET /api/r2token — devolve o token R2 pro frontend fazer upload
+  if (method === 'GET' && path.endsWith('/r2token')) {
+    if (!env.R2_TOKEN) return new Response(JSON.stringify({ error: 'não configurado' }), { status: 500, headers: CORS });
+    return new Response(JSON.stringify({ token: env.R2_TOKEN }), { headers: CORS });
+  }
+
+  if (!KV) return json({ error: 'KV não configurado.' }, 500);
 
   try {
-    // LIST — GET /api/pontos
     if (method === 'GET') {
       const list = await KV.list({ prefix: 'ponto:' });
-      const items = await Promise.all(
-        list.keys.map(k => KV.get(k.name, { type: 'json' }))
-      );
-      const pontos = items
-        .filter(Boolean)
-        .sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+      const items = await Promise.all(list.keys.map(k => KV.get(k.name, { type: 'json' })));
+      const pontos = items.filter(Boolean).sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
       return json(pontos);
     }
 
-    // CREATE — POST /api/pontos
     if (method === 'POST') {
       const body = await request.json();
       const id = `ponto:${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
@@ -65,6 +56,7 @@ export async function onRequest(context) {
         tipo: body.tipo || '',
         letra: body.letra || '',
         yt: body.yt || '',
+        audioUrl: body.audioUrl || '',
         isGuia: !!body.isGuia,
         guia: body.guia || '',
         postadoPor: body.postadoPor || '',
@@ -72,22 +64,17 @@ export async function onRequest(context) {
         criadoEm: Date.now(),
       };
       await KV.put(id, JSON.stringify(ponto));
-
-      // notificação por email
       await sendEmail(env,
         `🕯️ Novo ponto adicionado: ${ponto.nome}`,
         `<h2 style="color:#c4396b">Novo Ponto Cantado</h2>
          <p><b>Nome:</b> ${ponto.nome}</p>
          ${ponto.linha ? `<p><b>Linha:</b> ${ponto.linha}</p>` : ''}
-         ${ponto.tipo ? `<p><b>Tipo:</b> ${ponto.tipo}</p>` : ''}
-         ${ponto.isGuia && ponto.guia ? `<p><b>Guia:</b> ${ponto.guia}</p>` : ''}
+         ${ponto.audioUrl ? `<p><b>🎙️ Tem áudio gravado</b></p>` : ''}
          <p><b>Adicionado por:</b> ${ponto.postadoPor || 'Anônimo'}</p>`
       );
-
       return json(ponto);
     }
 
-    // UPDATE — PUT /api/pontos  (body traz o id)
     if (method === 'PUT') {
       const body = await request.json();
       const { id, ...fields } = body;
@@ -99,7 +86,6 @@ export async function onRequest(context) {
       return json(updated);
     }
 
-    // DELETE — DELETE /api/pontos?id=ponto:xxx
     if (method === 'DELETE') {
       const id = url.searchParams.get('id');
       if (!id) return json({ error: 'id obrigatório' }, 400);
@@ -108,7 +94,6 @@ export async function onRequest(context) {
     }
 
     return json({ error: 'Método não suportado' }, 405);
-
   } catch (e) {
     return json({ error: e.message }, 500);
   }
