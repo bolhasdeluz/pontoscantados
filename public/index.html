@@ -55,6 +55,26 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .sessao-banner{background:linear-gradient(135deg,#fffbe8,#fff5d0);border:1px solid #e8c860;border-left:3px solid #c8a000;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.04em;color:#8c5a00;font-weight:700}
 .sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
 
+
+/* ── SEGMENTOS ── */
+.seg-toggle{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fdf5f7;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;cursor:pointer;transition:all .18s}
+.seg-toggle:hover{border-color:var(--gold)}
+.seg-toggle input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.seg-toggle span{font-size:.85rem;color:var(--text)}
+.seg-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.seg-row{background:#fafafa;border:1.5px solid #eee;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;position:relative}
+.seg-row-top{display:flex;gap:8px;align-items:center}
+.seg-row-times{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg-num{background:var(--gold);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0}
+.seg-name{flex:1;background:transparent;border:1px solid #eee;border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;padding:7px 10px;outline:none}
+.seg-name:focus{border-color:var(--gold)}
+.seg-time{background:transparent;border:1px solid #eee;border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;padding:7px 10px;outline:none;text-align:center}
+.seg-time:focus{border-color:var(--gold)}
+.seg-time::placeholder{color:#ccc;font-size:.78rem}
+.seg-del{background:none;border:none;color:#e0a0a0;cursor:pointer;font-size:1.1rem;padding:0 2px;flex-shrink:0;transition:color .18s}
+.seg-del:hover{color:#e05555}
+.btn-add-seg{background:transparent;border:1.5px dashed rgba(196,57,107,.3);border-radius:8px;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;padding:8px;width:100%;transition:all .18s;margin-top:2px}
+.btn-add-seg:hover{background:var(--gold-dim);border-color:var(--gold)}
 /* ── ÁUDIO / NOSSOS PONTOS ── */
 .audio-player{margin-top:10px;width:100%;background:linear-gradient(135deg,#fff0f4,#fde8ed);border-radius:10px;padding:8px;border:1px solid rgba(196,57,107,.15)}
 .audio-player audio{width:100%;border-radius:6px;accent-color:#c4396b;outline:none;height:36px}
@@ -246,6 +266,15 @@ select option{background:#fff;color:#2a1a22}
       <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
     </div>
     <div class="form-row"><label>Data da gravação (opcional)</label><input type="date" id="fDataGravacao"></div>
+    <div class="form-row" id="seg-area" style="display:none">
+      <label>Segmentos do áudio</label>
+      <label class="seg-toggle">
+        <input type="checkbox" id="fMultiSeg" onchange="toggleMultiSeg(this.checked)">
+        <span>Este áudio tem vários pontos — definir trechos</span>
+      </label>
+      <div id="seg-list" class="seg-list" style="display:none"></div>
+      <button type="button" class="btn-add-seg" id="btn-add-seg" onclick="adicionarSegmento()" style="display:none">+ Adicionar trecho</button>
+    </div>
     <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
     <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa..."></div>
     <div class="form-row"><label>Postado por</label><input type="text" id="fPostadoPor" placeholder="Seu nome..."></div>
@@ -300,6 +329,88 @@ async function load() {
   try { const res=await fetch(API); pontos=await res.json(); renderCards(); }
   catch { document.getElementById('mainGrid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar.</p></div>'; }
 }
+async 
+// ══ SEGMENTOS ══
+let segmentos = [];
+
+function toggleMultiSeg(on) {
+  document.getElementById('seg-list').style.display = on ? 'flex' : 'none';
+  document.getElementById('btn-add-seg').style.display = on ? 'block' : 'none';
+  if (on && segmentos.length === 0) adicionarSegmento();
+}
+
+function adicionarSegmento() {
+  segmentos.push({ nome:'', inicio:'', fim:'' });
+  renderSegmentos();
+}
+
+function removerSegmento(i) {
+  segmentos.splice(i, 1);
+  renderSegmentos();
+}
+
+function renderSegmentos() {
+  const el = document.getElementById('seg-list');
+  el.innerHTML = '';
+  segmentos.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'seg-row';
+    div.innerHTML = `
+      <div class="seg-row-top">
+        <span class="seg-num">${i+1}</span>
+        <input class="seg-name" type="text" placeholder="Nome do ponto neste trecho" value="${esc(s.nome)}" oninput="segmentos[${i}].nome=this.value">
+        <button class="seg-del" onclick="removerSegmento(${i})" title="Remover">×</button>
+      </div>
+      <div class="seg-row-times">
+        <input class="seg-time" type="text" placeholder="Início (ex: 0:30)" value="${esc(s.inicio)}" oninput="segmentos[${i}].inicio=this.value">
+        <input class="seg-time" type="text" placeholder="Fim (ex: 1:45)" value="${esc(s.fim)}" oninput="segmentos[${i}].fim=this.value">
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+
+function buildAudioPlayer(p) {
+  const id = 'ap-' + p.id.replace(/[^a-z0-9]/gi,'');
+  const start = p.audioStart != null ? p.audioStart : 0;
+  const end = p.audioEnd != null ? p.audioEnd : null;
+  const endAttr = end ? `data-end="${end}"` : '';
+  return `<audio id="${id}" controls preload="none" ${endAttr}
+    onplay="initAudioSegment(this,${start},${end||'null'})"
+    ontimeupdate="checkAudioEnd(this)"
+    style="width:100%">
+    <source src="${p.audioUrl}">
+  </audio>
+  ${p.audioStart!=null?`<div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;text-align:center">▶ ${formatTime(p.audioStart)}${p.audioEnd!=null?' — '+formatTime(p.audioEnd):''}</div>`:''}`;
+}
+
+function formatTime(s) {
+  if (s == null) return '';
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+function initAudioSegment(el, start, end) {
+  if (start && el.currentTime < start - 0.5) el.currentTime = start;
+}
+
+function checkAudioEnd(el) {
+  const end = parseFloat(el.dataset.end);
+  if (!isNaN(end) && el.currentTime >= end) {
+    el.pause();
+    el.currentTime = parseFloat(el.dataset.start || 0) || 0;
+  }
+}
+
+function parseTime(str) {
+  if (!str) return null;
+  const parts = str.trim().split(':').map(Number);
+  if (parts.length === 2) return parts[0]*60 + parts[1];
+  if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  return null;
+}
+
 async function previewAudio(input) {
   const file = input.files[0];
   if (!file) return;
@@ -312,8 +423,10 @@ async function previewAudio(input) {
     urlEl.textContent = '🎵 Áudio pronto para salvar';
     urlEl.dataset.url = uploaded;
     urlEl.style.display = 'block';
+    document.getElementById('seg-area').style.display = 'block';
   } else {
     document.getElementById('audioFileName').textContent = '❌ Falhou — tente outro arquivo';
+    document.getElementById('seg-area').style.display = 'none';
   }
 }
 
@@ -394,7 +507,7 @@ function cardHtml(p){
     </div>
     <div class="card-body">
       ${p.letra?`<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none"><source src="${p.audioUrl}"></audio></div>`:''}
+      ${p.audioUrl?`<div class="audio-player">${buildAudioPlayer(p)}</div>`:''}
     ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     </div>
   </div>`;
@@ -450,7 +563,7 @@ function abrirDetalhe(id){
       ${p.isGuia&&p.guia?`<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>`:''}
     </div>
     ${p.letra?`<div class="detail-lyrics">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-    ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
+    ${p.audioUrl?`<div class="audio-player">${buildAudioPlayer(p)}</div>`:''}
     ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     ${p.postadoPor?`<p style="color:rgba(80,30,50,.4);font-size:13px;font-style:italic">por ${esc(p.postadoPor)}</p>`:''}`;
   abrirModal('ov-detalhe');
@@ -476,6 +589,7 @@ window.toggleDestaque=async(id,cur)=>{const p=pontos.find(x=>x.id===id);if(!p)re
 window.deletePonto=async id=>{if(!confirm('Excluir este ponto?'))return;await fetch(`${API}?id=${encodeURIComponent(id)}`,{method:'DELETE'});pontos=pontos.filter(x=>x.id!==id);renderCards();toast('Ponto excluído');};
 window.openModal=()=>{document.getElementById('modalTitle').textContent='Novo Ponto Cantado';document.getElementById('editId').value='';['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo','fDataGravacao'].forEach(id=>document.getElementById(id).value='');document.getElementById('fLinha').value='';document.getElementById('fIsGuia').checked=false;document.getElementById('guiaField').style.display='none';
   document.getElementById('audioCurrentUrl').textContent='';document.getElementById('audioCurrentUrl').dataset.url='';document.getElementById('audioCurrentUrl').style.display='none';
+  segmentos=[];document.getElementById('seg-area').style.display='none';document.getElementById('fMultiSeg').checked=false;document.getElementById('seg-list').style.display='none';document.getElementById('btn-add-seg').style.display='none';
   document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';
   document.getElementById('fAudioFile').value='';
   abrirModal('overlay');};
@@ -507,6 +621,7 @@ window.savePonto=async()=>{
     dataGravacao:document.getElementById('fDataGravacao').value||'',
     destaque:editId?(pontos.find(x=>x.id===editId)||{}).destaque||false:false
   };
+  const multiSeg = document.getElementById('fMultiSeg').checked;
   try {
     if(editId){
       const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:editId,...data})});
@@ -515,7 +630,24 @@ window.savePonto=async()=>{
       const idx=pontos.findIndex(x=>x.id===editId);
       if(idx>=0)pontos[idx]=updated;
       toast('Ponto atualizado!');
-    }else{
+    } else if(multiSeg && segmentos.length > 0) {
+      // Cria um card por segmento
+      let criados = 0;
+      for (const seg of segmentos) {
+        if (!seg.nome.trim()) continue;
+        const segData = { ...data,
+          nome: seg.nome.trim(),
+          audioStart: parseTime(seg.inicio),
+          audioEnd: parseTime(seg.fim),
+        };
+        const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(segData)});
+        if(!res.ok) throw new Error(await res.text());
+        const novo=await res.json();
+        pontos.unshift(novo);
+        criados++;
+      }
+      toast(`✅ ${criados} ponto${criados>1?'s':''} criado${criados>1?'s':''}!`);
+    } else {
       const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
       if(!res.ok) throw new Error(await res.text());
       const novo=await res.json();
