@@ -374,29 +374,13 @@ async function load() {
 }
 
 // ══ CUSTOM PLAYER ══
-function cpLog(pid, msg) {
-  const el = document.getElementById(pid+'-wrap');
-  if (!el) return;
-  let log = el.querySelector('.cp-debug');
-  if (!log) {
-    log = document.createElement('div');
-    log.className = 'cp-debug';
-    log.style.cssText = 'font-size:.65rem;font-family:monospace;color:#666;margin-top:4px;padding:4px;background:#f5f5f5;border-radius:4px;max-height:60px;overflow-y:auto';
-    el.appendChild(log);
-  }
-  log.innerHTML += '<div>' + msg + '</div>';
-  log.scrollTop = log.scrollHeight;
-}
-
 function cpReady(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
   const dur = a.duration;
-  cpLog(pid, '📼 loaded | dur=' + (dur||'?') + ' | start=' + start + ' | ct=' + a.currentTime.toFixed(2));
   if (dur && !isNaN(dur)) document.getElementById(pid+'-dur').textContent = formatTime(dur);
   if (start != null) {
     a.currentTime = start;
-    cpLog(pid, '⏩ set ct=' + start + ' → actual=' + a.currentTime.toFixed(2));
   }
 }
 
@@ -404,14 +388,9 @@ function cpToggle(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
   if (a.paused) {
-    cpLog(pid, '▶ play | ct before=' + a.currentTime.toFixed(2));
     a.play().then(() => {
-      cpLog(pid, '✅ playing | ct after=' + a.currentTime.toFixed(2));
-      if (start != null && a.currentTime < start - 0.5) {
-        a.currentTime = start;
-        cpLog(pid, '⏩ forced seek → ' + start);
-      }
-    }).catch(e => cpLog(pid, '❌ ' + e.message));
+      if (start != null && a.currentTime < start - 0.5) a.currentTime = start;
+    }).catch(e => console.warn(e));
     document.getElementById(pid+'-playbtn').textContent = '⏸';
   } else {
     a.pause();
