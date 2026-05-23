@@ -391,17 +391,10 @@ function cpToggle(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
   if (a.paused) {
-    const p = a.play();
-    if (p !== undefined) {
-      p.then(() => {
-        // iOS: só pode setar currentTime depois que play() resolve
-        if (start != null && a.currentTime < start - 0.1) {
-          a.currentTime = start;
-        }
-      }).catch(e => console.warn('play error:', e));
-    } else {
-      if (start != null && a.currentTime < start - 0.1) a.currentTime = start;
-    }
+    a.play().then(() => {
+      // fallback seek if fragment URI didn't work
+      if (start != null && a.currentTime < start - 0.5) a.currentTime = start;
+    }).catch(e => console.warn(e));
     document.getElementById(pid+'-playbtn').textContent = '⏸';
   } else {
     a.pause();
@@ -511,11 +504,20 @@ function buildAudioPlayer(p) {
   const pid = 'cp' + String(p.id).replace(/[^a-z0-9]/gi,'').slice(-8);
   const start = p.audioStart != null ? Number(p.audioStart) : null;
   const end = p.audioEnd != null ? Number(p.audioEnd) : null;
+
+  // Media Fragment URI — Safari/iOS suporta nativamente #t=inicio,fim
+  let src = p.audioUrl;
+  if (start != null) {
+    src += '#t=' + start.toFixed(1);
+    if (end != null) src += ',' + end.toFixed(1);
+  }
+
   const segLabel = start != null
     ? `▶ ${formatTime(start)}${end != null ? ' — ' + formatTime(end) : ''}`
     : '';
+
   return `<div class="cplayer" id="${pid}-wrap">
-    <audio id="${pid}" preload="metadata" src="${p.audioUrl}"
+    <audio id="${pid}" preload="metadata" src="${src}"
       ontimeupdate="cpUpdate('${pid}',${start||'null'},${end||'null'})"
       onloadedmetadata="cpReady('${pid}',${start||'null'})">
     </audio>
