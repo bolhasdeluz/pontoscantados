@@ -56,6 +56,18 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
 
 
+
+/* ── CUSTOM AUDIO PLAYER ── */
+.cplayer{background:linear-gradient(135deg,#fff0f4,#fde8ed);border:1px solid rgba(196,57,107,.15);border-radius:10px;padding:10px 12px;margin-top:8px}
+.cplayer-time{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);font-family:monospace;margin-bottom:6px}
+.cplayer-bar-wrap{position:relative;height:28px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.cplayer-track{width:100%;height:5px;background:rgba(196,57,107,.15);border-radius:3px;position:relative;overflow:visible}
+.cplayer-fill{height:100%;background:linear-gradient(90deg,#c4396b,#e8688a);border-radius:3px;transition:width .1s linear;pointer-events:none}
+.cplayer-thumb{position:absolute;top:50%;width:16px;height:16px;background:#c4396b;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(196,57,107,.4);pointer-events:none}
+.cplayer-controls{display:flex;align-items:center;gap:8px;margin-top:8px}
+.cplayer-btn{background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all .18s}
+.cplayer-btn:hover{background:#b02d5a}
+.cplayer-segment{font-size:.7rem;color:#8c5a00;background:#fffbe8;border:1px solid #e8c860;border-radius:6px;padding:3px 8px;flex:1;text-align:center}
 /* ── SEGMENTOS ── */
 .seg-toggle{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fdf5f7;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;cursor:pointer;transition:all .18s}
 .seg-toggle:hover{border-color:var(--gold)}
@@ -320,7 +332,7 @@ function abrirModal(id) { document.getElementById(id).classList.add('open'); }
 function fecharModal(id) {
   document.getElementById(id).classList.remove('open');
   // pause any playing audio inside this modal
-  document.querySelectorAll('#'+id+' audio').forEach(a => { a.pause(); });
+  document.querySelectorAll('#'+id+' audio').forEach(a => { a.pause(); document.querySelectorAll('[id$="-playbtn"]').forEach(b=>b.textContent='▶'); });
   // also pause edit player
   const ep = document.getElementById('edit-audio-player');
   if (ep) ep.pause();
@@ -360,6 +372,89 @@ async function load() {
       <button onclick="load()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;padding:9px 18px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px">Tentar novamente</button></div>`;
   }
 }
+
+// ══ CUSTOM PLAYER ══
+function cpReady(pid, start) {
+  const a = document.getElementById(pid);
+  if (!a) return;
+  const dur = a.duration;
+  if (dur && !isNaN(dur)) {
+    document.getElementById(pid+'-dur').textContent = formatTime(dur);
+  }
+  if (start != null) {
+    a.currentTime = start;
+    document.getElementById(pid+'-cur').textContent = formatTime(start);
+  }
+}
+
+function cpToggle(pid, start) {
+  const a = document.getElementById(pid);
+  if (!a) return;
+  if (a.paused) {
+    // iOS: must set currentTime after play() resolves
+    if (start != null && (a.currentTime < start - 0.3 || a.currentTime < 0.1)) {
+      a.currentTime = start;
+    }
+    a.play();
+    document.getElementById(pid+'-playbtn').textContent = '⏸';
+  } else {
+    a.pause();
+    document.getElementById(pid+'-playbtn').textContent = '▶';
+  }
+}
+
+function cpUpdate(pid, start, end) {
+  const a = document.getElementById(pid);
+  if (!a) return;
+  const t = a.currentTime;
+  const dur = a.duration || 0;
+  // enforce end
+  if (end != null && t >= end - 0.08) {
+    a.pause();
+    a.currentTime = start != null ? start : 0;
+    document.getElementById(pid+'-playbtn').textContent = '▶';
+  }
+  // update bar
+  if (dur > 0) {
+    const pct = (t / dur * 100).toFixed(2);
+    const fill = document.getElementById(pid+'-fill');
+    const thumb = document.getElementById(pid+'-thumb');
+    if (fill) fill.style.width = pct + '%';
+    if (thumb) thumb.style.left = pct + '%';
+  }
+  const el = document.getElementById(pid+'-cur');
+  if (el) el.textContent = formatTime(t);
+  if (!a.paused) {
+    const btn = document.getElementById(pid+'-playbtn');
+    if (btn) btn.textContent = '⏸';
+  }
+}
+
+function cpSeekStart(e, pid) {
+  e.preventDefault();
+  const a = document.getElementById(pid);
+  if (!a || !a.duration) return;
+  const bar = document.getElementById(pid+'-bar');
+  const seek = (clientX) => {
+    const rect = bar.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    a.currentTime = pct * a.duration;
+  };
+  const getX = ev => ev.touches ? ev.touches[0].clientX : ev.clientX;
+  seek(getX(e));
+  const onMove = ev => { ev.preventDefault(); seek(getX(ev)); };
+  const onUp = () => {
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('touchmove', onMove);
+    window.removeEventListener('mouseup', onUp);
+    window.removeEventListener('touchend', onUp);
+  };
+  window.addEventListener('mousemove', onMove, {passive:false});
+  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+}
+
 // ══ SEGMENTOS ══
 let segmentos = [];
 
@@ -407,25 +502,34 @@ function renderSegmentos() {
 
 
 function buildAudioPlayer(p) {
-  const start = p.audioStart != null ? p.audioStart : null;
-  const end = p.audioEnd != null ? p.audioEnd : null;
-  const startAttr = start != null ? `data-start="${start}"` : '';
-  const endAttr = end != null ? `data-end="${end}"` : '';
-  // iOS needs canplaythrough + play() then seek
-  const oncanplay = start != null
-    ? `if(!this._seeked){this._seeked=true;this.pause();this.currentTime=${start};}`
+  const pid = 'cp' + String(p.id).replace(/[^a-z0-9]/gi,'').slice(-8);
+  const start = p.audioStart != null ? Number(p.audioStart) : null;
+  const end = p.audioEnd != null ? Number(p.audioEnd) : null;
+  const segLabel = start != null
+    ? `▶ ${formatTime(start)}${end != null ? ' — ' + formatTime(end) : ''}`
     : '';
-  const onplay = start != null
-    ? `if(this.currentTime < ${start} - 0.5){this.currentTime=${start};}`
-    : '';
-  return `<audio controls preload="metadata" ${startAttr} ${endAttr}
-    oncanplay="${oncanplay}"
-    onplay="${onplay}"
-    ontimeupdate="checkAudioEnd(this)"
-    style="width:100%">
-    <source src="${p.audioUrl}">
-  </audio>
-  ${start!=null?`<div style="font-size:.7rem;color:var(--text-dim);margin-top:3px;text-align:center;font-family:'DM Sans',sans-serif">▶ ${formatTime(start)}${end!=null?' — '+formatTime(end):''}</div>`:''}`;
+  return `<div class="cplayer" id="${pid}-wrap">
+    <audio id="${pid}" preload="metadata" src="${p.audioUrl}"
+      ontimeupdate="cpUpdate('${pid}',${start||'null'},${end||'null'})"
+      onloadedmetadata="cpReady('${pid}',${start||'null'})">
+    </audio>
+    <div class="cplayer-time">
+      <span id="${pid}-cur">0:00.0</span>
+      <span id="${pid}-dur">—</span>
+    </div>
+    <div class="cplayer-bar-wrap" id="${pid}-bar"
+      onmousedown="cpSeekStart(event,'${pid}')"
+      ontouchstart="cpSeekStart(event,'${pid}')">
+      <div class="cplayer-track">
+        <div class="cplayer-fill" id="${pid}-fill" style="width:0%"></div>
+        <div class="cplayer-thumb" id="${pid}-thumb" style="left:0%"></div>
+      </div>
+    </div>
+    <div class="cplayer-controls">
+      <button class="cplayer-btn" onclick="cpToggle('${pid}',${start||'null'})" id="${pid}-playbtn">▶</button>
+      ${segLabel ? `<span class="cplayer-segment">${segLabel}</span>` : ''}
+    </div>
+  </div>`;
 }
 
 function formatTime(s) {
@@ -433,19 +537,6 @@ function formatTime(s) {
   const m = Math.floor(s/60);
   const sec = Math.floor(s%60);
   return m+':'+(sec<10?'0':'')+sec;
-}
-
-function initAudioSegment(el, start, end) {
-  if (start && el.currentTime < start - 0.5) el.currentTime = start;
-}
-
-function checkAudioEnd(el) {
-  const end = parseFloat(el.dataset.end);
-  if (!isNaN(end) && el.currentTime >= end - 0.1) {
-    el.pause();
-    const start = parseFloat(el.dataset.start);
-    el.currentTime = isNaN(start) ? 0 : start;
-  }
 }
 
 function marcarTempo(inputId, idx, campo) {
