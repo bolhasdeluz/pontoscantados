@@ -326,10 +326,26 @@ function extractYtId(url) {
   return m?m[1]:null;
 }
 async function load() {
-  try { const res=await fetch(API); pontos=await res.json(); renderCards(); }
-  catch { document.getElementById('mainGrid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar.</p></div>'; }
+  const timeout = setTimeout(() => {
+    document.getElementById('mainGrid').innerHTML =
+      `<div class="empty"><div class="empty-icon">⏱️</div><p>Tempo esgotado.<br><br><button onclick="load()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;padding:9px 18px;font-family:'DM Sans',sans-serif;cursor:pointer">Tentar novamente</button></p></div>`;
+  }, 8000);
+  try {
+    const res = await fetch(API);
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Resposta inválida: ' + JSON.stringify(data).slice(0,100));
+    pontos = data;
+    renderCards();
+  } catch(e) {
+    clearTimeout(timeout);
+    document.getElementById('mainGrid').innerHTML =
+      `<div class="empty"><div class="empty-icon">❌</div>
+      <p style="font-size:.82rem;color:#b84040;font-family:monospace;white-space:pre-wrap;text-align:left;background:#fff5f5;padding:12px;border-radius:8px;margin-top:8px">${e.message}</p>
+      <button onclick="load()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;padding:9px 18px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:12px">Tentar novamente</button></div>`;
+  }
 }
-async 
 // ══ SEGMENTOS ══
 let segmentos = [];
 
