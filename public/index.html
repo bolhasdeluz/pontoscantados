@@ -301,10 +301,21 @@ async function load() {
   try { const res=await fetch(API); pontos=await res.json(); renderCards(); }
   catch { document.getElementById('mainGrid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar.</p></div>'; }
 }
-function previewAudio(input) {
+async function previewAudio(input) {
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('audioFileName').textContent = '🎵 ' + file.name;
+  document.getElementById('audioFileName').textContent = '⏳ Enviando ' + file.name + '...';
+  const urlEl = document.getElementById('audioCurrentUrl');
+  urlEl.textContent = ''; urlEl.dataset.url = ''; urlEl.style.display = 'none';
+  const uploaded = await uploadAudioToR2(file);
+  if (uploaded) {
+    document.getElementById('audioFileName').textContent = '✅ ' + file.name;
+    urlEl.textContent = '🎵 Áudio pronto para salvar';
+    urlEl.dataset.url = uploaded;
+    urlEl.style.display = 'block';
+  } else {
+    document.getElementById('audioFileName').textContent = '❌ Falhou — tente outro arquivo';
+  }
 }
 
 async function uploadAudioToR2(file) {
@@ -323,7 +334,7 @@ async function uploadAudioToR2(file) {
     return url;
   } catch(e) {
     progressWrap.style.display = 'none';
-    toast('❌ Erro no upload: ' + e.message);
+    mostrarErro('Erro no upload de áudio', e);
     return null;
   }
 }
@@ -484,9 +495,7 @@ window.savePonto=async()=>{
   const nome=document.getElementById('fNome').value.trim();
   if(!nome){alert('Informe o nome do ponto.');return;}
   const editId=document.getElementById('editId').value;
-  let audioUrl=document.getElementById('audioCurrentUrl').dataset.url||'';
-  const audioFile=document.getElementById('fAudioFile').files[0];
-  if(audioFile){toast('⏳ Enviando áudio...');const uploaded=await uploadAudioToR2(audioFile);if(uploaded)audioUrl=uploaded;}
+  const audioUrl=document.getElementById('audioCurrentUrl').dataset.url||'';
   const data={
     nome,
     linha:document.getElementById('fLinha').value,
@@ -500,24 +509,56 @@ window.savePonto=async()=>{
     dataGravacao:document.getElementById('fDataGravacao').value||'',
     destaque:editId?(pontos.find(x=>x.id===editId)||{}).destaque||false:false
   };
-  if(editId){
-    const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:editId,...data})});
-    const updated=await res.json();
-    const idx=pontos.findIndex(x=>x.id===editId);
-    if(idx>=0)pontos[idx]=updated;
-    toast('Ponto atualizado!');
-  }else{
-    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    const novo=await res.json();
-    pontos.unshift(novo);
-    toast('Ponto salvo!');
+  try {
+    if(editId){
+      const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:editId,...data})});
+      if(!res.ok) throw new Error(await res.text());
+      const updated=await res.json();
+      const idx=pontos.findIndex(x=>x.id===editId);
+      if(idx>=0)pontos[idx]=updated;
+      toast('Ponto atualizado!');
+    }else{
+      const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      if(!res.ok) throw new Error(await res.text());
+      const novo=await res.json();
+      pontos.unshift(novo);
+      toast('Ponto salvo!');
+    }
+    closeModal();renderCards();
+  } catch(e) {
+    mostrarErro('Erro ao salvar ponto', e);
   }
-  closeModal();renderCards();
 };
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);}
 window.exportarJSON=()=>{if(!pontos.length){toast('Nenhum ponto para exportar');return;}const blob=new Blob([JSON.stringify(pontos,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`pontos-cantados-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);toast('Backup baixado!');};
+// ══ ERRO ══
+const errosJs = [];
+window.addEventListener('error', e => { errosJs.push(e.message + ' (' + e.filename?.split('/').pop() + ':' + e.lineno + ')'); });
+window.addEventListener('unhandledrejection', e => { errosJs.push('Promise: ' + (e.reason?.message || e.reason)); });
+
+function mostrarErro(contexto, err) {
+  const lines = [
+    '📍 Contexto: ' + contexto,
+    '❌ Erro: ' + (err?.message || String(err)),
+  ];
+  if (errosJs.length) lines.push('\n🔴 Erros JS capturados:\n' + errosJs.join('\n'));
+  document.getElementById('erro-msg').textContent = lines.join('\n');
+  abrirModal('ov-erro');
+}
+
 load();
 </script>
+<!-- MODAL ERRO -->
+<div class="overlay" id="ov-erro">
+  <div class="modal" style="max-width:400px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-erro')">✕</button>
+    <h2 style="color:#b84040;font-size:1rem;margin-bottom:12px">❌ Erro</h2>
+    <pre id="erro-msg" style="background:#fff5f5;border:1px solid #fcc;border-radius:8px;padding:12px;font-size:.75rem;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:50vh;overflow-y:auto;color:#7a1a22;font-family:monospace"></pre>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button class="btn-cancel" onclick="fecharModal('ov-erro')">Fechar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
