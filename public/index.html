@@ -55,9 +55,9 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
 
 /* ── ÁUDIO / NOSSOS PONTOS ── */
-.audio-player{margin-top:10px;width:100%}
-.audio-player audio{width:100%;border-radius:8px;accent-color:var(--gold);outline:none}
-.audio-player audio::-webkit-media-controls-panel{background:#fff5f8}
+.audio-player{margin-top:12px;width:100%}
+.audio-player audio{width:100%;border-radius:30px;outline:none}
+.audio-player audio::-webkit-media-controls-panel{background:#fff0f3;border:1px solid rgba(196,57,107,0.2)}
 .upload-area{border:2px dashed rgba(196,57,107,.3);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:#fdf5f7}
 .upload-area:hover{border-color:var(--gold);background:#fffbe8}
 .upload-area input{display:none}
@@ -232,7 +232,7 @@ select option{background:#fff;color:#2a1a22}
     <div class="form-row">
       <label>Referência</label>
       <div style="display:flex;gap:6px;margin-bottom:10px">
-        <button type="button" id="tab-yt" onclick="setMediaTab('yt')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer">▶ YouTube</button>
+        <button type="button" id="tab-yt" onclick="setMediaTab('yt')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold)	;color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer">▶ YouTube</button>
         <button type="button" id="tab-audio" onclick="setMediaTab('audio')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid rgba(196,57,107,.3);background:transparent;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer">🎙️ Áudio gravado</button>
       </div>
       <div id="media-yt"><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
@@ -303,7 +303,7 @@ async function load() {
 }
 window.setFilter = f => {
   currentFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  const map={all:'filterAll',sessao:'filterSessao',guia:'filterGuia'};
+  const map={all:'filterAll',sessao:'filterSessao',guia:'filterGuia',noguia:'filterNoGuia',nossos:'filterNossos'};
   if(map[f]) document.getElementById(map[f]).classList.add('active');
   renderCards();
 };
@@ -342,6 +342,7 @@ function cardHtml(p){
       <button class="icon-btn admin-only del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
     </div>
   </div>`;
+  
   return `<div class="card${p.destaque?' destaque':''}">
     ${topBar}
     <div class="card-header">
@@ -356,9 +357,10 @@ function cardHtml(p){
     </div>
     <div class="card-body">
       ${p.letra?`<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
-      ${p.audioUrl?`<div class="audio-player"><audio controls preload="none"><source src="${p.audioUrl}"><span style="font-size:.8rem;color:var(--text-dim)">Áudio não suportado</span></audio></div>`:''}
+      
       ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
-    ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
+      
+      ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="http://googleusercontent.com/youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     </div>
   </div>`;
 }
@@ -414,7 +416,7 @@ function abrirDetalhe(id){
     </div>
     ${p.letra?`<div class="detail-lyrics">${esc(p.letra).replace(/\n/g,'<br>')}</div>`:''}
     ${p.audioUrl?`<div class="audio-player"><audio controls preload="none" style="width:100%"><source src="${p.audioUrl}"></audio></div>`:''}
-    ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
+    ${ytId?`<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="http://googleusercontent.com/youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>`:p.yt?`<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>`:''}
     ${p.postadoPor?`<p style="color:rgba(80,30,50,.4);font-size:13px;font-style:italic">por ${esc(p.postadoPor)}</p>`:''}`;
   abrirModal('ov-detalhe');
 }
@@ -431,7 +433,6 @@ window.setMediaTab=function(tab){
   tAu.style.color=isYt?'var(--text-dim)':'#fff';
   tAu.style.borderColor=isYt?'rgba(196,57,107,.3)':'var(--gold)';
   if(isYt){document.getElementById('fAudioFile').value='';document.getElementById('audioFileName').textContent='Toque para escolher um áudio do iPhone';}
-  else{document.getElementById('fYt').value='';}
 };
 window.toggleLyrics=btn=>{const el=btn.nextElementSibling;const open=el.classList.toggle('open');btn.textContent=open?'▾ Ocultar letra':'▸ Ver letra';};
 window.togglePlayer=btn=>{const wrap=btn.nextElementSibling;const isOpen=wrap.classList.toggle('open');btn.textContent=isOpen?'⏹ Fechar player':'▶ Tocar aqui';if(!isOpen){const iframe=wrap.querySelector('iframe');if(iframe)iframe.src=iframe.src;}};
@@ -474,6 +475,7 @@ window.savePonto=async()=>{
   if(!nome){alert('Informe o nome do ponto.');return;}
   const editId=document.getElementById('editId').value;
   let audioUrl=document.getElementById('audioCurrentUrl').dataset.url||'';
+  
   const data={
     nome,
     linha:document.getElementById('fLinha').value,
