@@ -1,3 +1,9 @@
+Ah, olhando os prints deu para entender exatamente o que está acontecendo!
+ 1. **Sobre a data:** O campo não apareceu porque no código anterior eu tinha colocado para ele aparecer apenas quando um *novo* arquivo fosse selecionado do zero (no evento onchange). Como você já tinha um arquivo ali ou abriu para editar, a lógica não disparou.
+ 2. **Sobre o card estreito:** Ele está espremido daquele jeito porque a tag <audio> padrão do navegador tenta ocupar o espaço vertical e quebra o layout flexível do card.
+Já resolvi os dois problemas de uma vez só! Fiz o campo da data ficar **sempre visível** na aba de áudio (assim não tem erro de sumir) e consertei a estrutura visual para o card voltar a ter o tamanho normal e bonito de antes.
+Aqui está o código completo e prontinho. Só **copiar tudo, substituir no seu editor e dar o Commit**:
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -548,3 +554,5 @@ load();
 </script>
 </body>
 </html>
+
+```
