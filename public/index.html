@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pontos Cantados</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#fff5f7;--surface:#ffffff;--border:rgba(196,57,107,0.15);--gold:#c4396b;--gold-light:#e8688a;--gold-dim:rgba(196,57,107,0.08);--text:#2a1a22;--text-dim:rgba(80,30,50,0.5);--red:#b84040;--red-dim:rgba(184,64,64,0.08)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -35,7 +35,6 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .filter-select:focus{border-color:var(--gold)}
 .filter-btn{background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:20px;color:var(--text-dim);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;padding:5px 12px;transition:all .18s;white-space:nowrap;flex-shrink:0}
 .filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:#fff}
-.layout-btns{display:flex;gap:2px;background:#f5eaed;border-radius:8px;padding:3px;margin-left:auto;flex-shrink:0}
 .layout-btn{background:none;border:none;border-radius:6px;color:var(--text-dim);cursor:pointer;padding:5px 8px;transition:all .18s;display:flex;align-items:center;font-size:.82rem}
 .layout-btn.active{background:#fff;color:var(--gold);box-shadow:0 1px 4px rgba(180,60,90,.12)}
 .main{max-width:900px;margin:20px auto 0;padding:0 16px;display:grid;gap:14px}
@@ -54,18 +53,16 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .li-actions{display:flex;gap:5px;align-items:center;flex-shrink:0}
 .sessao-banner{background:linear-gradient(135deg,#fffbe8,#fff5d0);border:1px solid #e8c860;border-left:3px solid #c8a000;border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.04em;color:#8c5a00;font-weight:700}
 .sessao-banner .flame{font-size:16px;animation:flicker 2s ease-in-out infinite alternate}
+@keyframes flicker{0%{opacity:.8;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}
 
 /* ── APRENDER / LOTE ── */
 .aprender-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#e8f4f0,#d4ede6);border:1px solid #b8ddd4;border-radius:20px;color:#2a7a60;font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:600;letter-spacing:.03em;padding:2px 9px;text-transform:uppercase;white-space:nowrap}
-.card-check{position:absolute;top:10px;left:10px;display:none;z-index:2}
-.card-check input{width:18px;height:18px;accent-color:var(--gold);cursor:pointer}
 .card.selectable{position:relative}
 .card.selecionado{box-shadow:0 0 0 2px var(--gold),0 4px 16px rgba(196,57,107,.1)}
-.admin-mode .card-check{display:block}
-/* FIX: inline-block evita checkbox virar bloco enorme */
-.admin-mode .card-check-input.admin-only{display:inline-block!important}
-.batch-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#2a7a60,#3a9a78);padding:10px 16px;align-items:center;justify-content:center;gap:8px;z-index:700;box-shadow:0 -4px 18px rgba(0,0,0,.2);flex-wrap:wrap}
+.batch-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#2a7a60,#3a9a78);padding:10px 16px;align-items:center;justify-content:center;gap:8px;z-index:700;box-shadow:0 -4px 18px rgba(0,0,0,.2);flex-wrap:wrap;transition:bottom .2s}
 .batch-bar.open{display:flex}
+/* Batch bar sobe quando a admin bar está visível */
+.admin-mode .batch-bar.open{bottom:54px}
 .batch-info{color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;margin-right:4px}
 .batch-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:8px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;padding:7px 12px;transition:all .18s;white-space:nowrap}
 .batch-btn:hover{background:rgba(255,255,255,.35)}
@@ -103,12 +100,17 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .seg-del:hover{color:#e05555}
 .btn-add-seg{background:transparent;border:1.5px dashed rgba(196,57,107,.3);border-radius:8px;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;padding:8px;width:100%;transition:all .18s;margin-top:2px}
 .btn-add-seg:hover{background:var(--gold-dim);border-color:var(--gold)}
-.btn-mark{background:rgba(196,57,107,.08);border:1px solid rgba(196,57,107,.25);border-radius:6px;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;padding:5px 8px;white-space:nowrap;transition:all .18s}
+.btn-mark{background:rgba(196,57,107,.08);border:1px solid rgba(196,57,107,.25);border-radius:6px;color:var(--gold);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;padding:5px 8px;white-space:nowrap;transition:all .18s;flex-shrink:0}
 .btn-mark:hover{background:var(--gold);color:#fff}
+.seg-hint{font-size:.73rem;color:var(--text-dim);margin-bottom:8px}
+
+/* ── TRECHO ÚNICO ── */
+.single-timing{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.single-timing-row{display:flex;flex-direction:column;gap:4px}
+.single-timing-row label{font-size:.7rem;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase}
+.single-timing-input{display:flex;gap:4px;align-items:center}
 
 /* ── ÁUDIO / NOSSOS PONTOS ── */
-.audio-player{margin-top:10px;width:100%;background:linear-gradient(135deg,#fff0f4,#fde8ed);border-radius:10px;padding:8px;border:1px solid rgba(196,57,107,.15)}
-.audio-player audio{width:100%;border-radius:6px;accent-color:#c4396b;outline:none;height:36px}
 .upload-area{border:2px dashed rgba(196,57,107,.3);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:#fdf5f7}
 .upload-area:hover{border-color:var(--gold);background:#fffbe8}
 .upload-area input{display:none}
@@ -117,14 +119,24 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .upload-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),#e8688a);border-radius:4px;width:0;transition:width .3s}
 .nossos-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(196,57,107,.08);border:1px solid rgba(196,57,107,.25);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:500;letter-spacing:.04em;padding:2px 9px;border-radius:20px;text-transform:uppercase}
 
-@keyframes flicker{0%{opacity:.8;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}
+/* ── LINHAS MODAL ── */
+.linha-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fdf5f7;border:1px solid rgba(196,57,107,.15);border-radius:8px;transition:all .15s}
+.linha-item:hover{border-color:rgba(196,57,107,.3);background:#fce8ef}
+.linha-item-name{flex:1;font-size:.85rem;color:var(--text)}
+.btn-rm-linha{background:none;border:none;color:#e0a0a0;cursor:pointer;font-size:.9rem;padding:2px 6px;border-radius:4px;transition:color .18s}
+.btn-rm-linha:hover{color:#e05555}
+.linhas-add-row{display:flex;gap:8px;margin-top:4px}
+.linhas-add-row input{flex:1}
+.linhas-empty{text-align:center;padding:20px;color:var(--text-dim);font-size:.82rem}
+
+/* ── CARDS ── */
 .card{background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(180,60,90,.07);overflow:hidden;transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column;animation:fadeIn .3s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(180,60,90,.13)}
-.card.destaque{box-shadow:0 2px 16px rgba(180,60,90,.08),0 0 0 2px #e8c86080}.card.destaque:hover{box-shadow:0 6px 30px rgba(196,57,107,.12),0 0 0 2px #d4a83080}
+.card.destaque{box-shadow:0 2px 16px rgba(180,60,90,.08),0 0 0 2px #e8c86080}
+.card.destaque:hover{box-shadow:0 6px 30px rgba(196,57,107,.12),0 0 0 2px #d4a83080}
 .card-top-bar{background:linear-gradient(135deg,#fde8ed,#fce8ef);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .card.destaque .card-top-bar{background:linear-gradient(135deg,#fffbe8,#fff5d0)}
-.card.destaque .card-top-bar .destaque-tag{margin-bottom:0}
 .card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 18px 10px;gap:12px}
 .card-title-wrap{flex:1;min-width:0}
 .destaque-tag{background:linear-gradient(135deg,#8c5a00,#c88c00);border-radius:8px;color:#fff8e0;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;padding:4px 10px;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;letter-spacing:.01em}
@@ -135,12 +147,15 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .cat-badge{display:inline-block;background:#fce8ef;border-radius:20px;color:#d4607a;font-size:.67rem;font-weight:500;letter-spacing:.04em;padding:3px 9px;white-space:nowrap;text-transform:uppercase}
 .card-actions{display:flex;gap:6px;flex-shrink:0;align-items:center}
 .icon-btn{background:none;border:1px solid var(--border);color:var(--text-dim);width:30px;height:30px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .18s}
+/* Edit: always visible; Delete e Aprender e Destaque: admin-only */
 .icon-btn.admin-only{display:none}
 .admin-mode .icon-btn.admin-only{display:flex}
 .icon-btn:hover{border-color:var(--gold);color:var(--gold)}
 .icon-btn.star{color:var(--gold);border-color:rgba(196,57,107,.3);background:var(--gold-dim)}
 .icon-btn.del:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
-.admin-mode .icon-btn{display:flex}
+/* Checkbox de seleção: só no admin-mode */
+.card-check-input{display:none}
+.admin-mode .card-check-input{display:inline-block;width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
 .card-body{padding:0 16px 14px}
 .toggle-lyrics{background:none;border:none;color:var(--gold);font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;padding:0;display:flex;align-items:center;gap:5px;opacity:.8;transition:opacity .2s}
 .toggle-lyrics:hover{opacity:1}
@@ -157,19 +172,19 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .empty-icon{font-size:36px;opacity:.3;margin-bottom:14px}
 .count-info{text-align:center;font-size:12px;color:var(--text-dim);font-family:'Cinzel',serif;letter-spacing:.08em;padding:4px 0 8px}
 
-/* list mode */
+/* ── LIST MODE ── */
 .list-section-header{font-size:.72rem;font-weight:700;color:#9a7000;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px 4px;display:flex;align-items:center;gap:6px}
 .list-section-divider{height:1px;background:#f0d8de;margin:6px 0}
 
-/* overlays */
+/* ── OVERLAYS ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:2000;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top));backdrop-filter:blur(4px);overflow-y:auto}
 .overlay.open{display:flex}
 .modal{background:#fff;border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;box-shadow:0 8px 40px rgba(196,57,107,.15);width:100%;max-width:560px;max-height:calc(100vh - 48px);overflow-y:auto;padding:28px 24px;position:relative;margin:auto}
 .modal h2{font-family:'Cinzel',serif;font-size:18px;color:#b02d5a;margin-bottom:22px;letter-spacing:.06em}
 .form-row{margin-bottom:16px}
 label{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
-input[type=text],input[type=url],textarea,select{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:16px;outline:none;transition:border-color .2s}
-input[type=text]:focus,input[type=url]:focus,textarea:focus,select:focus{border-color:var(--gold)}
+input[type=text],input[type=url],input[type=date],textarea,select{width:100%;background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:6px;font-family:'Crimson Pro',serif;font-size:16px;outline:none;transition:border-color .2s}
+input[type=text]:focus,input[type=url]:focus,input[type=date]:focus,textarea:focus,select:focus{border-color:var(--gold)}
 textarea{resize:vertical;min-height:110px;line-height:1.7}
 select option{background:#fff;color:#2a1a22}
 .check-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:border-color .2s}
@@ -232,11 +247,12 @@ select option{background:#fff;color:#2a1a22}
     <div class="ci-filters">
       <select class="filter-select" id="filterLinha" onchange="renderCards()">
         <option value="">Todas as linhas</option>
-        <option value="Quimbanda">Quimbanda</option>
-        <option value="Pretos Velhos">Pretos Velhos</option>
-        <option value="Crianças">Crianças</option>
-        <option value="Ciganos">Ciganos</option>
-        <option value="Caboclos">Caboclos</option>
+      </select>
+      <select class="filter-select" id="sortBy" onchange="renderCards()">
+        <option value="default">Mais recentes</option>
+        <option value="az">A → Z</option>
+        <option value="za">Z → A</option>
+        <option value="linha">Por linha</option>
       </select>
     </div>
     <div class="layout-btns">
@@ -258,8 +274,13 @@ select option{background:#fff;color:#2a1a22}
 <div class="bottom-space"></div>
 
 <div id="admin-bar">
-  <span style="color:rgba(255,255,255,.7);font-size:.78rem">Modo Admin — ★ e ✕ liberados</span>
-  <button class="hbtn" onclick="exportarJSON()" style="background:rgba(255,255,255,.12)"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup</button>
+  <span style="color:rgba(255,255,255,.7);font-size:.78rem">Modo Admin ativo</span>
+  <button class="hbtn" onclick="abrirGerenciarLinhas()" style="background:rgba(255,255,255,.12)">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Linhas
+  </button>
+  <button class="hbtn" onclick="exportarJSON()" style="background:rgba(255,255,255,.12)">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup
+  </button>
   <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
 </div>
 
@@ -286,7 +307,9 @@ select option{background:#fff;color:#2a1a22}
       <input type="password" id="pin-input" placeholder="••••••" autocomplete="current-password"/>
       <span id="pin-error">Senha incorreta.</span>
     </div>
-    <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn-save" onclick="verificarSenha()">Entrar</button></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <button class="btn-save" onclick="verificarSenha()">Entrar</button>
+    </div>
   </div>
 </div>
 
@@ -296,39 +319,63 @@ select option{background:#fff;color:#2a1a22}
     <button class="btn-close-modal" onclick="closeModal()">✕</button>
     <h2 id="modalTitle">Novo Ponto Cantado</h2>
     <input type="hidden" id="editId">
-    <div class="form-row"><label>Nome do Ponto *</label><input type="text" id="fNome" placeholder="ex: Ponto de Oxalá..."></div>
-    <div class="form-row"><label>Linha de Trabalho</label><select id="fLinha"><option value="">— Selecionar —</option><option value="Quimbanda">Quimbanda</option><option value="Pretos Velhos">Pretos Velhos</option><option value="Crianças">Crianças</option><option value="Ciganos">Ciganos</option><option value="Caboclos">Caboclos</option></select></div>
-    <div class="form-row"><label>Tipo do ponto</label><input type="text" id="fTipo" placeholder="ex: abertura, firmeza, despedida..."></div>
+    <div class="form-row"><label>Nome do Ponto *</label><input type="text" id="fNome" placeholder="Nome do ponto cantado..."></div>
+    <div class="form-row"><label>Linha de Trabalho</label><select id="fLinha"><option value="">— Selecionar —</option></select></div>
+    <div class="form-row"><label>Tipo do ponto</label><input type="text" id="fTipo" placeholder="abertura, firmeza, despedida..."></div>
     <div class="form-row"><label>Letra / Texto</label><textarea id="fLetra" placeholder="Cole aqui a letra do ponto..."></textarea></div>
     <div class="form-row"><label>Link do YouTube (opcional)</label><input type="url" id="fYt" placeholder="https://youtube.com/..."></div>
     <div class="form-row">
       <label>Áudio gravado — opcional (🎙️ Nossos Pontos)</label>
       <div class="upload-area" onclick="document.getElementById('fAudioFile').click()">
-        <input type="file" id="fAudioFile" onchange="previewAudio(this)">
+        <input type="file" id="fAudioFile" accept="audio/*" onchange="previewAudio(this)">
         <label class="upload-label">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 18.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M9.5 11.5l2.5-2.5 2.5 2.5"/><path d="M12 9v6"/></svg>
-          <span id="audioFileName">Toque para escolher um áudio do iPhone</span>
+          <span id="audioFileName">Toque para escolher um áudio</span>
         </label>
         <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
       </div>
       <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
       <div id="edit-audio-preview" style="display:none;margin-top:8px">
         <audio id="edit-audio-player" controls preload="metadata" style="width:100%;border-radius:8px;accent-color:#c4396b"></audio>
-        <p style="font-size:.72rem;color:var(--text-dim);margin-top:4px">🎵 Ouça e anote os tempos para cada trecho</p>
+        <p style="font-size:.72rem;color:var(--text-dim);margin-top:4px">🎵 Ouça e use 📍 para marcar os tempos de cada trecho</p>
       </div>
     </div>
-    <div class="form-row"><label>Data da gravação (opcional)</label><input type="date" id="fDataGravacao"></div>
-    <div class="form-row" id="seg-area" style="display:none">
-      <label>Segmentos do áudio</label>
-      <label class="seg-toggle">
-        <input type="checkbox" id="fMultiSeg" onchange="toggleMultiSeg(this.checked)">
-        <span>Este áudio tem vários pontos — definir trechos</span>
-      </label>
-      <div id="seg-list" class="seg-list" style="display:none"></div>
-      <button type="button" class="btn-add-seg" id="btn-add-seg" onclick="adicionarSegmento()" style="display:none">+ Adicionar trecho</button>
+
+    <!-- SEGMENTOS: trecho único + multi-seg -->
+    <div id="seg-area" style="display:none">
+      <div class="form-row" style="margin-bottom:8px">
+        <label>Trecho do áudio <span style="font-size:.68rem;letter-spacing:0;text-transform:none;color:rgba(80,30,50,.4)">(opcional — deixe em branco para usar o áudio inteiro)</span></label>
+        <div class="single-timing">
+          <div class="single-timing-row">
+            <label style="font-size:.68rem">Início</label>
+            <div class="single-timing-input">
+              <input class="seg-time" type="text" id="fAudioStart" placeholder="0:00" style="flex:1">
+              <button class="btn-mark" onclick="marcarTempoForm('fAudioStart')" title="Capturar posição atual">📍</button>
+            </div>
+          </div>
+          <div class="single-timing-row">
+            <label style="font-size:.68rem">Fim</label>
+            <div class="single-timing-input">
+              <input class="seg-time" type="text" id="fAudioEnd" placeholder="0:00" style="flex:1">
+              <button class="btn-mark" onclick="marcarTempoForm('fAudioEnd')" title="Capturar posição atual">📍</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Multi-seg: só para novos pontos -->
+      <div id="seg-multi-wrap">
+        <label class="seg-toggle">
+          <input type="checkbox" id="fMultiSeg" onchange="toggleMultiSeg(this.checked)">
+          <span>Este áudio tem vários pontos — definir trechos separados</span>
+        </label>
+        <div id="seg-list" class="seg-list" style="display:none"></div>
+        <button type="button" class="btn-add-seg" id="btn-add-seg" onclick="adicionarSegmento()" style="display:none">+ Adicionar trecho</button>
+      </div>
     </div>
+
+    <div class="form-row"><label>Data da gravação (opcional)</label><input type="date" id="fDataGravacao"></div>
     <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
-    <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="ex: Vovô Joaquim, Cigana Rosa..."></div>
+    <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="Nome do guia..."></div>
     <div class="form-row"><label>Postado por</label><input type="text" id="fPostadoPor" placeholder="Seu nome..."></div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="savePonto()">Salvar Ponto</button></div>
   </div>
@@ -339,6 +386,19 @@ select option{background:#fff;color:#2a1a22}
   <div class="modal" style="max-width:560px">
     <button class="btn-close-modal" onclick="fecharModal('ov-detalhe')">✕</button>
     <div id="detalhe-body" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+</div>
+
+<!-- GERENCIAR LINHAS -->
+<div class="overlay" id="ov-linhas">
+  <div class="modal" style="max-width:400px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-linhas')">✕</button>
+    <h2>Linhas de Trabalho</h2>
+    <div id="linhas-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-height:40px"></div>
+    <div class="linhas-add-row">
+      <input type="text" id="nova-linha-input" placeholder="Nome da linha...">
+      <button class="btn-save" onclick="adicionarLinha()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
+    </div>
   </div>
 </div>
 
@@ -355,12 +415,102 @@ select option{background:#fff;color:#2a1a22}
 </div>
 
 <script>
-const ADMIN_PASS = 'terreiro';
+// ── CONFIGURAÇÃO ──
+// Para trocar a senha: substitua o valor de ADMIN_HASH por btoa('nova_senha')
+const ADMIN_HASH = btoa('terreiro');
+const API = '/api/pontos';
+
+// ── ESTADO ──
 let adminMode = false;
 let currentLayout = 'cards';
 let pontos = [];
 let currentFilter = 'all';
-const API = '/api/pontos';
+let selectedIds = new Set();
+let segmentos = [];
+let linhas = [];
+
+// ── LINHAS ──
+function loadLinhas() {
+  try { linhas = JSON.parse(localStorage.getItem('pontos_linhas') || '[]'); }
+  catch { linhas = []; }
+  refreshLinhaSelects();
+}
+
+function saveLinhas() {
+  localStorage.setItem('pontos_linhas', JSON.stringify(linhas));
+  refreshLinhaSelects();
+}
+
+function syncLinhasFromData() {
+  const existing = new Set(linhas.map(l => l.toLowerCase()));
+  pontos.forEach(p => {
+    if (p.linha && !existing.has(p.linha.toLowerCase())) {
+      linhas.push(p.linha);
+      existing.add(p.linha.toLowerCase());
+    }
+  });
+  saveLinhas();
+}
+
+function refreshLinhaSelects() {
+  const filterVal = document.getElementById('filterLinha')?.value;
+  const formVal = document.getElementById('fLinha')?.value;
+  const opts = linhas.map(l => `<option value="${esc(l)}">${esc(l)}</option>`).join('');
+  const fSel = document.getElementById('filterLinha');
+  if (fSel) {
+    fSel.innerHTML = '<option value="">Todas as linhas</option>' + opts;
+    if (filterVal) fSel.value = filterVal;
+  }
+  const fForm = document.getElementById('fLinha');
+  if (fForm) {
+    fForm.innerHTML = '<option value="">— Selecionar —</option>' + opts;
+    if (formVal) fForm.value = formVal;
+  }
+}
+
+function abrirGerenciarLinhas() {
+  renderLinhasModal();
+  abrirModal('ov-linhas');
+}
+
+function renderLinhasModal() {
+  const el = document.getElementById('linhas-list');
+  if (!linhas.length) {
+    el.innerHTML = '<p class="linhas-empty">Nenhuma linha cadastrada ainda.</p>';
+    return;
+  }
+  el.innerHTML = linhas.map((l, i) => `
+    <div class="linha-item">
+      <span class="linha-item-name">${esc(l)}</span>
+      <button class="btn-rm-linha" onclick="removerLinha(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
+
+function adicionarLinha() {
+  const input = document.getElementById('nova-linha-input');
+  const nome = input.value.trim();
+  if (!nome) return;
+  if (linhas.some(l => l.toLowerCase() === nome.toLowerCase())) {
+    toast('Linha já existe!'); return;
+  }
+  linhas.push(nome);
+  saveLinhas();
+  input.value = '';
+  renderLinhasModal();
+  toast('Linha adicionada!');
+}
+
+function removerLinha(i) {
+  if (!confirm(`Remover a linha "${linhas[i]}"? Os pontos vinculados a ela não serão afetados.`)) return;
+  linhas.splice(i, 1);
+  saveLinhas();
+  renderLinhasModal();
+  toast('Linha removida!');
+}
+
+document.getElementById('nova-linha-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adicionarLinha();
+});
 
 // ── ADMIN ──
 document.getElementById('btn-admin').addEventListener('click', () => {
@@ -368,10 +518,13 @@ document.getElementById('btn-admin').addEventListener('click', () => {
   abrirModal('ov-senha');
   setTimeout(() => document.getElementById('pin-input').focus(), 100);
 });
-document.getElementById('pin-input').addEventListener('keydown', e => { if(e.key==='Enter') verificarSenha(); });
+
+document.getElementById('pin-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') verificarSenha();
+});
 
 function verificarSenha() {
-  if (document.getElementById('pin-input').value === ADMIN_PASS) {
+  if (btoa(document.getElementById('pin-input').value) === ADMIN_HASH) {
     fecharModal('ov-senha');
     document.getElementById('pin-input').value = '';
     document.getElementById('pin-error').style.display = 'none';
@@ -399,21 +552,46 @@ function sairAdmin() {
   limparSelecao();
 }
 
+// ── MODAIS ──
 function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+
 function fecharModal(id) {
   document.getElementById(id).classList.remove('open');
-  document.querySelectorAll('#'+id+' audio').forEach(a => { a.pause(); });
-  const ep = document.getElementById('edit-audio-player');
-  if (ep) ep.pause();
+  document.querySelectorAll('#' + id + ' audio').forEach(a => a.pause());
+  if (id === 'overlay') {
+    const ep = document.getElementById('edit-audio-player');
+    if (ep) ep.pause();
+  }
 }
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// Escape fecha qualquer modal aberto
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay.open').forEach(o => {
+      const id = o.id;
+      o.classList.remove('open');
+      o.querySelectorAll('audio').forEach(a => a.pause());
+    });
+    const ep = document.getElementById('edit-audio-player');
+    if (ep) ep.pause();
+  }
+});
+
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => {
+    if (e.target === o) {
+      fecharModal(o.id);
+    }
+  });
+});
 
 // ── LAYOUT ──
 function setLayout(l) {
   currentLayout = l;
-  document.getElementById('btn-cards').classList.toggle('active', l==='cards');
-  document.getElementById('btn-list').classList.toggle('active', l==='list');
-  document.getElementById('mainGrid').classList.toggle('layout-list', l==='list');
+  localStorage.setItem('pontos_layout', l);
+  document.getElementById('btn-cards').classList.toggle('active', l === 'cards');
+  document.getElementById('btn-list').classList.toggle('active', l === 'list');
+  document.getElementById('mainGrid').classList.toggle('layout-list', l === 'list');
   renderCards();
 }
 
@@ -427,8 +605,6 @@ window.setFilter = f => {
 };
 
 // ── SELEÇÃO EM LOTE ──
-let selectedIds = new Set();
-
 function toggleSelecao(id, checked) {
   const sid = String(id);
   if (checked) selectedIds.add(sid);
@@ -530,10 +706,11 @@ async function load() {
     clearTimeout(timeout);
     if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
     const data = await res.json();
-    if (!Array.isArray(data)) throw new Error('Resposta inválida: ' + JSON.stringify(data).slice(0,100));
+    if (!Array.isArray(data)) throw new Error('Resposta inválida: ' + JSON.stringify(data).slice(0, 100));
     pontos = data;
+    syncLinhasFromData();
     renderCards();
-  } catch(e) {
+  } catch (e) {
     clearTimeout(timeout);
     document.getElementById('mainGrid').innerHTML =
       `<div class="empty"><div class="empty-icon">❌</div>
@@ -547,7 +724,7 @@ function cpReady(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
   const dur = a.duration;
-  if (dur && !isNaN(dur)) document.getElementById(pid+'-dur').textContent = formatTime(dur);
+  if (dur && !isNaN(dur)) document.getElementById(pid + '-dur').textContent = formatTime(dur);
   if (start != null) a.currentTime = start;
 }
 
@@ -558,10 +735,10 @@ function cpToggle(pid, start) {
     a.play().then(() => {
       if (start != null && a.currentTime < start - 0.5) a.currentTime = start;
     }).catch(e => console.warn(e));
-    document.getElementById(pid+'-playbtn').textContent = '⏸';
+    document.getElementById(pid + '-playbtn').textContent = '⏸';
   } else {
     a.pause();
-    document.getElementById(pid+'-playbtn').textContent = '▶';
+    document.getElementById(pid + '-playbtn').textContent = '▶';
   }
 }
 
@@ -573,19 +750,19 @@ function cpUpdate(pid, start, end) {
   if (end != null && t >= end - 0.08) {
     a.pause();
     a.currentTime = start != null ? start : 0;
-    document.getElementById(pid+'-playbtn').textContent = '▶';
+    document.getElementById(pid + '-playbtn').textContent = '▶';
   }
   if (dur > 0) {
     const pct = (t / dur * 100).toFixed(2);
-    const fill = document.getElementById(pid+'-fill');
-    const thumb = document.getElementById(pid+'-thumb');
+    const fill = document.getElementById(pid + '-fill');
+    const thumb = document.getElementById(pid + '-thumb');
     if (fill) fill.style.width = pct + '%';
     if (thumb) thumb.style.left = pct + '%';
   }
-  const el = document.getElementById(pid+'-cur');
+  const el = document.getElementById(pid + '-cur');
   if (el) el.textContent = formatTime(t);
   if (!a.paused) {
-    const btn = document.getElementById(pid+'-playbtn');
+    const btn = document.getElementById(pid + '-playbtn');
     if (btn) btn.textContent = '⏸';
   }
 }
@@ -594,7 +771,7 @@ function cpSeekStart(e, pid) {
   e.preventDefault();
   const a = document.getElementById(pid);
   if (!a || !a.duration) return;
-  const bar = document.getElementById(pid+'-bar');
+  const bar = document.getElementById(pid + '-bar');
   const seek = (clientX) => {
     const rect = bar.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
@@ -609,15 +786,13 @@ function cpSeekStart(e, pid) {
     window.removeEventListener('mouseup', onUp);
     window.removeEventListener('touchend', onUp);
   };
-  window.addEventListener('mousemove', onMove, {passive:false});
-  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('mousemove', onMove, { passive: false });
+  window.addEventListener('touchmove', onMove, { passive: false });
   window.addEventListener('mouseup', onUp);
   window.addEventListener('touchend', onUp);
 }
 
 // ── SEGMENTOS ──
-let segmentos = [];
-
 function toggleMultiSeg(on) {
   document.getElementById('seg-list').style.display = on ? 'flex' : 'none';
   document.getElementById('btn-add-seg').style.display = on ? 'block' : 'none';
@@ -642,7 +817,7 @@ function renderSegmentos() {
     div.className = 'seg-row';
     div.innerHTML = `
       <div class="seg-row-top">
-        <span class="seg-num">${i+1}</span>
+        <span class="seg-num">${i + 1}</span>
         <input class="seg-name" type="text" placeholder="Nome do ponto neste trecho" value="${esc(s.nome)}" oninput="segmentos[${i}].nome=this.value">
         <button class="seg-del" onclick="removerSegmento(${i})" title="Remover">×</button>
       </div>
@@ -661,7 +836,7 @@ function renderSegmentos() {
 }
 
 function buildAudioPlayer(p) {
-  const pid = 'cp' + String(p.id).replace(/[^a-z0-9]/gi,'').slice(-8);
+  const pid = 'cp' + String(p.id).replace(/[^a-z0-9]/gi, '').slice(-8);
   const start = p.audioStart != null ? Number(p.audioStart) : null;
   const end = p.audioEnd != null ? Number(p.audioEnd) : null;
   let src = p.audioUrl;
@@ -674,8 +849,8 @@ function buildAudioPlayer(p) {
     : '';
   return `<div class="cplayer" id="${pid}-wrap">
     <audio id="${pid}" preload="metadata" src="${src}"
-      ontimeupdate="cpUpdate('${pid}',${start||'null'},${end||'null'})"
-      onloadedmetadata="cpReady('${pid}',${start||'null'})">
+      ontimeupdate="cpUpdate('${pid}',${start || 'null'},${end || 'null'})"
+      onloadedmetadata="cpReady('${pid}',${start || 'null'})">
     </audio>
     <div class="cplayer-time">
       <span id="${pid}-cur">0:00</span>
@@ -690,7 +865,7 @@ function buildAudioPlayer(p) {
       </div>
     </div>
     <div class="cplayer-controls">
-      <button class="cplayer-btn" onclick="cpToggle('${pid}',${start||'null'})" id="${pid}-playbtn">▶</button>
+      <button class="cplayer-btn" onclick="cpToggle('${pid}',${start || 'null'})" id="${pid}-playbtn">▶</button>
       ${segLabel ? `<span class="cplayer-segment">${segLabel}</span>` : ''}
     </div>
   </div>`;
@@ -698,11 +873,36 @@ function buildAudioPlayer(p) {
 
 function formatTime(s) {
   if (s == null) return '';
-  const m = Math.floor(s/60);
-  const sec = Math.floor(s%60);
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
   return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
+function formatTimeField(s) {
+  if (s == null) return '';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  const ms = Math.round((s % 1) * 10);
+  return m + ':' + (sec < 10 ? '0' : '') + sec + (ms > 0 ? '.' + ms : '');
+}
+
+// Marca tempo no player do form para trecho único
+function marcarTempoForm(inputId) {
+  const player = document.getElementById('edit-audio-player');
+  if (!player || !player.src || player.readyState < 1) {
+    alert('Aguarde o áudio carregar antes de marcar.');
+    return;
+  }
+  const t = player.currentTime;
+  const val = formatTimeField(t);
+  document.getElementById(inputId).value = val;
+  const el = document.getElementById(inputId);
+  el.style.borderColor = '#2a7a60';
+  el.style.background = '#e8f4f0';
+  setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 800);
+}
+
+// Marca tempo nos segmentos multi-ponto
 function marcarTempo(inputId, idx, campo) {
   const player = document.getElementById('edit-audio-player');
   if (!player || !player.src || player.readyState < 1) {
@@ -710,12 +910,9 @@ function marcarTempo(inputId, idx, campo) {
     return;
   }
   const t = player.currentTime;
-  const m = Math.floor(t / 60);
-  const s = Math.floor(t % 60);
-  const ms = Math.floor((t % 1) * 10);
-  const str = m + ':' + (s < 10 ? '0' : '') + s + '.' + ms;
-  document.getElementById(inputId).value = str;
-  segmentos[idx][campo] = str;
+  const val = formatTimeField(t);
+  document.getElementById(inputId).value = val;
+  segmentos[idx][campo] = val;
   const el = document.getElementById(inputId);
   el.style.borderColor = '#2a7a60';
   el.style.background = '#e8f4f0';
@@ -725,8 +922,8 @@ function marcarTempo(inputId, idx, campo) {
 function parseTime(str) {
   if (!str) return null;
   const parts = str.trim().split(':');
-  if (parts.length === 2) return parseFloat(parts[0])*60 + parseFloat(parts[1]);
-  if (parts.length === 3) return parseFloat(parts[0])*3600 + parseFloat(parts[1])*60 + parseFloat(parts[2]);
+  if (parts.length === 2) return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
+  if (parts.length === 3) return parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
   return null;
 }
 
@@ -743,6 +940,9 @@ async function previewAudio(input) {
     urlEl.dataset.url = uploaded;
     urlEl.style.display = 'block';
     document.getElementById('seg-area').style.display = 'block';
+    // Multi-seg só aparece para novos pontos
+    const isEditing = !!document.getElementById('editId').value;
+    document.getElementById('seg-multi-wrap').style.display = isEditing ? 'none' : 'block';
     const prev = document.getElementById('edit-audio-preview');
     const player = document.getElementById('edit-audio-player');
     player.src = uploaded;
@@ -767,7 +967,7 @@ async function uploadAudioToR2(file) {
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload falhou'); }
     const { url } = await res.json();
     return url;
-  } catch(e) {
+  } catch (e) {
     progressWrap.style.display = 'none';
     mostrarErro('Erro no upload de áudio', e);
     return null;
@@ -778,14 +978,16 @@ async function uploadAudioToR2(file) {
 window.renderCards = () => {
   const search = document.getElementById('searchInput').value.toLowerCase();
   const linhaFilter = document.getElementById('filterLinha').value;
-  const filtered = pontos.filter(p => {
+  const sortBy = document.getElementById('sortBy').value;
+
+  let filtered = pontos.filter(p => {
     const match = !search
-      || (p.nome||'').toLowerCase().includes(search)
-      || (p.guia||'').toLowerCase().includes(search)
-      || (p.letra||'').toLowerCase().includes(search)
-      || (p.postadoPor||'').toLowerCase().includes(search);
+      || (p.nome || '').toLowerCase().includes(search)
+      || (p.guia || '').toLowerCase().includes(search)
+      || (p.letra || '').toLowerCase().includes(search)
+      || (p.postadoPor || '').toLowerCase().includes(search);
     if (!match) return false;
-    if (linhaFilter && (p.linha||'') !== linhaFilter) return false;
+    if (linhaFilter && (p.linha || '') !== linhaFilter) return false;
     if (currentFilter === 'sessao') return p.destaque;
     if (currentFilter === 'guia') return p.isGuia;
     if (currentFilter === 'noguia') return !p.isGuia;
@@ -793,14 +995,29 @@ window.renderCards = () => {
     if (currentFilter === 'aprender') return !!p.aprender;
     return true;
   });
-  document.getElementById('countInfo').textContent = filtered.length === 0 ? '' : filtered.length === 1 ? '1 ponto encontrado' : `${filtered.length} pontos encontrados`;
+
+  // Ordenação
+  if (sortBy === 'az') filtered.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt'));
+  else if (sortBy === 'za') filtered.sort((a, b) => (b.nome || '').localeCompare(a.nome || '', 'pt'));
+  else if (sortBy === 'linha') filtered.sort((a, b) => (a.linha || '').localeCompare(b.linha || '', 'pt') || (a.nome || '').localeCompare(b.nome || '', 'pt'));
+
+  document.getElementById('countInfo').textContent = filtered.length === 0 ? '' :
+    filtered.length === 1 ? '1 ponto encontrado' : `${filtered.length} pontos encontrados`;
+
   const grid = document.getElementById('mainGrid');
-  if (!filtered.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">🕯️</div><p>Nenhum ponto encontrado.</p></div>'; return; }
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">🕯️</div><p>Nenhum ponto encontrado.</p></div>';
+    return;
+  }
+
   const dest = filtered.filter(p => p.destaque);
   const outros = filtered.filter(p => !p.destaque);
+
   if (currentLayout === 'list') { renderList(dest, outros, grid); return; }
+
   let html = '';
-  if (dest.length && currentFilter !== 'sessao') html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length>1?'s':''}</div>`;
+  if (dest.length && currentFilter !== 'sessao')
+    html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length > 1 ? 's' : ''}</div>`;
   [...dest, ...outros].forEach(p => { html += cardHtml(p); });
   grid.innerHTML = html;
 };
@@ -811,19 +1028,18 @@ function cardHtml(p) {
     ${p.destaque ? `<div class="destaque-tag">🕯️ Aprender para a Próxima Sessão</div>` : ''}
     ${p.linha ? `<span class="cat-badge">${esc(p.linha)}</span>` : ''}
     <div class="card-actions" style="margin-left:auto">
-      <input type="checkbox" class="card-check-input admin-only"
-        style="display:none;width:16px;height:16px;accent-color:var(--gold);cursor:pointer;border-radius:3px;flex-shrink:0"
+      <input type="checkbox" class="card-check-input"
         onchange="toggleSelecao('${p.id}',this.checked)"
         onclick="event.stopPropagation()">
       <button class="icon-btn admin-only" title="Aprender"
         style="${p.aprender ? 'color:#2a7a60;border-color:#b8ddd4;background:#e8f4f0' : ''}"
         onclick="toggleAprender('${p.id}',${!!p.aprender})">📚</button>
       <button class="icon-btn admin-only ${p.destaque ? 'star' : ''}" title="Sessão" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
-      <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
+      <button class="icon-btn admin-only" title="Editar" onclick="openEdit('${p.id}')">✎</button>
       <button class="icon-btn admin-only del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
     </div>
   </div>`;
-  return `<div class="card${p.destaque?' destaque':''}" data-id="${p.id}">
+  return `<div class="card${p.destaque ? ' destaque' : ''}" data-id="${p.id}">
     ${topBar}
     <div class="card-header">
       <div class="card-title-wrap">
@@ -837,8 +1053,8 @@ function cardHtml(p) {
       </div>
     </div>
     <div class="card-body">
-      ${p.letra ? `<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g,'<br>')}</div>` : ''}
-      ${p.audioUrl ? `<div class="audio-player">${buildAudioPlayer(p)}</div>` : ''}
+      ${p.letra ? `<button class="toggle-lyrics" onclick="toggleLyrics(this)">▸ Ver letra</button><div class="lyrics-text">${esc(p.letra).replace(/\n/g, '<br>')}</div>` : ''}
+      ${p.audioUrl ? `<div style="margin-top:8px">${buildAudioPlayer(p)}</div>` : ''}
       ${ytId ? `<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn" style="margin-top:6px">↗ Abrir no YouTube</a>` : p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
     </div>
   </div>`;
@@ -853,21 +1069,21 @@ function renderList(dest, outros, grid) {
     hdr.className = 'list-section-header';
     hdr.textContent = '✦ Aprender para a Próxima Sessão';
     wrap.appendChild(hdr);
-    dest.forEach((p,i) => wrap.appendChild(makeListItem(p,i)));
+    dest.forEach((p, i) => wrap.appendChild(makeListItem(p, i)));
   }
   if (dest.length && outros.length) {
     const sep = document.createElement('div');
     sep.className = 'list-section-divider';
     wrap.appendChild(sep);
   }
-  outros.forEach((p,i) => wrap.appendChild(makeListItem(p, dest.length+i)));
+  outros.forEach((p, i) => wrap.appendChild(makeListItem(p, dest.length + i)));
   grid.appendChild(wrap);
 }
 
 function makeListItem(p, i) {
   const div = document.createElement('div');
   div.className = 'list-item-row' + (p.destaque ? ' destaque' : '');
-  div.style.animationDelay = (i*.02) + 's';
+  div.style.animationDelay = (i * .02) + 's';
   div.innerHTML = `
     <div class="li-main">
       <div class="li-top">
@@ -877,11 +1093,11 @@ function makeListItem(p, i) {
         ${p.aprender ? `<span class="aprender-badge">📚 Aprender</span>` : ''}
         ${p.destaque ? `<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>` : ''}
       </div>
-      <div class="li-meta">${p.tipo ? esc(p.tipo) : ''}${p.isGuia && p.guia ? (p.tipo?' · ':'')+esc(p.guia) : ''}</div>
+      <div class="li-meta">${p.tipo ? esc(p.tipo) : ''}${p.isGuia && p.guia ? (p.tipo ? ' · ' : '') + esc(p.guia) : ''}</div>
     </div>
     <div class="li-actions">
-      <button class="icon-btn admin-only ${p.destaque?'star':''}" style="width:26px;height:26px" title="Destaque" onclick="event.stopPropagation();toggleDestaque('${p.id}',${p.destaque})">★</button>
-      <button class="icon-btn" style="width:26px;height:26px" title="Editar" onclick="event.stopPropagation();openEdit('${p.id}')">✎</button>
+      <button class="icon-btn admin-only ${p.destaque ? 'star' : ''}" style="width:26px;height:26px" title="Destaque" onclick="event.stopPropagation();toggleDestaque('${p.id}',${p.destaque})">★</button>
+      <button class="icon-btn admin-only" style="width:26px;height:26px" title="Editar" onclick="event.stopPropagation();openEdit('${p.id}')">✎</button>
       <button class="icon-btn admin-only del" style="width:26px;height:26px" title="Excluir" onclick="event.stopPropagation();deletePonto('${p.id}')">✕</button>
     </div>`;
   div.addEventListener('click', () => abrirDetalhe(p.id));
@@ -902,8 +1118,8 @@ function abrirDetalhe(id) {
       ${p.tipo ? `<span style="color:var(--text-dim);font-style:italic;font-size:14px">${esc(p.tipo)}</span>` : ''}
       ${p.isGuia && p.guia ? `<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>` : ''}
     </div>
-    ${p.letra ? `<div class="detail-lyrics">${esc(p.letra).replace(/\n/g,'<br>')}</div>` : ''}
-    ${p.audioUrl ? `<div class="audio-player">${buildAudioPlayer(p)}</div>` : ''}
+    ${p.letra ? `<div class="detail-lyrics">${esc(p.letra).replace(/\n/g, '<br>')}</div>` : ''}
+    ${p.audioUrl ? `${buildAudioPlayer(p)}` : ''}
     ${ytId ? `<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>` : p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
     ${p.postadoPor ? `<p style="color:rgba(80,30,50,.4);font-size:13px;font-style:italic">por ${esc(p.postadoPor)}</p>` : ''}`;
   abrirModal('ov-detalhe');
@@ -921,7 +1137,10 @@ window.deletePonto = async id => {
 window.openModal = () => {
   document.getElementById('modalTitle').textContent = 'Novo Ponto Cantado';
   document.getElementById('editId').value = '';
-  ['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo','fDataGravacao'].forEach(id => document.getElementById(id).value = '');
+  ['fNome','fLetra','fYt','fGuia','fPostadoPor','fTipo','fDataGravacao','fAudioStart','fAudioEnd'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  refreshLinhaSelects();
   document.getElementById('fLinha').value = '';
   document.getElementById('fIsGuia').checked = false;
   document.getElementById('guiaField').style.display = 'none';
@@ -930,10 +1149,11 @@ window.openModal = () => {
   document.getElementById('audioCurrentUrl').style.display = 'none';
   segmentos = [];
   document.getElementById('seg-area').style.display = 'none';
+  document.getElementById('seg-multi-wrap').style.display = 'block';
   document.getElementById('fMultiSeg').checked = false;
   document.getElementById('seg-list').style.display = 'none';
   document.getElementById('btn-add-seg').style.display = 'none';
-  document.getElementById('audioFileName').textContent = 'Toque para escolher um áudio do iPhone';
+  document.getElementById('audioFileName').textContent = 'Toque para escolher um áudio';
   document.getElementById('fAudioFile').value = '';
   document.getElementById('edit-audio-preview').style.display = 'none';
   abrirModal('overlay');
@@ -950,10 +1170,23 @@ window.openEdit = id => {
   document.getElementById('fIsGuia').checked = !!p.isGuia;
   document.getElementById('fGuia').value = p.guia || '';
   document.getElementById('fPostadoPor').value = p.postadoPor || '';
-  document.getElementById('fLinha').value = p.linha || '';
   document.getElementById('fTipo').value = p.tipo || '';
   document.getElementById('fDataGravacao').value = p.dataGravacao || '';
   document.getElementById('guiaField').style.display = p.isGuia ? 'block' : 'none';
+
+  // Garantir que a linha do ponto existe nas opções
+  if (p.linha && !linhas.some(l => l.toLowerCase() === p.linha.toLowerCase())) {
+    linhas.push(p.linha);
+    saveLinhas();
+  } else {
+    refreshLinhaSelects();
+  }
+  document.getElementById('fLinha').value = p.linha || '';
+
+  // audioStart / audioEnd
+  document.getElementById('fAudioStart').value = p.audioStart != null ? formatTimeField(p.audioStart) : '';
+  document.getElementById('fAudioEnd').value = p.audioEnd != null ? formatTimeField(p.audioEnd) : '';
+
   const urlEl = document.getElementById('audioCurrentUrl');
   if (p.audioUrl) {
     urlEl.textContent = '🎵 ' + p.audioUrl.split('/').pop();
@@ -964,16 +1197,27 @@ window.openEdit = id => {
     player.src = p.audioUrl;
     prev.style.display = 'block';
     document.getElementById('seg-area').style.display = 'block';
+    // Edição: sem multi-seg
+    document.getElementById('seg-multi-wrap').style.display = 'none';
   } else {
     urlEl.textContent = ''; urlEl.dataset.url = ''; urlEl.style.display = 'none';
     document.getElementById('edit-audio-preview').style.display = 'none';
+    document.getElementById('seg-area').style.display = 'none';
+    document.getElementById('seg-multi-wrap').style.display = 'block';
   }
-  document.getElementById('audioFileName').textContent = 'Toque para escolher um áudio do iPhone';
+
+  segmentos = [];
+  document.getElementById('fMultiSeg').checked = false;
+  document.getElementById('seg-list').style.display = 'none';
+  document.getElementById('btn-add-seg').style.display = 'none';
+  document.getElementById('audioFileName').textContent = 'Toque para escolher um áudio';
   document.getElementById('fAudioFile').value = '';
+
   abrirModal('overlay');
 };
 
 window.closeModal = () => fecharModal('overlay');
+
 window.toggleGuiaField = () => {
   document.getElementById('guiaField').style.display = document.getElementById('fIsGuia').checked ? 'block' : 'none';
 };
@@ -983,6 +1227,8 @@ window.savePonto = async () => {
   if (!nome) { alert('Informe o nome do ponto.'); return; }
   const editId = document.getElementById('editId').value;
   const audioUrl = document.getElementById('audioCurrentUrl').dataset.url || '';
+  const audioStart = parseTime(document.getElementById('fAudioStart').value);
+  const audioEnd = parseTime(document.getElementById('fAudioEnd').value);
   const data = {
     nome,
     linha: document.getElementById('fLinha').value,
@@ -990,6 +1236,8 @@ window.savePonto = async () => {
     letra: document.getElementById('fLetra').value.trim(),
     yt: document.getElementById('fYt').value.trim(),
     audioUrl,
+    audioStart,
+    audioEnd,
     isGuia: document.getElementById('fIsGuia').checked,
     guia: document.getElementById('fIsGuia').checked ? document.getElementById('fGuia').value.trim() : '',
     postadoPor: document.getElementById('fPostadoPor').value.trim(),
@@ -1015,7 +1263,7 @@ window.savePonto = async () => {
         pontos.unshift(await res.json());
         criados++;
       }
-      toast(`✅ ${criados} ponto${criados>1?'s':''} criado${criados>1?'s':''}!`);
+      toast(`✅ ${criados} ponto${criados > 1 ? 's' : ''} criado${criados > 1 ? 's' : ''}!`);
     } else {
       const res = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
       if (!res.ok) throw new Error(await res.text());
@@ -1023,7 +1271,7 @@ window.savePonto = async () => {
       toast('Ponto salvo!');
     }
     closeModal(); renderCards();
-  } catch(e) {
+  } catch (e) {
     mostrarErro('Erro ao salvar ponto', e);
   }
 };
@@ -1037,7 +1285,7 @@ function extractYtId(url) {
 
 function esc(s) {
   if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function toast(msg) {
@@ -1049,10 +1297,10 @@ function toast(msg) {
 
 window.exportarJSON = () => {
   if (!pontos.length) { toast('Nenhum ponto para exportar'); return; }
-  const blob = new Blob([JSON.stringify(pontos, null, 2)], {type:'application/json'});
+  const blob = new Blob([JSON.stringify(pontos, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `pontos-cantados-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.href = url; a.download = `pontos-cantados-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click(); URL.revokeObjectURL(url);
   toast('Backup baixado!');
 };
@@ -1072,8 +1320,12 @@ window.togglePlayer = btn => {
 
 // ── ERROS ──
 const errosJs = [];
-window.addEventListener('error', e => { errosJs.push(e.message + ' (' + e.filename?.split('/').pop() + ':' + e.lineno + ')'); });
-window.addEventListener('unhandledrejection', e => { errosJs.push('Promise: ' + (e.reason?.message || e.reason)); });
+window.addEventListener('error', e => {
+  errosJs.push(e.message + ' (' + e.filename?.split('/').pop() + ':' + e.lineno + ')');
+});
+window.addEventListener('unhandledrejection', e => {
+  errosJs.push('Promise: ' + (e.reason?.message || e.reason));
+});
 
 function mostrarErro(contexto, err) {
   const lines = [
@@ -1085,6 +1337,10 @@ function mostrarErro(contexto, err) {
   abrirModal('ov-erro');
 }
 
+// ── INIT ──
+loadLinhas();
+const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
+setLayout(savedLayout);
 load();
 </script>
 </body>
