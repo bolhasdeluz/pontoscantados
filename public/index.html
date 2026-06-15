@@ -216,14 +216,14 @@ select option{background:#fff;color:#2a1a22}
 .ts-prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px}
 .ts-prov-btn{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:transparent;cursor:pointer;text-align:left;transition:all .15s;position:relative;width:100%}
 .ts-prov-btn:hover{border-color:rgba(196,57,107,.3);background:var(--gold-dim)}
-.ts-prov-btn.ts-selected{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 1px var(--gold)}
+.ts-prov-btn.ts-sel{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 1px var(--gold)}
 .ts-prov-name{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text);text-transform:uppercase;margin-bottom:2px}
 .ts-prov-desc{font-size:11px;color:var(--text-dim);line-height:1.35}
 .ts-prov-check{position:absolute;top:8px;right:9px;color:var(--gold);font-size:12px;display:none}
-.ts-prov-btn.ts-selected .ts-prov-check{display:block}
+.ts-prov-btn.ts-sel .ts-prov-check{display:block}
 .ts-prov-tag{display:inline-block;margin-top:4px;font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:20px}
 .ts-tag-free{background:#e8f4f0;border:1px solid #b8ddd4;color:#2a7a60}
-.ts-tag-credits{background:#fffbe8;border:1px solid #e8d880;color:#8c6a00}
+.ts-tag-cred{background:#fffbe8;border:1px solid #e8d880;color:#8c6a00}
 .ts-tag-paid{background:rgba(120,60,180,.07);border:1px solid rgba(120,60,180,.2);color:#6030a0}
 .ts-prov-link{font-size:10.5px;color:var(--gold);text-decoration:none;display:inline-block;margin-top:3px}
 .ts-prov-link:hover{text-decoration:underline}
@@ -254,8 +254,6 @@ select option{background:#fff;color:#2a1a22}
 .ts-prog-bar{height:100%;background:linear-gradient(90deg,#c4396b,#e8688a);width:0%;transition:width .4s ease}
 .ts-status{font-size:12.5px;color:var(--text-dim);text-align:center;min-height:18px;margin-bottom:10px;font-style:italic}
 .ts-err{background:var(--red-dim);border:1px solid rgba(184,64,64,.2);color:var(--red);border-radius:8px;padding:.65rem 1rem;font-size:13px;margin-bottom:12px;display:none}
-
-/* Player */
 .ts-player{background:linear-gradient(135deg,#fff0f4,#fde8ed);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px}
 .ts-player-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .ts-play-btn{width:38px;height:38px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0;transition:background .15s;box-shadow:0 2px 8px rgba(196,57,107,.25)}
@@ -266,8 +264,6 @@ select option{background:#fff;color:#2a1a22}
 .ts-player-bar{position:relative;height:4px;background:rgba(196,57,107,.15);border-radius:99px;cursor:pointer;margin:0}
 .ts-player-fill{height:100%;background:linear-gradient(90deg,#c4396b,#e8688a);border-radius:99px;width:0%;pointer-events:none}
 .ts-player-thumb{position:absolute;top:50%;width:13px;height:13px;background:var(--gold);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 1px 4px rgba(196,57,107,.4)}
-
-/* Transcript */
 .ts-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
 .ts-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
 .ts-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -290,8 +286,6 @@ select option{background:#fff;color:#2a1a22}
 .ts-ts-badge:hover{border-color:var(--gold);color:var(--gold)}
 .ts-meta{display:flex;gap:1rem;margin-top:6px;flex-wrap:wrap}
 .ts-meta span{font-size:11.5px;color:var(--text-dim);font-style:italic}
-
-/* Seleção panel */
 .ts-sel-panel{display:none;background:#e8f4f0;border:1px solid #b8ddd4;border-radius:10px;padding:12px 14px;margin-top:10px}
 .ts-sel-panel.open{display:block}
 .ts-sel-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a7a60;margin-bottom:7px}
@@ -300,12 +294,10 @@ select option{background:#fff;color:#2a1a22}
 .ts-sel-actions{display:flex;gap:8px;flex-wrap:wrap}
 .ts-btn-usar{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;border:none;background:var(--gold);color:#fff;transition:opacity .12s;box-shadow:0 2px 8px rgba(196,57,107,.2)}
 .ts-btn-usar:hover{opacity:.85}
-.ts-btn-ok-outline{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid #b8ddd4;background:transparent;color:#2a7a60;transition:all .12s}
-.ts-btn-ok-outline:hover{background:#2a7a60;color:#fff}
-
-/* Sessions */
+.ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid #b8ddd4;background:transparent;color:#2a7a60;transition:all .12s}
+.ts-btn-ok-ol:hover{background:#2a7a60;color:#fff}
 .ts-sess-empty{font-size:13px;color:var(--text-dim);font-style:italic;padding:4px 0}
-.ts-sess-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+.ts-sess-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;margin-bottom:8px}
 .ts-sess-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
 .ts-sess-info{flex:1;min-width:0}
 .ts-sess-name{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -317,11 +309,8 @@ select option{background:#fff;color:#2a1a22}
 .ts-save-row input:focus{border-color:var(--gold)}
 .ts-btn-save{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:var(--gold);color:#fff;white-space:nowrap}
 .ts-section{margin-bottom:14px}
-.ts-section-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.ts-section-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
-.ts-collapsible-body{display:none}
-.ts-collapsible-body.open{display:block}
-.ts-toggle-btn{background:none;border:none;cursor:pointer;color:var(--gold);font-size:11.5px;font-family:'DM Sans',sans-serif;padding:0;margin-left:4px}
+.ts-sec-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
 /* ══════════ /TRANSCRIÇÃO ══════════ */
 
 </style>
@@ -524,6 +513,138 @@ select option{background:#fff;color:#2a1a22}
     <pre id="erro-msg" style="background:#fff5f5;border:1px solid #fcc;border-radius:8px;padding:12px;font-size:.75rem;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:50vh;overflow-y:auto;color:#7a1a22;font-family:monospace"></pre>
     <div style="display:flex;justify-content:flex-end;margin-top:12px">
       <button class="btn-cancel" onclick="fecharModal('ov-erro')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── TRANSCRICAO ── -->
+<div class="overlay" id="ov-transcricao">
+  <div class="modal" style="max-width:680px">
+    <button class="btn-close-modal" id="ts-close-btn">✕</button>
+    <h2>Transcrever Sessão</h2>
+
+    <!-- Sessões salvas -->
+    <div class="ts-section">
+      <div class="ts-sec-lbl">Sessões salvas</div>
+      <div id="ts-sess-list"><div class="ts-sess-empty">Nenhuma sessão salva ainda.</div></div>
+      <div class="ts-save-row" id="ts-save-row" style="display:none">
+        <input type="text" id="ts-sess-name" placeholder="Nome da sessão (ex: Gira de Exu — Jun 2025)"/>
+        <button class="ts-btn-save" id="ts-btn-save-sess">Salvar</button>
+      </div>
+    </div>
+
+    <!-- Provedor -->
+    <div class="ts-section">
+      <div class="ts-sec-lbl">Provedor de IA</div>
+      <div class="ts-prov-grid">
+        <button class="ts-prov-btn ts-sel" data-prov="deepgram">
+          <div class="ts-prov-check">✓</div>
+          <div class="ts-prov-name">Deepgram</div>
+          <div class="ts-prov-desc">Melhor no teste. Timestamps por palavra.</div>
+          <span class="ts-prov-tag ts-tag-cred">$200 créditos</span><br/>
+          <a class="ts-prov-link" href="https://console.deepgram.com/signup" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
+        </button>
+        <button class="ts-prov-btn" data-prov="assemblyai">
+          <div class="ts-prov-check">✓</div>
+          <div class="ts-prov-name">AssemblyAI</div>
+          <div class="ts-prov-desc">Word boost pro vocabulário do terreiro.</div>
+          <span class="ts-prov-tag ts-tag-free">Free tier</span><br/>
+          <a class="ts-prov-link" href="https://www.assemblyai.com/dashboard/signup" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
+        </button>
+        <button class="ts-prov-btn" data-prov="elevenlabs">
+          <div class="ts-prov-check">✓</div>
+          <div class="ts-prov-name">ElevenLabs</div>
+          <div class="ts-prov-desc">96.7% accuracy, top de qualidade.</div>
+          <span class="ts-prov-tag ts-tag-paid">~$0,22–0,48/h</span><br/>
+          <a class="ts-prov-link" href="https://elevenlabs.io/app/sign-up" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
+        </button>
+      </div>
+      <div class="ts-key-wrap visible" id="ts-key-wrap">
+        <div class="ts-key-row">
+          <input type="password" id="ts-api-key" placeholder="Cole sua chave Deepgram…"/>
+        </div>
+        <p class="ts-key-hint" id="ts-key-hint">console.deepgram.com → Settings → API Keys · $200 créditos no cadastro</p>
+      </div>
+    </div>
+
+    <!-- Áudio -->
+    <div class="ts-section">
+      <div class="ts-sec-lbl">Áudio da sessão</div>
+      <div class="ts-drop" id="ts-drop">
+        <input type="file" id="ts-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.webm,.mp4,.aac"/>
+        <div class="ts-drop-icon">🎙️</div>
+        <div class="ts-drop-text">Arrasta o áudio ou clica para escolher</div>
+        <div class="ts-drop-sub">MP3, WAV, M4A, OGG, FLAC, WEBM — qualquer tamanho</div>
+        <div class="ts-drop-name" id="ts-drop-name"></div>
+      </div>
+    </div>
+
+    <!-- Vocabulário -->
+    <div class="ts-section">
+      <div class="ts-sec-lbl">Vocabulário do terreiro</div>
+      <div class="ts-chips" id="ts-chips">
+        <button class="ts-chip active" data-id="umbanda">Umbanda</button>
+        <button class="ts-chip active" data-id="quimbanda">Quimbanda</button>
+        <button class="ts-chip active" data-id="exus">Exus e Pombagiras</button>
+        <button class="ts-chip" data-id="preto">Preto Velho</button>
+        <button class="ts-chip" data-id="orixas">Orixás</button>
+        <button class="ts-chip" data-id="pontos">Pontos Cantados</button>
+        <button class="ts-chip" data-id="yoruba">Iorubá / Quimbundo</button>
+      </div>
+      <div class="ts-ctx"><textarea id="ts-ctx" placeholder="Nomes das entidades e guias do terreiro…"></textarea></div>
+    </div>
+
+    <div class="ts-err" id="ts-err"></div>
+    <button class="ts-btn-transcribe" id="ts-btn-transcribe" disabled>Transcrever Sessão</button>
+    <div class="ts-prog-wrap" id="ts-prog-wrap"><div class="ts-prog-bar" id="ts-prog-bar"></div></div>
+    <div class="ts-status" id="ts-status"></div>
+
+    <!-- Resultado -->
+    <div id="ts-result" style="display:none">
+      <div class="ts-player">
+        <div class="ts-player-top">
+          <button class="ts-play-btn" id="ts-play-btn">▶</button>
+          <div class="ts-player-info">
+            <div class="ts-player-name" id="ts-player-name"></div>
+            <div class="ts-player-time" id="ts-player-time">0:00 / 0:00</div>
+          </div>
+        </div>
+        <div class="ts-player-bar" id="ts-bar">
+          <div class="ts-player-fill" id="ts-fill"></div>
+          <div class="ts-player-thumb" id="ts-thumb"></div>
+        </div>
+      </div>
+      <div class="ts-hdr">
+        <span class="ts-lbl">Transcrição</span>
+        <div class="ts-actions">
+          <button class="ts-btn-sm" id="ts-btn-sel">✂ Selecionar trecho</button>
+          <button class="ts-btn-sm" id="ts-btn-copy-all">Copiar tudo</button>
+          <button class="ts-btn-sm" id="ts-btn-dl-txt">Baixar .txt</button>
+          <button class="ts-btn-sm" id="ts-btn-dl-srt">Baixar .srt</button>
+        </div>
+      </div>
+      <div class="ts-search">
+        <input type="text" id="ts-search" placeholder="Buscar na transcrição…"/>
+        <span class="ts-search-count" id="ts-search-count"></span>
+      </div>
+      <div class="ts-box" id="ts-box"></div>
+      <div class="ts-meta">
+        <span id="ts-meta-dur"></span>
+        <span id="ts-meta-words"></span>
+        <span id="ts-meta-prov"></span>
+      </div>
+      <div class="ts-sel-panel" id="ts-sel-panel">
+        <div class="ts-sel-lbl">Trecho selecionado</div>
+        <div class="ts-sel-text" id="ts-sel-text"></div>
+        <div class="ts-sel-meta" id="ts-sel-meta"></div>
+        <div class="ts-sel-actions">
+          <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como ponto</button>
+          <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
+          <button class="ts-btn-ok-ol" id="ts-btn-copy-trecho">Copiar legenda</button>
+          <button class="ts-btn-ok-ol" id="ts-btn-clear-sel">Limpar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1454,477 +1575,405 @@ function mostrarErro(contexto, err) {
 
 // ══════════ MÓDULO TRANSCRIÇÃO ══════════
 (function() {
-const TS_VOCAB = {
-  umbanda:  'Umbanda,terreiro,gira,sessão,incorporação,desenvolvimento,médium,Aruanda,ponto cantado,firmeza,defumação,pemba,quartinha,Mojubá',
-  quimbanda:'Quimbanda,Exu,Pombagira,Kalunga,encruzilhada,Exu Mirim,Tranca Ruas,Maria Padilha,Sete Encruzilhadas',
-  exus:     'Exu Caveira,Exu das Almas,Maria Padilha,Dama da Noite,Rosa Caveira,Cigana,Exu Veludo,Marabô,Pomba Gira',
-  preto:    'Preto Velho,Pai José,Vovó Maria Conga,Pai Joaquim,Caboclo,Jurema,Boiadeiro,Marinheiro,Baiano',
-  orixas:   'Orixá,Oxossi,Ogum,Xangô,Iemanjá,Oxum,Oxalá,Iansã,Nanã,Omulu,Ossanin,Logunedé',
-  pontos:   'ponto cantado,ponto de Exu,ponto de Pombagira,saravá,Laroyê,salve,firmeza na gira',
-  yoruba:   'Laroyê,Saravá,Mojubá,Axé,Kalunga,Pemba,Aruanda,Orixá,irmão da esquerda,irmão da direita,Okê Arô'
-};
-const TS_PROVS = {
-  deepgram:  {label:'Deepgram Nova-2',ph:'Cole sua chave Deepgram…',hint:'console.deepgram.com → Settings → API Keys · $200 créditos'},
-  assemblyai:{label:'AssemblyAI',ph:'Cole sua chave AssemblyAI…',hint:'assemblyai.com → Dashboard → API Keys'},
-  elevenlabs:{label:'ElevenLabs Scribe',ph:'Cole sua chave ElevenLabs…',hint:'elevenlabs.io → Profile → API Keys'}
-};
-const TS_STORE = 'bolhasdeluz_sessions';
+  const TS_VOCAB = {
+    umbanda:  'Umbanda,terreiro,gira,sessão,incorporação,desenvolvimento,médium,Aruanda,ponto cantado,firmeza,defumação,pemba,quartinha,Mojubá',
+    quimbanda:'Quimbanda,Exu,Pombagira,Kalunga,encruzilhada,Exu Mirim,Tranca Ruas,Maria Padilha,Sete Encruzilhadas',
+    exus:     'Exu Caveira,Exu das Almas,Maria Padilha,Dama da Noite,Rosa Caveira,Cigana,Exu Veludo,Marabô,Pomba Gira',
+    preto:    'Preto Velho,Pai José,Vovó Maria Conga,Pai Joaquim,Caboclo,Jurema,Boiadeiro,Marinheiro,Baiano',
+    orixas:   'Orixá,Oxossi,Ogum,Xangô,Iemanjá,Oxum,Oxalá,Iansã,Nanã,Omulu,Ossanin,Logunedé',
+    pontos:   'ponto cantado,ponto de Exu,ponto de Pombagira,saravá,Laroyê,salve,firmeza na gira',
+    yoruba:   'Laroyê,Saravá,Mojubá,Axé,Kalunga,Pemba,Aruanda,Orixá,irmão da esquerda,irmão da direita,Okê Arô'
+  };
+  const TS_PROVS = {
+    deepgram:  {label:'Deepgram Nova-2', ph:'Cole sua chave Deepgram…',   hint:'console.deepgram.com → Settings → API Keys · $200 créditos'},
+    assemblyai:{label:'AssemblyAI',      ph:'Cole sua chave AssemblyAI…', hint:'assemblyai.com → Dashboard → API Keys'},
+    elevenlabs:{label:'ElevenLabs Scribe',ph:'Cole sua chave ElevenLabs…',hint:'elevenlabs.io → Profile → API Keys'}
+  };
+  const TS_STORE = 'bolhasdeluz_sessions';
 
-let tsProv = 'deepgram', tsFile = null, tsWords = [], tsR2Url = '';
-let tsSelStart = null, tsSelEnd = null, tsSelMode = false;
-const tsAudio = new Audio();
-const tg = id => document.getElementById(id);
+  let tsProv = 'deepgram', tsFile = null, tsWords = [], tsR2Url = '';
+  let tsSelStart = null, tsSelEnd = null, tsSelMode = false;
+  const tsAudio = new Audio();
+  const tg = id => document.getElementById(id);
 
-// Abre/fecha overlay
-window.tsAbrir = () => { abrirModal('ov-transcricao'); tsRenderSessions(); };
-window.tsFechar = () => {
-  tsAudio.pause();
-  fecharModal('ov-transcricao');
-};
+  // ── Abrir / Fechar ──
+  window.tsAbrir = () => { abrirModal('ov-transcricao'); tsRenderSessions(); };
+  function tsFechar() { tsAudio.pause(); fecharModal('ov-transcricao'); }
+  tg('ts-close-btn').addEventListener('click', tsFechar);
+  tg('ov-transcricao').addEventListener('click', e => { if (e.target === tg('ov-transcricao')) tsFechar(); });
 
-// Click outside
-document.getElementById('ov-transcricao').addEventListener('click', e => {
-  if (e.target === tg('ov-transcricao')) tsFechar();
-});
-
-// Sessions toggle
-window.tsSessToggle = () => {
-  const b = tg('ts-sess-body');
-  b.classList.toggle('open');
-  document.querySelector('#ov-transcricao .ts-toggle-btn').textContent = b.classList.contains('open') ? '▴ fechar' : '▾ ver';
-};
-
-// Provider
-document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(b => b.classList.remove('ts-selected'));
-    btn.classList.add('ts-selected');
-    tsProv = btn.dataset.prov;
-    const p = TS_PROVS[tsProv];
-    tg('ts-api-key').placeholder = p.ph;
-    tg('ts-key-hint').textContent = p.hint;
-    tsUpdateBtn();
+  // ── Provider ──
+  document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(b => b.classList.remove('ts-sel'));
+      btn.classList.add('ts-sel');
+      tsProv = btn.dataset.prov;
+      const p = TS_PROVS[tsProv];
+      tg('ts-api-key').placeholder = p.ph;
+      tg('ts-key-hint').textContent = p.hint;
+      tsUpdateBtn();
+    });
   });
-});
-tg('ts-api-key').addEventListener('input', tsUpdateBtn);
+  tg('ts-api-key').addEventListener('input', tsUpdateBtn);
 
-// File
-function tsSetFile(f) {
-  const ext = (f.name.split('.').pop() || '').toLowerCase();
-  if (!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','mpga','aac'].includes(ext)) {
-    tsShowErr('Formato não reconhecido.'); return;
+  // ── Arquivo ──
+  function tsSetFile(f) {
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if (!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','mpga','aac'].includes(ext)) { tsShowErr('Formato não reconhecido.'); return; }
+    tsFile = f;
+    tg('ts-drop-name').textContent = f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)';
+    tg('ts-drop').classList.add('ts-has-file');
+    tsAudio.src = URL.createObjectURL(f);
+    tg('ts-player-name').textContent = f.name;
+    tsHideErr(); tsUpdateBtn();
   }
-  tsFile = f;
-  tg('ts-drop-name').textContent = f.name + ' (' + (f.size/1024/1024).toFixed(1) + ' MB)';
-  tg('ts-drop').classList.add('ts-has-file');
-  tsAudio.src = URL.createObjectURL(f);
-  tg('ts-player-name').textContent = f.name;
-  tsHideErr(); tsUpdateBtn();
-}
-tg('ts-file-input').addEventListener('change', e => { if (e.target.files[0]) tsSetFile(e.target.files[0]); });
-tg('ts-drop').addEventListener('dragover', e => { e.preventDefault(); });
-tg('ts-drop').addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) tsSetFile(e.dataTransfer.files[0]); });
+  tg('ts-file-input').addEventListener('change', e => { if (e.target.files[0]) tsSetFile(e.target.files[0]); });
+  tg('ts-drop').addEventListener('dragover', e => e.preventDefault());
+  tg('ts-drop').addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) tsSetFile(e.dataTransfer.files[0]); });
 
-// Chips
-document.querySelectorAll('#ov-transcricao .ts-chip').forEach(c => c.addEventListener('click', () => { c.classList.toggle('active'); tsRebuildCtx(); }));
-function tsRebuildCtx() {
-  tg('ts-ctx').value = Array.from(document.querySelectorAll('#ov-transcricao .ts-chip.active')).map(c => TS_VOCAB[c.dataset.id]).filter(Boolean).join(', ');
-}
-tsRebuildCtx();
+  // ── Chips ──
+  document.querySelectorAll('#ts-chips .ts-chip').forEach(c => c.addEventListener('click', () => { c.classList.toggle('active'); tsRebuildCtx(); }));
+  function tsRebuildCtx() {
+    tg('ts-ctx').value = Array.from(document.querySelectorAll('#ts-chips .ts-chip.active')).map(c => TS_VOCAB[c.dataset.id]).filter(Boolean).join(', ');
+  }
+  tsRebuildCtx();
 
-function tsUpdateBtn() {
-  tg('ts-btn-transcribe').disabled = !(tsProv && tsFile && tg('ts-api-key').value.trim().length > 8);
-}
-function tsShowErr(m) { tg('ts-err').innerHTML = m; tg('ts-err').style.display = 'block'; }
-function tsHideErr()  { tg('ts-err').style.display = 'none'; }
-function tsSetProg(p) { tg('ts-prog-bar').style.width = p + '%'; }
-function tsFmtTime(s) { const m=Math.floor(s/60);const sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec; }
-function tsCtxWords() { return tg('ts-ctx').value.trim().split(',').map(s=>s.trim()).filter(Boolean); }
-function tsCtxPrompt() {
-  const c = tg('ts-ctx').value.trim();
-  return c ? 'Transcrição de sessão de Umbanda/Quimbanda em português brasileiro. Termos: '+c+'. Preserve pontos cantados como versos.' : 'Sessão espiritual em português brasileiro.';
-}
+  function tsUpdateBtn() { tg('ts-btn-transcribe').disabled = !(tsProv && tsFile && tg('ts-api-key').value.trim().length > 8); }
+  function tsShowErr(m) { tg('ts-err').innerHTML = m; tg('ts-err').style.display = 'block'; }
+  function tsHideErr()  { tg('ts-err').style.display = 'none'; }
+  function tsSetProg(p) { tg('ts-prog-bar').style.width = p + '%'; }
+  function tsFmt(s)     { const m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
+  function tsCtxWords() { return tg('ts-ctx').value.trim().split(',').map(s=>s.trim()).filter(Boolean); }
+  function tsCtxPrompt(){ const c=tg('ts-ctx').value.trim(); return c?'Transcrição de sessão de Umbanda/Quimbanda em português brasileiro. Termos: '+c+'. Preserve pontos cantados como versos.':'Sessão espiritual em português brasileiro.'; }
 
-// ── TRANSCRIBE ──
-tg('ts-btn-transcribe').addEventListener('click', async () => {
-  const key = tg('ts-api-key').value.trim();
-  if (!key || !tsFile) return;
-  tsHideErr();
-  tg('ts-btn-transcribe').disabled = true;
-  tg('ts-result').style.display = 'none';
-  tg('ts-prog-wrap').style.display = 'block';
-  tsSetProg(5);
-  const t0 = Date.now();
-  // Upload para R2 em paralelo
-  tsR2Url = '';
-  uploadAudioToR2(tsFile).then(url => { if (url) tsR2Url = url; });
-  try {
-    if (tsProv === 'deepgram')   await tsFlowDeepgram(key, t0);
-    if (tsProv === 'assemblyai') await tsFlowAssemblyAI(key, t0);
-    if (tsProv === 'elevenlabs') await tsFlowElevenLabs(key, t0);
-  } catch(e) {
-    tsShowErr('<strong>Erro:</strong> ' + e.message);
+  // ── Transcrever ──
+  tg('ts-btn-transcribe').addEventListener('click', async () => {
+    const key = tg('ts-api-key').value.trim();
+    if (!key || !tsFile) return;
+    tsHideErr();
+    tg('ts-btn-transcribe').disabled = true;
+    tg('ts-result').style.display = 'none';
+    tg('ts-prog-wrap').style.display = 'block';
+    tsSetProg(5); tsR2Url = '';
+    // upload R2 em paralelo
+    uploadAudioToR2(tsFile).then(url => { if (url) tsR2Url = url; });
+    const t0 = Date.now();
+    try {
+      if (tsProv === 'deepgram')    await tsDeepgram(key, t0);
+      if (tsProv === 'assemblyai')  await tsAssemblyAI(key, t0);
+      if (tsProv === 'elevenlabs')  await tsElevenLabs(key, t0);
+    } catch(e) {
+      tsShowErr('<strong>Erro:</strong> ' + e.message);
+      tg('ts-status').textContent = '';
+      tg('ts-prog-wrap').style.display = 'none';
+    } finally { tsUpdateBtn(); }
+  });
+
+  function tsDone(words, t0) {
+    if (!words || !words.length) throw new Error('Nenhuma fala detectada. Tenta um trecho com mais fala direta.');
+    tsWords = words;
+    tsSetProg(100);
+    const el = ((Date.now()-t0)/1000).toFixed(1);
+    tg('ts-meta-dur').textContent   = 'processado em ' + el + 's';
+    tg('ts-meta-words').textContent = '~' + words.length + ' palavras';
+    tg('ts-meta-prov').textContent  = TS_PROVS[tsProv].label;
     tg('ts-status').textContent = '';
-    tg('ts-prog-wrap').style.display = 'none';
-  } finally {
-    tsUpdateBtn();
+    tsRenderWords();
+    tg('ts-result').style.display = 'block';
+    tsSaveRowShow();
   }
-});
 
-function tsFinalizeWords(words, t0) {
-  if (!words || !words.length) throw new Error('Nenhuma fala detectada. Tenta um trecho com mais fala direta.');
-  tsWords = words;
-  tsSetProg(100);
-  const elapsed = ((Date.now()-t0)/1000).toFixed(1);
-  tg('ts-meta-dur').textContent = 'processado em ' + elapsed + 's';
-  tg('ts-meta-words').textContent = '~' + words.length + ' palavras';
-  tg('ts-meta-prov').textContent = TS_PROVS[tsProv].label;
-  tg('ts-status').textContent = '';
-  tsRenderWords();
-  tg('ts-result').style.display = 'block';
-  tsSessShowSaveRow();
-}
+  // ── Flows ──
+  async function tsDeepgram(k, t0) {
+    tg('ts-status').textContent = 'Enviando áudio…'; tsSetProg(20);
+    const w = tsCtxWords();
+    let url = 'https://api.deepgram.com/v1/listen?language=pt&punctuate=true&model=nova-2&words=true';
+    if (w.length) url += '&keywords=' + w.slice(0,200).map(encodeURIComponent).join('&keywords=');
+    tsSetProg(50); tg('ts-status').textContent = 'Transcrevendo…';
+    const res = await fetch(url, {method:'POST', headers:{'Authorization':'Token '+k,'Content-Type':tsFile.type||'audio/mpeg'}, body:tsFile});
+    tsSetProg(90);
+    if (!res.ok) { const e=await res.json().catch(()=>({})); if(res.status===401) throw new Error('Chave inválida'); throw new Error(e.err_msg||'Erro '+res.status); }
+    const d = await res.json();
+    const raw = d?.results?.channels?.[0]?.alternatives?.[0]?.words || [];
+    if (!raw.length) throw new Error('Nenhuma fala detectada. O áudio pode ter muito ruído ou pouca fala direta.');
+    tsDone(raw.map(w => ({word:w.punctuated_word||w.word, start:w.start, end:w.end})), t0);
+  }
 
-// ── FLOWS ──
-async function tsFlowDeepgram(k, t0) {
-  tg('ts-status').textContent = 'Enviando áudio…'; tsSetProg(20);
-  const words = tsCtxWords();
-  let url = 'https://api.deepgram.com/v1/listen?language=pt&punctuate=true&model=nova-2&words=true';
-  if (words.length) url += '&keywords=' + words.slice(0,200).map(encodeURIComponent).join('&keywords=');
-  tsSetProg(50); tg('ts-status').textContent = 'Transcrevendo…';
-  const res = await fetch(url, {method:'POST',headers:{'Authorization':'Token '+k,'Content-Type':tsFile.type||'audio/mpeg'},body:tsFile});
-  tsSetProg(90);
-  if (!res.ok) { const e=await res.json().catch(()=>({}));if(res.status===401)throw new Error('Chave inválida');throw new Error(e.err_msg||'Erro '+res.status); }
-  const d = await res.json();
-  const raw = d?.results?.channels?.[0]?.alternatives?.[0]?.words || [];
-  if (!raw.length) throw new Error('Nenhuma fala detectada. Testa com um áudio com mais fala direta.');
-  tsFinalizeWords(raw.map(w => ({word:w.punctuated_word||w.word,start:w.start,end:w.end})), t0);
-}
-
-async function tsFlowAssemblyAI(k, t0) {
-  tg('ts-status').textContent = 'Enviando áudio…'; tsSetProg(15);
-  const up = await fetch('https://api.assemblyai.com/v2/upload',{method:'POST',headers:{'Authorization':k,'Content-Type':'application/octet-stream'},body:tsFile});
-  if (!up.ok){const e=await up.json().catch(()=>({}));if(up.status===401)throw new Error('Chave inválida');throw new Error(e.error||'Erro '+up.status);}
-  const {upload_url} = await up.json(); tsSetProg(30);
-  const ctxW = tsCtxWords();
-  const body = {audio_url:upload_url,language_code:'pt',punctuate:true,format_text:true};
-  if (ctxW.length){body.word_boost=ctxW.slice(0,1000);body.boost_param='high';}
-  const sub = await fetch('https://api.assemblyai.com/v2/transcript',{method:'POST',headers:{'Authorization':k,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if (!sub.ok){const e=await sub.json().catch(()=>({}));throw new Error(e.error||'Erro '+sub.status);}
-  const {id} = await sub.json(); tsSetProg(45);
-  for (let i=0;i<200;i++){
-    await new Promise(r=>setTimeout(r,3000));
-    const poll = await fetch('https://api.assemblyai.com/v2/transcript/'+id,{headers:{'Authorization':k}});
-    if (!poll.ok) continue;
-    const d = await poll.json();
-    const elapsed = (Date.now()-t0)/1000;
-    tsSetProg(Math.min(45+(elapsed/200)*50,93));
-    tg('ts-status').textContent = 'Transcrevendo… ' + Math.floor(elapsed) + 's';
-    if (d.status==='completed'){
-      const raw = d.words||[];
-      if (!raw.length) throw new Error('Nenhuma fala detectada.');
-      return tsFinalizeWords(raw.map(w=>({word:w.text,start:w.start/1000,end:w.end/1000})), t0);
+  async function tsAssemblyAI(k, t0) {
+    tg('ts-status').textContent = 'Enviando áudio…'; tsSetProg(15);
+    const up = await fetch('https://api.assemblyai.com/v2/upload', {method:'POST', headers:{'Authorization':k,'Content-Type':'application/octet-stream'}, body:tsFile});
+    if (!up.ok) { const e=await up.json().catch(()=>({})); if(up.status===401) throw new Error('Chave inválida'); throw new Error(e.error||'Erro '+up.status); }
+    const {upload_url} = await up.json(); tsSetProg(30);
+    const cw = tsCtxWords();
+    const body = {audio_url:upload_url, language_code:'pt', punctuate:true, format_text:true};
+    if (cw.length) { body.word_boost = cw.slice(0,1000); body.boost_param = 'high'; }
+    const sub = await fetch('https://api.assemblyai.com/v2/transcript', {method:'POST', headers:{'Authorization':k,'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    if (!sub.ok) { const e=await sub.json().catch(()=>({})); throw new Error(e.error||'Erro '+sub.status); }
+    const {id} = await sub.json(); tsSetProg(45);
+    for (let i=0; i<200; i++) {
+      await new Promise(r=>setTimeout(r,3000));
+      const poll = await fetch('https://api.assemblyai.com/v2/transcript/'+id, {headers:{'Authorization':k}});
+      if (!poll.ok) continue;
+      const d = await poll.json();
+      const elapsed = (Date.now()-t0)/1000;
+      tsSetProg(Math.min(45+(elapsed/200)*50, 93));
+      tg('ts-status').textContent = 'Transcrevendo… ' + Math.floor(elapsed) + 's';
+      if (d.status==='completed') {
+        const raw = d.words||[];
+        if (!raw.length) throw new Error('Nenhuma fala detectada.');
+        return tsDone(raw.map(w=>({word:w.text, start:w.start/1000, end:w.end/1000})), t0);
+      }
+      if (d.status==='error') throw new Error('Erro do modelo: '+(d.error||'desconhecido'));
     }
-    if (d.status==='error') throw new Error('Erro do modelo: '+(d.error||'desconhecido'));
+    throw new Error('Tempo limite. Tenta um áudio mais curto.');
   }
-  throw new Error('Tempo limite.');
-}
 
-async function tsFlowElevenLabs(k, t0) {
-  tg('ts-status').textContent = 'Enviando para Scribe…'; tsSetProg(20);
-  const fd = new FormData(); fd.append('audio',tsFile,tsFile.name);
-  fd.append('model_id','scribe_v1'); fd.append('timestamps_granularity','word');
-  tsCtxWords().slice(0,1000).forEach(w => fd.append('keyterm',w));
-  tsSetProg(55); tg('ts-status').textContent = 'Processando…';
-  const res = await fetch('https://api.elevenlabs.io/v1/speech-to-text',{method:'POST',headers:{'xi-api-key':k},body:fd});
-  tsSetProg(90);
-  if (!res.ok){const e=await res.json().catch(()=>({}));if(res.status===401)throw new Error('Chave inválida');throw new Error(e.detail||e.message||'Erro '+res.status);}
-  const d = await res.json();
-  const raw = (d.words||[]).filter(w=>w.type==='word');
-  if (!raw.length) throw new Error('Nenhuma fala detectada.');
-  tsFinalizeWords(raw.map(w=>({word:w.text,start:w.start,end:w.end})), t0);
-}
+  async function tsElevenLabs(k, t0) {
+    tg('ts-status').textContent = 'Enviando para Scribe…'; tsSetProg(20);
+    const fd = new FormData();
+    fd.append('audio', tsFile, tsFile.name);
+    fd.append('model_id', 'scribe_v1');
+    fd.append('timestamps_granularity', 'word');
+    tsCtxWords().slice(0,1000).forEach(w => fd.append('keyterm', w));
+    tsSetProg(55); tg('ts-status').textContent = 'Processando…';
+    const res = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {method:'POST', headers:{'xi-api-key':k}, body:fd});
+    tsSetProg(90);
+    if (!res.ok) { const e=await res.json().catch(()=>({})); if(res.status===401) throw new Error('Chave inválida'); throw new Error(e.detail||e.message||'Erro '+res.status); }
+    const d = await res.json();
+    const raw = (d.words||[]).filter(w=>w.type==='word');
+    if (!raw.length) throw new Error('Nenhuma fala detectada.');
+    tsDone(raw.map(w=>({word:w.text, start:w.start, end:w.end})), t0);
+  }
 
-// ── RENDER PALAVRAS ──
-function tsRenderWords() {
-  const box = tg('ts-box');
-  box.innerHTML = '';
-  let lastMin = -1;
-  tsWords.forEach((w, i) => {
-    const min = Math.floor(w.start/60);
-    if (min !== lastMin) {
-      lastMin = min;
-      const badge = document.createElement('span');
-      badge.className = 'ts-ts-badge';
-      badge.textContent = tsFmtTime(w.start);
-      badge.addEventListener('click', () => tsSeekTo(w.start));
-      box.appendChild(badge);
-      box.appendChild(document.createTextNode(' '));
+  // ── Render ──
+  function tsRenderWords() {
+    const box = tg('ts-box'); box.innerHTML = ''; let lastMin = -1;
+    tsWords.forEach((w, i) => {
+      const min = Math.floor(w.start/60);
+      if (min !== lastMin) {
+        lastMin = min;
+        const badge = document.createElement('span');
+        badge.className = 'ts-ts-badge'; badge.textContent = tsFmt(w.start);
+        badge.addEventListener('click', () => tsSeekTo(w.start));
+        box.appendChild(badge); box.appendChild(document.createTextNode(' '));
+      }
+      const span = document.createElement('span');
+      span.className = 'ts-word'; span.textContent = w.word + ' '; span.dataset.idx = i;
+      span.addEventListener('click', () => tsWordClick(i));
+      box.appendChild(span);
+    });
+  }
+
+  function tsWordClick(i) { tsSelMode ? tsHandleSel(i) : tsSeekTo(tsWords[i].start); }
+  function tsSeekTo(t) { tsAudio.currentTime = t; if (tsAudio.paused) tsAudio.play(); tg('ts-play-btn').textContent = '⏸'; }
+
+  // ── Player ──
+  tg('ts-play-btn').addEventListener('click', () => {
+    if (tsAudio.paused) { tsAudio.play(); tg('ts-play-btn').textContent = '⏸'; }
+    else { tsAudio.pause(); tg('ts-play-btn').textContent = '▶'; }
+  });
+  tsAudio.addEventListener('ended', () => { tg('ts-play-btn').textContent = '▶'; });
+  tsAudio.addEventListener('timeupdate', () => {
+    const c = tsAudio.currentTime||0, d = tsAudio.duration||0;
+    tg('ts-player-time').textContent = tsFmt(c) + ' / ' + tsFmt(d);
+    const pct = d ? c/d*100 : 0;
+    tg('ts-fill').style.width = pct + '%';
+    tg('ts-thumb').style.left = pct + '%';
+    // Destaque palavra
+    let idx = -1;
+    for (let i=0; i<tsWords.length; i++) { if (c>=tsWords[i].start && c<=tsWords[i].end) { idx=i; break; } }
+    document.querySelectorAll('#ts-box .ts-active-w').forEach(el => el.classList.remove('ts-active-w'));
+    if (idx >= 0) {
+      const el = document.querySelector('#ts-box .ts-word[data-idx="'+idx+'"]');
+      if (el) { el.classList.add('ts-active-w'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
     }
-    const span = document.createElement('span');
-    span.className = 'ts-word';
-    span.textContent = w.word + ' ';
-    span.dataset.idx = i;
-    span.addEventListener('click', () => tsWordClick(i));
-    box.appendChild(span);
   });
-}
-
-function tsWordClick(i) {
-  if (tsSelMode) { tsHandleSel(i); } else { tsSeekTo(tsWords[i].start); }
-}
-
-function tsSeekTo(t) {
-  tsAudio.currentTime = t;
-  if (tsAudio.paused) tsAudio.play();
-  tsUpdatePlayBtn(true);
-}
-
-// ── PLAYER ──
-tg('ts-play-btn').addEventListener('click', () => {
-  if (tsAudio.paused) { tsAudio.play(); tsUpdatePlayBtn(true); }
-  else { tsAudio.pause(); tsUpdatePlayBtn(false); }
-});
-tsAudio.addEventListener('ended', () => tsUpdatePlayBtn(false));
-tsAudio.addEventListener('timeupdate', () => { tsUpdateTimeDisplay(); tsHighlightWord(); });
-tsAudio.addEventListener('loadedmetadata', () => tsUpdateTimeDisplay());
-
-function tsUpdatePlayBtn(p) { tg('ts-play-btn').textContent = p ? '⏸' : '▶'; }
-function tsUpdateTimeDisplay() {
-  const c = tsAudio.currentTime||0, d = tsAudio.duration||0;
-  tg('ts-player-time').textContent = tsFmtTime(c) + ' / ' + tsFmtTime(d);
-  const pct = d ? c/d*100 : 0;
-  tg('ts-fill').style.width = pct + '%';
-  tg('ts-thumb').style.left = pct + '%';
-}
-
-tg('ts-bar').addEventListener('click', e => {
-  const rect = tg('ts-bar').getBoundingClientRect();
-  tsAudio.currentTime = ((e.clientX - rect.left) / rect.width) * (tsAudio.duration||0);
-});
-
-let tsLastActiveIdx = -1;
-function tsHighlightWord() {
-  const t = tsAudio.currentTime;
-  let idx = -1;
-  for (let i=0; i<tsWords.length; i++) {
-    if (t >= tsWords[i].start && t <= tsWords[i].end) { idx=i; break; }
-  }
-  if (idx === tsLastActiveIdx) return;
-  if (tsLastActiveIdx >= 0) { const p=document.querySelector('.ts-word[data-idx="'+tsLastActiveIdx+'"]'); if(p)p.classList.remove('ts-active-w'); }
-  if (idx >= 0) { const el=document.querySelector('.ts-word[data-idx="'+idx+'"]'); if(el){el.classList.add('ts-active-w');el.scrollIntoView({behavior:'smooth',block:'nearest'});} }
-  tsLastActiveIdx = idx;
-}
-
-// ── SELEÇÃO ──
-tg('ts-btn-sel').addEventListener('click', () => {
-  tsSelMode = !tsSelMode;
-  tg('ts-btn-sel').classList.toggle('ts-active-mode', tsSelMode);
-  tg('ts-btn-sel').textContent = tsSelMode ? '✂ Cancelar seleção' : '✂ Selecionar trecho';
-  if (!tsSelMode) tsClearSel();
-  else toast('Clica na 1ª e última palavra do trecho');
-});
-
-function tsHandleSel(i) {
-  if (tsSelStart === null) {
-    tsSelStart = i;
-    document.querySelector('.ts-word[data-idx="'+i+'"]')?.classList.add('ts-in-sel');
-    toast('Agora clica na última palavra do trecho');
-  } else if (tsSelEnd === null && i > tsSelStart) {
-    tsSelEnd = i;
-    tsPaintSel();
-    tsShowSelPanel();
-  } else {
-    tsClearSel();
-    tsSelStart = i;
-    document.querySelector('.ts-word[data-idx="'+i+'"]')?.classList.add('ts-in-sel');
-  }
-}
-
-function tsPaintSel() {
-  document.querySelectorAll('#ts-box .ts-word').forEach(el => {
-    const idx = parseInt(el.dataset.idx);
-    el.classList.toggle('ts-in-sel', idx >= tsSelStart && idx <= tsSelEnd);
+  tg('ts-bar').addEventListener('click', e => {
+    const r = tg('ts-bar').getBoundingClientRect();
+    tsAudio.currentTime = ((e.clientX-r.left)/r.width) * (tsAudio.duration||0);
   });
-}
 
-function tsShowSelPanel() {
-  const words = tsWords.slice(tsSelStart, tsSelEnd+1);
-  const text = words.map(w=>w.word).join(' ');
-  const t1 = tsFmtTime(words[0].start), t2 = tsFmtTime(words[words.length-1].end);
-  tg('ts-sel-text').textContent = text;
-  tg('ts-sel-meta').textContent = t1 + ' → ' + t2 + ' · ' + words.length + ' palavras';
-  tg('ts-sel-panel').classList.add('open');
-  tg('ts-sel-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-window.tsClearSel = () => {
-  tsSelStart = null; tsSelEnd = null;
-  document.querySelectorAll('#ts-box .ts-in-sel').forEach(el=>el.classList.remove('ts-in-sel'));
-  tg('ts-sel-panel').classList.remove('open');
-  tsSelMode = false;
-  tg('ts-btn-sel').classList.remove('ts-active-mode');
-  tg('ts-btn-sel').textContent = '✂ Selecionar trecho';
-};
-
-window.tsOuvirTrecho = () => {
-  if (tsSelStart === null) return;
-  tsSeekTo(tsWords[tsSelStart].start);
-};
-
-window.tsCopyTrecho = () => {
-  if (tsSelStart === null) return;
-  const words = tsWords.slice(tsSelStart, tsSelEnd+1);
-  const t1=tsFmtTime(words[0].start), t2=tsFmtTime(words[words.length-1].end);
-  navigator.clipboard.writeText('['+t1+' → '+t2+']\n'+words.map(w=>w.word).join(' '))
-    .then(()=>toast('Legenda copiada ✓'));
-};
-
-// ── USAR COMO PONTO ──
-window.tsUsarComoPonto = () => {
-  if (tsSelStart === null) return;
-  const words = tsWords.slice(tsSelStart, tsSelEnd+1);
-  const text = words.map(w=>w.word).join(' ');
-  const startSec = words[0].start;
-  const endSec = words[words.length-1].end;
-
-  tsAudio.pause();
-  fecharModal('ov-transcricao');
-  openModal(); // abre o form limpo
-
-  // Preenche letra e tempos
-  tg('fLetra').value = text;
-  tg('fAudioStart').value = formatTimeField(startSec);
-  tg('fAudioEnd').value = formatTimeField(endSec);
-
-  // Se o áudio já foi enviado ao R2, pré-carrega no form
-  if (tsR2Url) {
-    const urlEl = tg('audioCurrentUrl');
-    urlEl.textContent = '🎵 Áudio pronto para salvar (da transcrição)';
-    urlEl.dataset.url = tsR2Url;
-    urlEl.style.display = 'block';
-    const player = tg('edit-audio-player');
-    player.src = tsR2Url + '#t=' + startSec.toFixed(1) + ',' + endSec.toFixed(1);
-    tg('edit-audio-preview').style.display = 'block';
-    tg('seg-area').style.display = 'block';
-    tg('seg-multi-wrap').style.display = 'none';
-    tg('audioFileName').textContent = '✅ ' + (tsFile ? tsFile.name : 'áudio carregado');
-  } else {
-    // Áudio ainda sendo enviado — avisa o usuário
-    toast('Preenche o áudio manualmente, o upload ainda estava em andamento.');
-  }
-};
-
-// ── BUSCA ──
-window.tsSearch = q => {
-  document.querySelectorAll('#ts-box .ts-word').forEach(el=>el.classList.remove('ts-highlight'));
-  if (!q.trim()) { tg('ts-search-count').textContent=''; return; }
-  const qL = q.toLowerCase();
-  const hits = [];
-  document.querySelectorAll('#ts-box .ts-word').forEach(el=>{
-    if (el.textContent.trim().toLowerCase().includes(qL)) { el.classList.add('ts-highlight'); hits.push(el); }
+  // ── Seleção ──
+  tg('ts-btn-sel').addEventListener('click', () => {
+    tsSelMode = !tsSelMode;
+    tg('ts-btn-sel').classList.toggle('ts-active-mode', tsSelMode);
+    tg('ts-btn-sel').textContent = tsSelMode ? '✂ Cancelar seleção' : '✂ Selecionar trecho';
+    if (!tsSelMode) tsClearSel();
+    else toast('Clica na 1ª e última palavra do trecho');
   });
-  tg('ts-search-count').textContent = hits.length + ' resultado' + (hits.length!==1?'s':'');
-  if (hits.length) hits[0].scrollIntoView({behavior:'smooth',block:'nearest'});
-};
 
-// ── COPY/DOWNLOAD ──
-window.tsCopyAll = () => {
-  const text = tsWords.map(w=>w.word).join(' ');
-  navigator.clipboard.writeText(text).then(()=>toast('Texto copiado ✓'));
-};
+  function tsHandleSel(i) {
+    if (tsSelStart === null) {
+      tsSelStart = i;
+      document.querySelector('#ts-box .ts-word[data-idx="'+i+'"]')?.classList.add('ts-in-sel');
+      toast('Agora clica na última palavra do trecho');
+    } else if (tsSelEnd === null && i > tsSelStart) {
+      tsSelEnd = i;
+      document.querySelectorAll('#ts-box .ts-word').forEach(el => {
+        const idx = parseInt(el.dataset.idx);
+        el.classList.toggle('ts-in-sel', idx >= tsSelStart && idx <= tsSelEnd);
+      });
+      tsShowSelPanel();
+    } else { tsClearSel(); tsHandleSel(i); }
+  }
 
-window.tsDownloadTxt = () => {
-  let out = ''; let lastMin = -1;
-  tsWords.forEach(w => {
-    const min = Math.floor(w.start/60);
-    if (min !== lastMin) { out += '\n['+tsFmtTime(w.start)+']\n'; lastMin=min; }
-    out += w.word + ' ';
+  function tsShowSelPanel() {
+    const ws = tsWords.slice(tsSelStart, tsSelEnd+1);
+    tg('ts-sel-text').textContent = ws.map(w=>w.word).join(' ');
+    tg('ts-sel-meta').textContent = tsFmt(ws[0].start) + ' → ' + tsFmt(ws[ws.length-1].end) + ' · ' + ws.length + ' palavras';
+    tg('ts-sel-panel').classList.add('open');
+    tg('ts-sel-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function tsClearSel() {
+    tsSelStart = null; tsSelEnd = null;
+    document.querySelectorAll('#ts-box .ts-in-sel').forEach(el => el.classList.remove('ts-in-sel'));
+    tg('ts-sel-panel').classList.remove('open');
+    tsSelMode = false;
+    tg('ts-btn-sel').classList.remove('ts-active-mode');
+    tg('ts-btn-sel').textContent = '✂ Selecionar trecho';
+  }
+  tg('ts-btn-clear-sel').addEventListener('click', tsClearSel);
+
+  tg('ts-btn-ouvir').addEventListener('click', () => {
+    if (tsSelStart !== null) tsSeekTo(tsWords[tsSelStart].start);
   });
-  const blob = new Blob([out.trim()], {type:'text/plain;charset=utf-8'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download = (tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_transcricao.txt'; a.click();
-};
 
-window.tsDownloadSrt = () => {
-  let srt=''; let n=1;
-  const pad = x => String(x).padStart(2,'0');
-  const srtTime = s => { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60),ms=Math.round((s%1)*1000); return pad(h)+':'+pad(m)+':'+pad(sec)+','+String(ms).padStart(3,'0'); };
-  for (let i=0; i<tsWords.length; i+=8) {
-    const chunk = tsWords.slice(i,i+8);
-    srt += n+'\n'+srtTime(chunk[0].start)+' --> '+srtTime(chunk[chunk.length-1].end)+'\n'+chunk.map(w=>w.word).join(' ')+'\n\n'; n++;
+  tg('ts-btn-copy-trecho').addEventListener('click', () => {
+    if (tsSelStart === null) return;
+    const ws = tsWords.slice(tsSelStart, tsSelEnd+1);
+    navigator.clipboard.writeText('['+tsFmt(ws[0].start)+' → '+tsFmt(ws[ws.length-1].end)+']\n'+ws.map(w=>w.word).join(' '))
+      .then(() => toast('Legenda copiada ✓'));
+  });
+
+  // ── Usar como ponto ──
+  tg('ts-btn-usar').addEventListener('click', () => {
+    if (tsSelStart === null) return;
+    const ws = tsWords.slice(tsSelStart, tsSelEnd+1);
+    const text = ws.map(w=>w.word).join(' ');
+    const startSec = ws[0].start, endSec = ws[ws.length-1].end;
+    tsAudio.pause();
+    fecharModal('ov-transcricao');
+    openModal();
+    document.getElementById('fLetra').value = text;
+    document.getElementById('fAudioStart').value = formatTimeField(startSec);
+    document.getElementById('fAudioEnd').value = formatTimeField(endSec);
+    if (tsR2Url) {
+      const urlEl = document.getElementById('audioCurrentUrl');
+      urlEl.textContent = '🎵 Áudio da transcrição (já enviado)';
+      urlEl.dataset.url = tsR2Url;
+      urlEl.style.display = 'block';
+      document.getElementById('edit-audio-player').src = tsR2Url + '#t=' + startSec.toFixed(1) + ',' + endSec.toFixed(1);
+      document.getElementById('edit-audio-preview').style.display = 'block';
+      document.getElementById('seg-area').style.display = 'block';
+      document.getElementById('seg-multi-wrap').style.display = 'none';
+      document.getElementById('audioFileName').textContent = '✅ ' + (tsFile ? tsFile.name : 'áudio carregado');
+    } else {
+      toast('Upload ainda em andamento — aguarda e tenta de novo');
+      abrirModal('ov-transcricao'); // reabre para esperar
+    }
+  });
+
+  // ── Busca ──
+  tg('ts-search').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#ts-box .ts-word').forEach(el => el.classList.remove('ts-highlight'));
+    if (!q) { tg('ts-search-count').textContent = ''; return; }
+    const hits = [];
+    document.querySelectorAll('#ts-box .ts-word').forEach(el => {
+      if (el.textContent.trim().toLowerCase().includes(q)) { el.classList.add('ts-highlight'); hits.push(el); }
+    });
+    tg('ts-search-count').textContent = hits.length + ' resultado' + (hits.length!==1?'s':'');
+    if (hits.length) hits[0].scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+
+  // ── Copy / Download ──
+  tg('ts-btn-copy-all').addEventListener('click', () => {
+    navigator.clipboard.writeText(tsWords.map(w=>w.word).join(' ')).then(() => toast('Texto copiado ✓'));
+  });
+
+  tg('ts-btn-dl-txt').addEventListener('click', () => {
+    let out=''; let lastMin=-1;
+    tsWords.forEach(w => {
+      const min = Math.floor(w.start/60);
+      if (min !== lastMin) { out += '\n['+tsFmt(w.start)+']\n'; lastMin=min; }
+      out += w.word + ' ';
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([out.trim()],{type:'text/plain;charset=utf-8'}));
+    a.download = (tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_transcricao.txt'; a.click();
+  });
+
+  tg('ts-btn-dl-srt').addEventListener('click', () => {
+    const pad = x => String(x).padStart(2,'0');
+    const srtT = s => { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60),ms=Math.round((s%1)*1000); return pad(h)+':'+pad(m)+':'+pad(sec)+','+String(ms).padStart(3,'0'); };
+    let srt=''; let n=1;
+    for (let i=0; i<tsWords.length; i+=8) {
+      const ch = tsWords.slice(i,i+8);
+      srt += n+'\n'+srtT(ch[0].start)+' --> '+srtT(ch[ch.length-1].end)+'\n'+ch.map(w=>w.word).join(' ')+'\n\n'; n++;
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([srt],{type:'text/plain;charset=utf-8'}));
+    a.download = (tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_legenda.srt'; a.click();
+  });
+
+  // ── Sessões ──
+  function tsGetSess(){ try{return JSON.parse(localStorage.getItem(TS_STORE)||'[]');}catch{return[];} }
+  function tsPutSess(l){ localStorage.setItem(TS_STORE, JSON.stringify(l)); }
+
+  function tsRenderSessions() {
+    const list = tsGetSess(), el = tg('ts-sess-list');
+    if (!list.length) { el.innerHTML='<div class="ts-sess-empty">Nenhuma sessão salva ainda.</div>'; return; }
+    el.innerHTML = '<div class="ts-sess-list">'+list.map((s,i)=>`
+      <div class="ts-sess-item">
+        <div class="ts-sess-info"><div class="ts-sess-name">${s.name}</div><div class="ts-sess-meta">${s.prov} · ${s.words} palavras · ${s.date}</div></div>
+        <button class="ts-btn-load" data-idx="${i}">Carregar</button>
+        <button class="ts-btn-del" data-idx="${i}">✕</button>
+      </div>`).join('')+'</div>';
+    el.querySelectorAll('.ts-btn-load').forEach(b => b.addEventListener('click', () => tsLoadSess(parseInt(b.dataset.idx))));
+    el.querySelectorAll('.ts-btn-del').forEach(b  => b.addEventListener('click', () => tsDelSess(parseInt(b.dataset.idx))));
   }
-  const blob = new Blob([srt],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=(tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_legenda.srt'; a.click();
-};
 
-// ── SESSÕES ──
-function tsGetSessions(){try{return JSON.parse(localStorage.getItem(TS_STORE)||'[]');}catch{return[];}}
-function tsSaveSessions(l){localStorage.setItem(TS_STORE,JSON.stringify(l));}
-
-function tsRenderSessions() {
-  const list = tsGetSessions();
-  const el = tg('ts-sess-list');
-  if (!list.length) { el.innerHTML='<div class="ts-sess-empty">Nenhuma sessão salva ainda.</div>'; return; }
-  el.innerHTML = '<div class="ts-sess-list">'+list.map((s,i)=>`
-    <div class="ts-sess-item">
-      <div class="ts-sess-info"><div class="ts-sess-name">${s.name}</div><div class="ts-sess-meta">${s.prov} · ${s.words} palavras · ${s.date}</div></div>
-      <button class="ts-btn-load" data-idx="${i}">Carregar</button>
-      <button class="ts-btn-del" data-idx="${i}">✕</button>
-    </div>`).join('')+'</div>';
-  el.querySelectorAll('.ts-btn-load').forEach(b=>b.addEventListener('click',()=>tsLoadSession(parseInt(b.dataset.idx))));
-  el.querySelectorAll('.ts-btn-del').forEach(b=>b.addEventListener('click',()=>tsDelSession(parseInt(b.dataset.idx))));
-}
-
-function tsSessShowSaveRow() {
-  tg('ts-save-row').style.display = 'flex';
-  if (!tg('ts-sess-name').value) {
-    const d = new Date();
-    tg('ts-sess-name').value = 'Sessão ' + d.toLocaleDateString('pt-BR');
+  function tsSaveRowShow() {
+    tg('ts-save-row').style.display = 'flex';
+    if (!tg('ts-sess-name').value) {
+      tg('ts-sess-name').value = 'Sessão ' + new Date().toLocaleDateString('pt-BR');
+    }
   }
-  // Abre o collapsible de sessões automaticamente
-  tg('ts-sess-body').classList.add('open');
-  document.querySelector('#ov-transcricao .ts-toggle-btn').textContent = '▴ fechar';
-}
 
-window.tsSalvarSessao = () => {
-  const name = tg('ts-sess-name').value.trim();
-  if (!name || !tsWords.length) return;
-  const list = tsGetSessions();
-  const entry = {name,prov:TS_PROVS[tsProv]?.label||tsProv,words:tsWords.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',data:tsWords};
-  const idx = list.findIndex(s=>s.name===name);
-  if (idx>=0) list[idx]=entry; else list.unshift(entry);
-  try { tsSaveSessions(list); tsRenderSessions(); tg('ts-sess-name').value=''; toast('Sessão "'+name+'" salva ✓'); }
-  catch(e) { toast('Erro ao salvar — localStorage pode estar cheio'); }
-};
-tg('ts-sess-name').addEventListener('keydown', e=>{if(e.key==='Enter')tsSalvarSessao();});
+  tg('ts-btn-save-sess').addEventListener('click', () => {
+    const name = tg('ts-sess-name').value.trim();
+    if (!name || !tsWords.length) return;
+    const list = tsGetSess();
+    const entry = {name, prov:TS_PROVS[tsProv]?.label||tsProv, words:tsWords.length, date:new Date().toLocaleDateString('pt-BR'), filename:tsFile?tsFile.name:'', data:tsWords};
+    const idx = list.findIndex(s=>s.name===name);
+    if (idx>=0) list[idx]=entry; else list.unshift(entry);
+    try { tsPutSess(list); tsRenderSessions(); tg('ts-sess-name').value=''; toast('Sessão "'+name+'" salva ✓'); }
+    catch(e) { toast('Erro ao salvar — localStorage pode estar cheio'); }
+  });
+  tg('ts-sess-name').addEventListener('keydown', e => { if(e.key==='Enter') tg('ts-btn-save-sess').click(); });
 
-function tsLoadSession(idx) {
-  const list = tsGetSessions();
-  const s = list[idx]; if (!s) return;
-  tsWords = s.data;
-  tsProv = Object.keys(TS_PROVS).find(k=>TS_PROVS[k].label===s.prov)||'deepgram';
-  tg('ts-meta-dur').textContent = 'carregada do cache';
-  tg('ts-meta-words').textContent = '~'+tsWords.length+' palavras';
-  tg('ts-meta-prov').textContent = s.prov;
-  tg('ts-player-name').textContent = s.filename||s.name;
-  tsRenderWords();
-  tg('ts-result').style.display = 'block';
-  tg('ts-save-row').style.display = 'flex';
-  tg('ts-sess-name').value = s.name;
-  tg('ts-status').textContent = 'Transcrição restaurada — carrega o áudio acima para o player sincronizar.';
-  toast('Sessão "'+s.name+'" carregada ✓');
-}
+  function tsLoadSess(idx) {
+    const s = tsGetSess()[idx]; if (!s) return;
+    tsWords = s.data;
+    tg('ts-meta-dur').textContent   = 'carregada do cache';
+    tg('ts-meta-words').textContent = '~'+tsWords.length+' palavras';
+    tg('ts-meta-prov').textContent  = s.prov;
+    tg('ts-player-name').textContent = s.filename||s.name;
+    tsRenderWords();
+    tg('ts-result').style.display = 'block';
+    tsSaveRowShow(); tg('ts-sess-name').value = s.name;
+    tg('ts-status').textContent = 'Transcrição restaurada — carrega o áudio acima para o player sincronizar.';
+    toast('Sessão "'+s.name+'" carregada ✓');
+  }
 
-function tsDelSession(idx) {
-  const list = tsGetSessions();
-  const name = list[idx]?.name||'sessão';
-  list.splice(idx,1); tsSaveSessions(list); tsRenderSessions();
-  toast('"'+name+'" excluída');
-}
-
-})(); // fim módulo transcrição
+  function tsDelSess(idx) {
+    const list = tsGetSess();
+    const name = list[idx]?.name||'sessão';
+    list.splice(idx,1); tsPutSess(list); tsRenderSessions();
+    toast('"'+name+'" excluída');
+  }
+})();
 // ══════════ /MÓDULO TRANSCRIÇÃO ══════════
 
 // ── INIT ──
@@ -1933,146 +1982,5 @@ const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
 setLayout(savedLayout);
 load();
 </script>
-
-<!-- TRANSCRICAO -->
-<div class="overlay" id="ov-transcricao">
-  <div class="modal" style="max-width:680px">
-    <button class="btn-close-modal" onclick="tsFechar()">✕</button>
-    <h2>Transcrever Sessão</h2>
-
-    <!-- SESSÕES SALVAS -->
-    <div class="ts-section">
-      <div class="ts-section-lbl">Sessões salvas <button class="ts-toggle-btn" onclick="tsSessToggle()">▾ ver</button></div>
-      <div class="ts-collapsible-body" id="ts-sess-body">
-        <div id="ts-sess-list"><div class="ts-sess-empty">Nenhuma sessão salva ainda.</div></div>
-        <div class="ts-save-row" id="ts-save-row" style="display:none">
-          <input type="text" id="ts-sess-name" placeholder="Nome da sessão (ex: Gira de Exu — Jun 2025)"/>
-          <button class="ts-btn-save" onclick="tsSalvarSessao()">Salvar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- PROVEDOR -->
-    <div class="ts-section">
-      <div class="ts-section-lbl">Provedor de IA</div>
-      <div class="ts-prov-grid">
-        <button class="ts-prov-btn ts-selected" data-prov="deepgram">
-          <div class="ts-prov-check">✓</div>
-          <div class="ts-prov-name">Deepgram</div>
-          <div class="ts-prov-desc">Melhor no teste. Timestamps palavra por palavra.</div>
-          <span class="ts-prov-tag ts-tag-credits">$200 créditos</span><br/>
-          <a class="ts-prov-link" href="https://console.deepgram.com/signup" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
-        </button>
-        <button class="ts-prov-btn" data-prov="assemblyai">
-          <div class="ts-prov-check">✓</div>
-          <div class="ts-prov-name">AssemblyAI</div>
-          <div class="ts-prov-desc">Word boost pro vocabulário do terreiro.</div>
-          <span class="ts-prov-tag ts-tag-free">Free tier</span><br/>
-          <a class="ts-prov-link" href="https://www.assemblyai.com/dashboard/signup" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
-        </button>
-        <button class="ts-prov-btn" data-prov="elevenlabs">
-          <div class="ts-prov-check">✓</div>
-          <div class="ts-prov-name">ElevenLabs</div>
-          <div class="ts-prov-desc">96.7% accuracy, top de qualidade.</div>
-          <span class="ts-prov-tag ts-tag-paid">~$0,22–0,48/h</span><br/>
-          <a class="ts-prov-link" href="https://elevenlabs.io/app/sign-up" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
-        </button>
-      </div>
-      <div class="ts-key-wrap visible" id="ts-key-wrap">
-        <div class="ts-key-row">
-          <input type="password" id="ts-api-key" placeholder="Cole sua chave Deepgram…"/>
-        </div>
-        <p class="ts-key-hint" id="ts-key-hint">console.deepgram.com → Settings → API Keys · $200 créditos no cadastro</p>
-      </div>
-    </div>
-
-    <!-- ÁUDIO -->
-    <div class="ts-section">
-      <div class="ts-section-lbl">Áudio da sessão</div>
-      <div class="ts-drop" id="ts-drop">
-        <input type="file" id="ts-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.webm,.mp4,.aac"/>
-        <div class="ts-drop-icon">🎙️</div>
-        <div class="ts-drop-text">Arrasta o áudio ou clica para escolher</div>
-        <div class="ts-drop-sub">MP3, WAV, M4A, OGG, FLAC, WEBM — qualquer tamanho</div>
-        <div class="ts-drop-name" id="ts-drop-name"></div>
-      </div>
-    </div>
-
-    <!-- VOCABULÁRIO -->
-    <div class="ts-section">
-      <div class="ts-section-lbl">Vocabulário do terreiro</div>
-      <div class="ts-chips" id="ts-chips">
-        <button class="ts-chip active" data-id="umbanda">Umbanda</button>
-        <button class="ts-chip active" data-id="quimbanda">Quimbanda</button>
-        <button class="ts-chip active" data-id="exus">Exus e Pombagiras</button>
-        <button class="ts-chip" data-id="preto">Preto Velho</button>
-        <button class="ts-chip" data-id="orixas">Orixás</button>
-        <button class="ts-chip" data-id="pontos">Pontos Cantados</button>
-        <button class="ts-chip" data-id="yoruba">Iorubá / Quimbundo</button>
-      </div>
-      <div class="ts-ctx"><textarea id="ts-ctx" placeholder="Nomes das entidades e guias do terreiro…"></textarea></div>
-    </div>
-
-    <div class="ts-err" id="ts-err"></div>
-    <button class="ts-btn-transcribe" id="ts-btn-transcribe" disabled>Transcrever Sessão</button>
-    <div class="ts-prog-wrap" id="ts-prog-wrap"><div class="ts-prog-bar" id="ts-prog-bar"></div></div>
-    <div class="ts-status" id="ts-status"></div>
-
-    <!-- RESULTADO -->
-    <div id="ts-result" style="display:none">
-
-      <!-- Player -->
-      <div class="ts-player">
-        <div class="ts-player-top">
-          <button class="ts-play-btn" id="ts-play-btn">▶</button>
-          <div class="ts-player-info">
-            <div class="ts-player-name" id="ts-player-name"></div>
-            <div class="ts-player-time" id="ts-player-time">0:00 / 0:00</div>
-          </div>
-        </div>
-        <div class="ts-player-bar" id="ts-bar">
-          <div class="ts-player-fill" id="ts-fill"></div>
-          <div class="ts-player-thumb" id="ts-thumb"></div>
-        </div>
-      </div>
-
-      <!-- Transcrição -->
-      <div class="ts-hdr">
-        <span class="ts-lbl">Transcrição</span>
-        <div class="ts-actions">
-          <button class="ts-btn-sm" id="ts-btn-sel">✂ Selecionar trecho</button>
-          <button class="ts-btn-sm" onclick="tsCopyAll()">Copiar tudo</button>
-          <button class="ts-btn-sm" onclick="tsDownloadTxt()">Baixar .txt</button>
-          <button class="ts-btn-sm" onclick="tsDownloadSrt()">Baixar .srt</button>
-        </div>
-      </div>
-      <div class="ts-search">
-        <input type="text" id="ts-search" placeholder="Buscar na transcrição…" oninput="tsSearch(this.value)"/>
-        <span class="ts-search-count" id="ts-search-count"></span>
-      </div>
-      <div class="ts-box" id="ts-box"></div>
-      <div class="ts-meta">
-        <span id="ts-meta-dur"></span>
-        <span id="ts-meta-words"></span>
-        <span id="ts-meta-prov"></span>
-      </div>
-
-      <!-- Seleção -->
-      <div class="ts-sel-panel" id="ts-sel-panel">
-        <div class="ts-sel-lbl">Trecho selecionado</div>
-        <div class="ts-sel-text" id="ts-sel-text"></div>
-        <div class="ts-sel-meta" id="ts-sel-meta"></div>
-        <div class="ts-sel-actions">
-          <button class="ts-btn-usar" onclick="tsUsarComoPonto()">✦ Usar como ponto</button>
-          <button class="ts-btn-ok-outline" onclick="tsOuvirTrecho()">▶ Ouvir trecho</button>
-          <button class="ts-btn-ok-outline" onclick="tsCopyTrecho()">Copiar legenda</button>
-          <button class="ts-btn-ok-outline" onclick="tsClearSel()">Limpar</button>
-        </div>
-      </div>
-
-    </div><!-- /ts-result -->
-  </div>
-</div>
-
 </body>
 </html>
