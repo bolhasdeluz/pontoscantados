@@ -344,6 +344,28 @@ select option{background:#fff;color:#2a1a22}
 @keyframes ts-pulse-border{0%,100%{border-color:#c8a000;box-shadow:0 0 0 0 rgba(200,160,0,.2)}50%{border-color:#8c5a00;box-shadow:0 0 0 4px rgba(200,160,0,.1)}}
 .ts-needs-audio-badge{display:inline-block;background:#fffbe8;border:1px solid #e8d060;border-radius:6px;color:#8c5a00;font-size:12px;font-weight:500;padding:6px 12px;margin-top:8px;line-height:1.4}
 
+
+/* Drive */
+.ts-drive-bar{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.ts-btn-drive{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:8px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(66,133,244,.4);background:rgba(66,133,244,.06);color:#1a73e8;transition:all .15s;white-space:nowrap}
+.ts-btn-drive:hover{background:rgba(66,133,244,.12);border-color:rgba(66,133,244,.7)}
+.ts-btn-drive:disabled{opacity:.4;cursor:not-allowed}
+.ts-drive-config{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:10px;display:none}
+.ts-drive-config.open{display:block}
+.ts-drive-config-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
+.ts-drive-config-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.ts-drive-config-row label{font-size:11px;color:var(--text-dim)}
+.ts-drive-config-row input{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;transition:border-color .18s}
+.ts-drive-config-row input:focus{border-color:#1a73e8}
+.ts-drive-config-row input::placeholder{color:var(--text-dim);font-size:11px}
+.ts-drive-hint{font-size:11px;color:var(--text-dim);line-height:1.55;margin-bottom:10px}
+.ts-drive-hint a{color:#1a73e8;text-decoration:none}
+.ts-drive-hint a:hover{text-decoration:underline}
+.ts-drive-save-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .12s}
+.ts-drive-save-btn:hover{opacity:.85}
+.ts-drive-downloading{font-size:12.5px;color:#1a73e8;font-style:italic;margin-top:6px;display:none}
+.ts-drive-downloading .ts-drive-spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(26,115,232,.2);border-top-color:#1a73e8;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
+
 /* ══════════ /TRANSCRIÇÃO ══════════ */
 
 </style>
@@ -657,6 +679,33 @@ select option{background:#fff;color:#2a1a22}
           <canvas id="ts-wf-canvas" height="140"></canvas>
         </div>
         <div class="ts-wf-loading" id="ts-wf-loading">Analisando forma de onda…</div>
+      <!-- Google Drive -->
+      <div class="ts-drive-bar">
+        <button class="ts-btn-drive" id="ts-btn-drive" onclick="tsOpenDrive()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4.5 21L9 13.5M4.5 21H19.5M4.5 21L2 17L8 6.5M19.5 21L21 17L14 6.5M19.5 21L15 13.5M8 6.5H14M8 6.5L6 10M14 6.5L16 10M6 10L9 13.5M6 10H16M16 10L15 13.5M9 13.5H15" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          Abrir do Google Drive
+        </button>
+        <button class="ts-btn-sm" id="ts-btn-drive-cfg" onclick="tsToggleDriveCfg()" style="border-color:rgba(66,133,244,.3);color:#1a73e8">⚙ Configurar</button>
+      </div>
+      <div class="ts-drive-config" id="ts-drive-config">
+        <div class="ts-drive-config-title">Configuração Google Drive</div>
+        <div class="ts-drive-hint">
+          Acessa <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> → cria um projeto → ativa as APIs <strong>Google Drive API</strong> e <strong>Google Picker API</strong> → em Credenciais cria uma <strong>chave de API</strong> e um <strong>Client ID OAuth (Web)</strong>.<br><br>
+          No Client ID, adiciona <code style="font-size:10px;background:#f5e8ed;padding:1px 4px;border-radius:3px">https://SEU-DOMINIO.pages.dev</code> em <em>Origens JavaScript autorizadas</em>.
+        </div>
+        <div class="ts-drive-config-row">
+          <label>Client ID OAuth 2.0</label>
+          <input type="text" id="ts-gclient-id" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com"/>
+        </div>
+        <div class="ts-drive-config-row">
+          <label>API Key</label>
+          <input type="text" id="ts-gapi-key" placeholder="AIzaSy…"/>
+        </div>
+        <button class="ts-drive-save-btn" onclick="tsSaveDriveCfg()">Salvar configuração</button>
+      </div>
+      <div class="ts-drive-downloading" id="ts-drive-dl">
+        <span class="ts-drive-spin"></span> <span id="ts-drive-dl-msg">Baixando do Drive…</span>
+      </div>
         <div class="ts-wf-sel-info" id="ts-wf-sel-info"></div>
       </div>
 
@@ -2278,6 +2327,139 @@ function tsDelSess(idx){
   const list=tsGetSess();const name=list[idx]?.name||'sessão';
   list.splice(idx,1);tsPutSess(list);tsRenderSessions();toast('"'+name+'" excluída');
 }
+
+  // ══ GOOGLE DRIVE ══
+  let tsGoogleToken = null, tsGoogleApisLoaded = false;
+
+  function tsLoadGoogleAPIs() {
+    return new Promise((resolve, reject) => {
+      if (tsGoogleApisLoaded) { resolve(); return; }
+      const s1 = document.createElement('script');
+      s1.src = 'https://apis.google.com/js/api.js';
+      s1.onerror = () => reject(new Error('Falha ao carregar Google API'));
+      s1.onload = () => {
+        gapi.load('picker', () => {
+          const s2 = document.createElement('script');
+          s2.src = 'https://accounts.google.com/gsi/client';
+          s2.onerror = () => reject(new Error('Falha ao carregar Google Sign-In'));
+          s2.onload = () => { tsGoogleApisLoaded = true; resolve(); };
+          document.head.appendChild(s2);
+        });
+      };
+      document.head.appendChild(s1);
+    });
+  }
+
+  function tsGetDriveCfg() {
+    return {
+      clientId: localStorage.getItem('ts_gclient_id') || '',
+      apiKey:   localStorage.getItem('ts_gapi_key') || ''
+    };
+  }
+
+  function tsSaveDriveCfg() {
+    const cid = tg('ts-gclient-id').value.trim();
+    const key = tg('ts-gapi-key').value.trim();
+    if (!cid || !key) { toast('Preenche Client ID e API Key'); return; }
+    localStorage.setItem('ts_gclient_id', cid);
+    localStorage.setItem('ts_gapi_key', key);
+    tg('ts-drive-config').classList.remove('open');
+    toast('Configuração salva ✓');
+  }
+  window.tsSaveDriveCfg = tsSaveDriveCfg;
+
+  function tsToggleDriveCfg() {
+    const cfg = tg('ts-drive-config');
+    cfg.classList.toggle('open');
+    if (cfg.classList.contains('open')) {
+      const {clientId, apiKey} = tsGetDriveCfg();
+      tg('ts-gclient-id').value = clientId;
+      tg('ts-gapi-key').value   = apiKey;
+    }
+  }
+  window.tsToggleDriveCfg = tsToggleDriveCfg;
+
+  async function tsOpenDrive() {
+    const {clientId, apiKey} = tsGetDriveCfg();
+    if (!clientId || !apiKey) {
+      tg('ts-drive-config').classList.add('open');
+      tg('ts-drive-config').scrollIntoView({behavior:'smooth',block:'start'});
+      toast('Configura o Client ID e API Key primeiro');
+      return;
+    }
+    tg('ts-btn-drive').disabled = true;
+    tg('ts-btn-drive').textContent = 'Carregando…';
+    try {
+      await tsLoadGoogleAPIs();
+      // Request OAuth token
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        callback: (resp) => {
+          if (resp.error) { toast('Erro de autenticação: ' + resp.error); return; }
+          tsGoogleToken = resp.access_token;
+          tsShowDrivePicker(apiKey);
+        }
+      });
+      tokenClient.requestAccessToken({prompt: tsGoogleToken ? '' : 'consent'});
+    } catch(e) {
+      toast('Erro ao carregar Google APIs: ' + e.message);
+    } finally {
+      tg('ts-btn-drive').disabled = false;
+      tg('ts-btn-drive').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4.5 21L9 13.5M4.5 21H19.5M4.5 21L2 17L8 6.5M19.5 21L21 17L14 6.5M19.5 21L15 13.5M8 6.5H14M8 6.5L6 10M14 6.5L16 10M6 10L9 13.5M6 10H16M16 10L15 13.5M9 13.5H15" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Abrir do Google Drive';
+    }
+  }
+  window.tsOpenDrive = tsOpenDrive;
+
+  function tsShowDrivePicker(apiKey) {
+    const audioMimes = 'audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/flac,audio/webm,audio/aac,audio/x-m4a,video/mp4';
+    const view = new google.picker.View(google.picker.ViewId.DOCS);
+    view.setMimeTypes(audioMimes);
+    const picker = new google.picker.PickerBuilder()
+      .addView(view)
+      .addView(new google.picker.DocsUploadView())
+      .setOAuthToken(tsGoogleToken)
+      .setDeveloperKey(apiKey)
+      .setTitle('Escolhe o áudio da sessão')
+      .setCallback(async (data) => {
+        if (data.action === google.picker.Action.PICKED) {
+          const doc = data.docs[0];
+          await tsDownloadFromDrive(doc.id, doc.name);
+        }
+      })
+      .build();
+    picker.setVisible(true);
+  }
+
+  async function tsDownloadFromDrive(fileId, fileName) {
+    const dlEl = tg('ts-drive-dl');
+    const msgEl = tg('ts-drive-dl-msg');
+    dlEl.style.display = 'block';
+    msgEl.textContent = 'Baixando "' + fileName + '" do Drive…';
+    tg('ts-drop-name').textContent = '';
+    try {
+      const res = await fetch(
+        'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media',
+        { headers: { Authorization: 'Bearer ' + tsGoogleToken } }
+      );
+      if (!res.ok) {
+        if (res.status === 403) throw new Error('Sem permissão para baixar este arquivo. Verifica o escopo OAuth.');
+        throw new Error('Erro ' + res.status + ' ao baixar do Drive');
+      }
+      msgEl.textContent = 'Processando "' + fileName + '"…';
+      const blob = await res.blob();
+      const file = new File([blob], fileName, { type: blob.type || 'audio/mpeg' });
+      tsSetFile(file);
+      toast('"' + fileName + '" carregado do Drive ✓');
+    } catch(e) {
+      toast('Erro Drive: ' + e.message);
+      tg('ts-drop-name').textContent = '';
+    } finally {
+      dlEl.style.display = 'none';
+    }
+  }
+  // ══ /GOOGLE DRIVE ══
+
 })();
 // ══════════ /MÓDULO TRANSCRIÇÃO ══════════
 
