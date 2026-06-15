@@ -366,6 +366,10 @@ select option{background:#fff;color:#2a1a22}
 .ts-drive-downloading{font-size:12.5px;color:#1a73e8;font-style:italic;margin-top:6px;display:none}
 .ts-drive-downloading .ts-drive-spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(26,115,232,.2);border-top-color:#1a73e8;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
 
+
+.ts-reload-drive-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 16px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .15s;box-shadow:0 2px 8px rgba(26,115,232,.25);margin-top:10px}
+.ts-reload-drive-btn:hover{opacity:.85}
+
 /* ══════════ /TRANSCRIÇÃO ══════════ */
 
 </style>
@@ -2296,7 +2300,7 @@ function tsSaveRowShow(){
 tg('ts-btn-save-sess').addEventListener('click',()=>{
   const name=tg('ts-sess-name').value.trim();if(!name||!tsWords.length)return;
   const list=tsGetSess();
-  const entry={name,prov:TS_PROVS[tsProv]?.label||tsProv,words:tsWords.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',data:tsWords};
+  const entry={name,prov:TS_PROVS[tsProv]?.label||tsProv,words:tsWords.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:tsCurrentDriveFileId||'',driveFileName:tsCurrentDriveFileName||'',data:tsWords};
   const idx=list.findIndex(s=>s.name===name);
   if(idx>=0)list[idx]=entry;else list.unshift(entry);
   try{tsPutSess(list);tsRenderSessions();tg('ts-sess-name').value='';toast('Sessão "'+name+'" salva ✓');}
@@ -2310,15 +2314,24 @@ function tsLoadSess(idx){
   tg('ts-meta-dur').textContent='carregada do cache';
   tg('ts-meta-words').textContent='~'+tsWords.length+' palavras';
   tg('ts-meta-prov').textContent=s.prov;
-  tg('ts-player-name').textContent=s.filename||s.name;
+  tg('ts-player-name').textContent=s.driveFileName||s.filename||s.name;
   tsRenderWords();tg('ts-result').style.display='block';
   tsSaveRowShow();tg('ts-sess-name').value=s.name;
   tg('ts-status').textContent='';
-  // Destacar drop zone pedindo o áudio
   const drop=tg('ts-drop');
   drop.classList.add('ts-needs-audio');
-  tg('ts-drop-name').innerHTML='<span class="ts-needs-audio-badge">📂 Transcrição restaurada!<br>Para tocar e ver a waveform, arrasta o arquivo <strong>'+(s.filename||'de áudio')+'</strong> aqui novamente.<br><em style="font-size:11px;opacity:.8">(o áudio não é salvo — só os timestamps)</em></span>';
-  // Scroll até o drop
+  if(s.driveFileId){
+    // Tem ID do Drive: mostra botão direto
+    tg('ts-drop-name').innerHTML=
+      '<span class="ts-needs-audio-badge">📂 Transcrição restaurada!<br>'+
+      'O áudio estava no Drive: <strong>'+s.driveFileName+'</strong></span>'+
+      '<br><button class="ts-reload-drive-btn" onclick="tsReloadFromDrive(''+s.driveFileId+'',''+s.driveFileName.replace(/'/g,"\'")+'')">'
+      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4.5 21L9 13.5M4.5 21H19.5M4.5 21L2 17L8 6.5M19.5 21L21 17L14 6.5M19.5 21L15 13.5M8 6.5H14M8 6.5L6 10M14 6.5L16 10M6 10L9 13.5M6 10H16M16 10L15 13.5M9 13.5H15" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
+      +' Recarregar do Drive</button>';
+  }else{
+    // Sem Drive: pede pra arrastar
+    tg('ts-drop-name').innerHTML='<span class="ts-needs-audio-badge">📂 Transcrição restaurada!<br>Para tocar e ver a waveform, arrasta o arquivo <strong>'+(s.filename||'de áudio')+'</strong> aqui novamente.<br><em style="font-size:11px;opacity:.8">(o áudio não é salvo — só os timestamps)</em></span>';
+  }
   drop.scrollIntoView({behavior:'smooth',block:'center'});
   toast('Sessão "'+s.name+'" carregada ✓');
 }
@@ -2330,6 +2343,7 @@ function tsDelSess(idx){
 
   // ══ GOOGLE DRIVE ══
   let tsGoogleToken = null, tsGoogleApisLoaded = false;
+  let tsCurrentDriveFileId = '', tsCurrentDriveFileName = '';
 
   function tsLoadGoogleAPIs() {
     return new Promise((resolve, reject) => {
@@ -2449,6 +2463,8 @@ function tsDelSess(idx){
       msgEl.textContent = 'Processando "' + fileName + '"…';
       const blob = await res.blob();
       const file = new File([blob], fileName, { type: blob.type || 'audio/mpeg' });
+      tsCurrentDriveFileId = fileId;
+      tsCurrentDriveFileName = fileName;
       tsSetFile(file);
       toast('"' + fileName + '" carregado do Drive ✓');
     } catch(e) {
@@ -2458,6 +2474,36 @@ function tsDelSess(idx){
       dlEl.style.display = 'none';
     }
   }
+
+  window.tsReloadFromDrive = async (fileId, fileName) => {
+    const {clientId, apiKey} = tsGetDriveCfg();
+    if (!clientId || !apiKey) {
+      tg('ts-drive-config').classList.add('open');
+      toast('Configura o Client ID e API Key do Drive primeiro');
+      return;
+    }
+    try {
+      await tsLoadGoogleAPIs();
+      if (!tsGoogleToken) {
+        // Precisa autenticar primeiro
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/drive.readonly',
+          callback: async (resp) => {
+            if (resp.error) { toast('Erro de autenticação: ' + resp.error); return; }
+            tsGoogleToken = resp.access_token;
+            await tsDownloadFromDrive(fileId, fileName);
+          }
+        });
+        tokenClient.requestAccessToken({prompt: ''});
+      } else {
+        await tsDownloadFromDrive(fileId, fileName);
+      }
+    } catch(e) {
+      toast('Erro ao reconectar com Drive: ' + e.message);
+    }
+  };
+
   // ══ /GOOGLE DRIVE ══
 
 })();
