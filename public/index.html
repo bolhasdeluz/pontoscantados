@@ -177,9 +177,9 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .list-section-divider{height:1px;background:#f0d8de;margin:6px 0}
 
 /* ── OVERLAYS ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:2000;align-items:flex-start;justify-content:center;padding:8px;padding-top:max(8px,env(safe-area-inset-top));backdrop-filter:blur(4px);overflow-y:auto}
+.overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:2000;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top));backdrop-filter:blur(4px);overflow-y:auto}
 .overlay.open{display:flex}
-.modal{background:#fff;border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;box-shadow:0 8px 40px rgba(196,57,107,.15);width:100%;max-width:560px;max-height:calc(100vh - 20px);overflow-y:auto;padding:28px 24px;position:relative;margin:auto}
+.modal{background:#fff;border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;box-shadow:0 8px 40px rgba(196,57,107,.15);width:100%;max-width:560px;max-height:calc(100vh - 48px);overflow-y:auto;padding:28px 24px;position:relative;margin:auto}
 .modal h2{font-family:'Cinzel',serif;font-size:18px;color:#b02d5a;margin-bottom:22px;letter-spacing:.06em}
 .form-row{margin-bottom:16px}
 label{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
@@ -212,7 +212,7 @@ select option{background:#fff;color:#2a1a22}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:600px){header{padding:10px 12px}header p{display:none}#searchInput{width:130px}.filter-btn{padding:4px 9px;font-size:.65rem}}
 
-/* ══════════ TRANSCRIÇÃO ══════════ */
+/* ══ TRANSCRIÇÃO ══ */
 .ts-prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px}
 .ts-prov-btn{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:transparent;cursor:pointer;text-align:left;transition:all .15s;position:relative;width:100%}
 .ts-prov-btn:hover{border-color:rgba(196,57,107,.3);background:var(--gold-dim)}
@@ -233,11 +233,13 @@ select option{background:#fff;color:#2a1a22}
 .ts-key-row input{flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Crimson Pro',serif;font-size:15px;padding:9px 12px;outline:none;transition:border-color .18s}
 .ts-key-row input:focus{border-color:var(--gold)}
 .ts-key-hint{font-size:11.5px;color:var(--text-dim);font-style:italic}
-.ts-drop{border:1.5px dashed rgba(196,57,107,.3);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px;background:#fdf5f7;position:relative}
+.ts-drop{border:1.5px dashed rgba(196,57,107,.3);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:8px;background:#fdf5f7;position:relative}
 .ts-drop:hover{border-color:var(--gold);background:var(--gold-dim)}
 .ts-drop.ts-has-file{border-style:solid;border-color:#2a7a60;background:#f0faf5}
+.ts-drop.ts-needs-audio{border-color:#c8a000;background:#fffbe8;animation:ts-pulse 2s ease-in-out infinite}
+@keyframes ts-pulse{0%,100%{border-color:#c8a000}50%{border-color:#8c5a00}}
 .ts-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.ts-drop-icon{font-size:26px;margin-bottom:6px}
+.ts-drop-icon{font-size:24px;margin-bottom:6px}
 .ts-drop-text{font-size:.88rem;color:var(--text-dim);font-weight:500}
 .ts-drop-sub{font-size:.73rem;color:var(--text-dim);margin-top:2px}
 .ts-drop-name{font-size:.78rem;color:#2a7a60;margin-top:6px;font-weight:500}
@@ -254,14 +256,12 @@ select option{background:#fff;color:#2a1a22}
 .ts-prog-bar{height:100%;background:linear-gradient(90deg,#c4396b,#e8688a);width:0%;transition:width .4s ease}
 .ts-status{font-size:12.5px;color:var(--text-dim);text-align:center;min-height:18px;margin-bottom:10px;font-style:italic}
 .ts-err{background:var(--red-dim);border:1px solid rgba(184,64,64,.2);color:var(--red);border-radius:8px;padding:.65rem 1rem;font-size:13px;margin-bottom:12px;display:none}
-
-/* ══ WAVEFORM EDITOR ══ */
 .ts-wf-wrap{background:linear-gradient(135deg,#fff0f4,#fde8ed);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px}
 .ts-wf-topbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .ts-wf-playbtn{width:36px;height:36px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0;transition:background .15s;box-shadow:0 2px 8px rgba(196,57,107,.25)}
 .ts-wf-playbtn:hover{background:var(--gold-light)}
 .ts-wf-timeinfo{font-size:12px;color:var(--text-dim);font-variant-numeric:tabular-nums;flex:1;min-width:80px}
-.ts-wf-filename{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.ts-wf-filename{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
 .ts-zoom-btns{display:flex;gap:3px;background:rgba(196,57,107,.08);border-radius:6px;padding:2px}
 .ts-zoom-btn{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.05em;padding:3px 8px;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .12s}
 .ts-zoom-btn.active,.ts-zoom-btn:hover{background:#fff;color:var(--gold);box-shadow:0 1px 3px rgba(196,57,107,.15)}
@@ -272,26 +272,41 @@ select option{background:#fff;color:#2a1a22}
 .ts-wf-scroll canvas{display:block}
 #ts-ruler-canvas{background:#fdf0f3;border-bottom:1px solid rgba(196,57,107,.12)}
 #ts-wf-canvas{background:#fff}
-.ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:8px 0;font-style:italic;display:none}
+.ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:6px 0;font-style:italic;display:none}
 .ts-wf-sel-info{font-size:11.5px;color:var(--gold);margin-top:6px;font-style:italic;min-height:16px}
-
-/* Marcações */
-.ts-markers-section{margin-bottom:14px}
-.ts-markers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
-.ts-marker-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);transition:border-color .12s}
-.ts-marker-item:hover{border-color:var(--border-h,rgba(196,57,107,.3))}
+.ts-drive-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.ts-btn-drive{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:8px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(66,133,244,.4);background:rgba(66,133,244,.06);color:#1a73e8;transition:all .15s;white-space:nowrap}
+.ts-btn-drive:hover{background:rgba(66,133,244,.12);border-color:rgba(66,133,244,.7)}
+.ts-btn-drive:disabled{opacity:.4;cursor:not-allowed}
+.ts-drive-cfg{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;display:none}
+.ts-drive-cfg.open{display:block}
+.ts-drive-cfg-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
+.ts-drive-cfg-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.ts-drive-cfg-row label{font-size:11px;color:var(--text-dim)}
+.ts-drive-cfg-row input{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;transition:border-color .18s}
+.ts-drive-cfg-row input:focus{border-color:#1a73e8}
+.ts-drive-cfg-row input::placeholder{color:var(--text-dim);font-size:11px}
+.ts-drive-hint{font-size:11px;color:var(--text-dim);line-height:1.55;margin-bottom:10px}
+.ts-drive-hint a{color:#1a73e8;text-decoration:none}
+.ts-drive-hint a:hover{text-decoration:underline}
+.ts-drive-hint code{font-size:10px;background:#f5e8ed;padding:1px 4px;border-radius:3px}
+.ts-drive-save-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .12s}
+.ts-drive-save-btn:hover{opacity:.85}
+.ts-drive-dl{font-size:12.5px;color:#1a73e8;font-style:italic;margin-bottom:10px;display:none;align-items:center;gap:6px}
+.ts-spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(26,115,232,.2);border-top-color:#1a73e8;border-radius:50%;animation:spin .7s linear infinite}
+.ts-reload-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 16px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .15s;box-shadow:0 2px 8px rgba(26,115,232,.25);margin-top:8px}
+.ts-reload-btn:hover{opacity:.85}
+.ts-needs-badge{display:inline-block;background:#fffbe8;border:1px solid #e8d060;border-radius:6px;color:#8c5a00;font-size:12px;padding:6px 12px;margin-top:4px;line-height:1.4}
+.ts-markers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
+.ts-marker-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)}
 .ts-marker-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
 .ts-marker-body{flex:1;min-width:0}
 .ts-marker-time{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;color:var(--text-dim);cursor:pointer}
 .ts-marker-time:hover{color:var(--gold)}
 .ts-marker-comment{font-size:13px;color:var(--text);margin-top:2px;word-break:break-word}
-.ts-marker-actions{display:flex;gap:5px;flex-shrink:0}
 .ts-marker-btn{font-size:10px;padding:3px 7px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-dim)}
 .ts-marker-btn:hover{background:var(--gold-dim);color:var(--gold);border-color:var(--gold)}
 .ts-marker-btn.del:hover{background:var(--red-dim);color:var(--red);border-color:var(--red)}
-.ts-add-marker-hint{font-size:11.5px;color:var(--text-dim);font-style:italic;text-align:center;padding:8px 0}
-
-/* Transcript box */
 .ts-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px}
 .ts-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
 .ts-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -336,41 +351,8 @@ select option{background:#fff;color:#2a1a22}
 .ts-save-row input{flex:1;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 10px;outline:none;transition:border-color .18s}
 .ts-save-row input:focus{border-color:var(--gold)}
 .ts-btn-save{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:var(--gold);color:#fff;white-space:nowrap}
-.ts-section{margin-bottom:14px}
 .ts-sec-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
-
-.ts-drop.ts-needs-audio{border-color:#8c5a00!important;background:#fffbe8!important;animation:ts-pulse-border 2s ease-in-out infinite}
-@keyframes ts-pulse-border{0%,100%{border-color:#c8a000;box-shadow:0 0 0 0 rgba(200,160,0,.2)}50%{border-color:#8c5a00;box-shadow:0 0 0 4px rgba(200,160,0,.1)}}
-.ts-needs-audio-badge{display:inline-block;background:#fffbe8;border:1px solid #e8d060;border-radius:6px;color:#8c5a00;font-size:12px;font-weight:500;padding:6px 12px;margin-top:8px;line-height:1.4}
-
-
-/* Drive */
-.ts-drive-bar{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
-.ts-btn-drive{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:8px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(66,133,244,.4);background:rgba(66,133,244,.06);color:#1a73e8;transition:all .15s;white-space:nowrap}
-.ts-btn-drive:hover{background:rgba(66,133,244,.12);border-color:rgba(66,133,244,.7)}
-.ts-btn-drive:disabled{opacity:.4;cursor:not-allowed}
-.ts-drive-config{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:10px;display:none}
-.ts-drive-config.open{display:block}
-.ts-drive-config-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
-.ts-drive-config-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.ts-drive-config-row label{font-size:11px;color:var(--text-dim)}
-.ts-drive-config-row input{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;transition:border-color .18s}
-.ts-drive-config-row input:focus{border-color:#1a73e8}
-.ts-drive-config-row input::placeholder{color:var(--text-dim);font-size:11px}
-.ts-drive-hint{font-size:11px;color:var(--text-dim);line-height:1.55;margin-bottom:10px}
-.ts-drive-hint a{color:#1a73e8;text-decoration:none}
-.ts-drive-hint a:hover{text-decoration:underline}
-.ts-drive-save-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .12s}
-.ts-drive-save-btn:hover{opacity:.85}
-.ts-drive-downloading{font-size:12.5px;color:#1a73e8;font-style:italic;margin-top:6px;display:none}
-.ts-drive-downloading .ts-drive-spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(26,115,232,.2);border-top-color:#1a73e8;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px}
-
-
-.ts-reload-drive-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 16px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .15s;box-shadow:0 2px 8px rgba(26,115,232,.25);margin-top:10px}
-.ts-reload-drive-btn:hover{opacity:.85}
-
-/* ══════════ /TRANSCRIÇÃO ══════════ */
 
 </style>
 </head>
@@ -576,71 +558,84 @@ select option{background:#fff;color:#2a1a22}
   </div>
 </div>
 
-
-<!-- ── TRANSCRICAO ── -->
+<!-- ── MODAL TRANSCRIÇÃO ── -->
 <div class="overlay" id="ov-transcricao">
-  <div class="modal" style="max-width:min(920px,96vw);padding:24px 20px">
-    <button class="btn-close-modal" id="ts-close-btn">✕</button>
+  <div class="modal" style="max-width:min(920px,96vw);max-height:calc(100vh - 20px);padding:24px 20px">
+    <button class="btn-close-modal" id="ts-x">✕</button>
     <h2>Transcrever Sessão</h2>
 
-    <!-- Sessões salvas -->
-    <div class="ts-section">
+    <div style="margin-bottom:14px">
       <div class="ts-sec-lbl">Sessões salvas</div>
-      <div id="ts-sess-list"><div class="ts-sess-empty">Nenhuma sessão salva ainda.</div></div>
+      <div id="ts-sess-list"><span class="ts-sess-empty">Nenhuma sessão salva ainda.</span></div>
       <div class="ts-save-row" id="ts-save-row" style="display:none">
-        <input type="text" id="ts-sess-name" placeholder="Nome da sessão (ex: Gira de Exu — Jun 2025)"/>
+        <input type="text" id="ts-sess-name" placeholder="Nome (ex: Gira de Exu — Jun 2025)"/>
         <button class="ts-btn-save" id="ts-btn-save-sess">Salvar</button>
       </div>
     </div>
 
-    <!-- Provedor -->
-    <div class="ts-section">
+    <div style="margin-bottom:14px">
       <div class="ts-sec-lbl">Provedor de IA</div>
       <div class="ts-prov-grid">
         <button class="ts-prov-btn ts-sel" data-prov="deepgram">
           <div class="ts-prov-check">✓</div>
           <div class="ts-prov-name">Deepgram</div>
-          <div class="ts-prov-desc">Melhor no teste. Timestamps por palavra.</div>
-          <span class="ts-prov-tag ts-tag-cred">$200 créditos</span><br/>
+          <div class="ts-prov-desc">Melhor nos testes. Timestamps por palavra.</div>
+          <span class="ts-prov-tag ts-tag-cred">$200 créditos</span><br>
           <a class="ts-prov-link" href="https://console.deepgram.com/signup" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
         </button>
         <button class="ts-prov-btn" data-prov="assemblyai">
           <div class="ts-prov-check">✓</div>
           <div class="ts-prov-name">AssemblyAI</div>
           <div class="ts-prov-desc">Word boost pro vocabulário do terreiro.</div>
-          <span class="ts-prov-tag ts-tag-free">Free tier</span><br/>
+          <span class="ts-prov-tag ts-tag-free">Free tier</span><br>
           <a class="ts-prov-link" href="https://www.assemblyai.com/dashboard/signup" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
         </button>
         <button class="ts-prov-btn" data-prov="elevenlabs">
           <div class="ts-prov-check">✓</div>
           <div class="ts-prov-name">ElevenLabs</div>
           <div class="ts-prov-desc">96.7% accuracy, top de qualidade.</div>
-          <span class="ts-prov-tag ts-tag-paid">~$0,22–0,48/h</span><br/>
+          <span class="ts-prov-tag ts-tag-paid">~$0,22/h</span><br>
           <a class="ts-prov-link" href="https://elevenlabs.io/app/sign-up" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
         </button>
       </div>
       <div class="ts-key-wrap visible" id="ts-key-wrap">
         <div class="ts-key-row">
-          <input type="password" id="ts-api-key" placeholder="Cole sua chave Deepgram…"/>
+          <input type="password" id="ts-api-key" placeholder="Cole sua chave Deepgram…">
         </div>
-        <p class="ts-key-hint" id="ts-key-hint">console.deepgram.com → Settings → API Keys · $200 créditos</p>
+        <p class="ts-key-hint" id="ts-key-hint">console.deepgram.com → Settings → API Keys</p>
       </div>
     </div>
 
-    <!-- Áudio -->
-    <div class="ts-section">
+    <div style="margin-bottom:14px">
       <div class="ts-sec-lbl">Áudio da sessão</div>
       <div class="ts-drop" id="ts-drop">
-        <input type="file" id="ts-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.webm,.mp4,.aac"/>
+        <input type="file" id="ts-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.webm,.mp4,.aac">
         <div class="ts-drop-icon">🎙️</div>
         <div class="ts-drop-text">Arrasta o áudio ou clica para escolher</div>
-        <div class="ts-drop-sub">MP3, WAV, M4A, OGG, FLAC, WEBM — qualquer tamanho</div>
-        <div class="ts-drop-name" id="ts-drop-name"></div>
+        <div class="ts-drop-sub">MP3, WAV, M4A, OGG, FLAC, WEBM</div>
+        <div id="ts-drop-name"></div>
       </div>
+      <div class="ts-drive-bar">
+        <button class="ts-btn-drive" id="ts-btn-drive">
+          <svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+          Abrir do Drive
+        </button>
+        <button class="ts-btn-sm" id="ts-btn-drive-cfg" style="border-color:rgba(66,133,244,.3);color:#1a73e8">⚙ Config Drive</button>
+      </div>
+      <div class="ts-drive-cfg" id="ts-drive-cfg">
+        <div class="ts-drive-cfg-title">Google Drive — Configuração</div>
+        <div class="ts-drive-hint">
+          <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> → ativa <strong>Drive API</strong> + <strong>Picker API</strong> → Credenciais → cria <strong>Chave de API</strong> e <strong>Client ID OAuth Web</strong>.<br>
+          No Client ID adiciona o teu domínio em <em>Origens autorizadas</em>: <code>https://bolhasdeluz.pages.dev</code>
+        </div>
+        <div class="ts-drive-cfg-row"><label>Client ID OAuth</label><input type="text" id="ts-gcid" placeholder="xxx.apps.googleusercontent.com"></div>
+        <div class="ts-drive-cfg-row"><label>API Key</label><input type="text" id="ts-gapikey" placeholder="AIzaSy…"></div>
+        <button class="ts-drive-save-btn" id="ts-drive-save-btn">Salvar</button>
+      </div>
+      <div class="ts-drive-dl" id="ts-drive-dl"><span class="ts-spin"></span><span id="ts-drive-dl-msg">Baixando…</span></div>
     </div>
 
-    <!-- Vocabulário -->
-    <div class="ts-section">
+    <div style="margin-bottom:14px">
       <div class="ts-sec-lbl">Vocabulário do terreiro</div>
       <div class="ts-chips" id="ts-chips">
         <button class="ts-chip active" data-id="umbanda">Umbanda</button>
@@ -659,10 +654,7 @@ select option{background:#fff;color:#2a1a22}
     <div class="ts-prog-wrap" id="ts-prog-wrap"><div class="ts-prog-bar" id="ts-prog-bar"></div></div>
     <div class="ts-status" id="ts-status"></div>
 
-    <!-- ══ RESULTADO ══ -->
     <div id="ts-result" style="display:none">
-
-      <!-- WAVEFORM EDITOR -->
       <div class="ts-wf-wrap">
         <div class="ts-wf-topbar">
           <button class="ts-wf-playbtn" id="ts-play-btn">▶</button>
@@ -676,50 +668,21 @@ select option{background:#fff;color:#2a1a22}
             <button class="ts-zoom-btn" data-zoom="4">4×</button>
             <button class="ts-zoom-btn" data-zoom="8">8×</button>
           </div>
-          <span class="ts-wf-hint">Arrasta=trecho · Duplo clique=marcação</span>
+          <span class="ts-wf-hint">Arrastar=trecho · 2×clique=marcação</span>
         </div>
         <div class="ts-wf-scroll" id="ts-wf-scroll">
           <canvas id="ts-ruler-canvas" height="24"></canvas>
           <canvas id="ts-wf-canvas" height="140"></canvas>
         </div>
         <div class="ts-wf-loading" id="ts-wf-loading">Analisando forma de onda…</div>
-      <!-- Google Drive -->
-      <div class="ts-drive-bar">
-        <button class="ts-btn-drive" id="ts-btn-drive" onclick="tsOpenDrive()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4.5 21L9 13.5M4.5 21H19.5M4.5 21L2 17L8 6.5M19.5 21L21 17L14 6.5M19.5 21L15 13.5M8 6.5H14M8 6.5L6 10M14 6.5L16 10M6 10L9 13.5M6 10H16M16 10L15 13.5M9 13.5H15" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-          Abrir do Google Drive
-        </button>
-        <button class="ts-btn-sm" id="ts-btn-drive-cfg" onclick="tsToggleDriveCfg()" style="border-color:rgba(66,133,244,.3);color:#1a73e8">⚙ Configurar</button>
-      </div>
-      <div class="ts-drive-config" id="ts-drive-config">
-        <div class="ts-drive-config-title">Configuração Google Drive</div>
-        <div class="ts-drive-hint">
-          Acessa <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> → cria um projeto → ativa as APIs <strong>Google Drive API</strong> e <strong>Google Picker API</strong> → em Credenciais cria uma <strong>chave de API</strong> e um <strong>Client ID OAuth (Web)</strong>.<br><br>
-          No Client ID, adiciona <code style="font-size:10px;background:#f5e8ed;padding:1px 4px;border-radius:3px">https://SEU-DOMINIO.pages.dev</code> em <em>Origens JavaScript autorizadas</em>.
-        </div>
-        <div class="ts-drive-config-row">
-          <label>Client ID OAuth 2.0</label>
-          <input type="text" id="ts-gclient-id" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com"/>
-        </div>
-        <div class="ts-drive-config-row">
-          <label>API Key</label>
-          <input type="text" id="ts-gapi-key" placeholder="AIzaSy…"/>
-        </div>
-        <button class="ts-drive-save-btn" onclick="tsSaveDriveCfg()">Salvar configuração</button>
-      </div>
-      <div class="ts-drive-downloading" id="ts-drive-dl">
-        <span class="ts-drive-spin"></span> <span id="ts-drive-dl-msg">Baixando do Drive…</span>
-      </div>
         <div class="ts-wf-sel-info" id="ts-wf-sel-info"></div>
       </div>
 
-      <!-- MARCAÇÕES -->
-      <div class="ts-section ts-markers-section" id="ts-markers-section" style="display:none">
+      <div id="ts-markers-section" style="display:none;margin-bottom:14px">
         <div class="ts-sec-lbl">Marcações</div>
         <div class="ts-markers-list" id="ts-markers-list"></div>
       </div>
 
-      <!-- TRANSCRIÇÃO -->
       <div class="ts-hdr">
         <span class="ts-lbl">Transcrição</span>
         <div class="ts-actions">
@@ -730,7 +693,7 @@ select option{background:#fff;color:#2a1a22}
         </div>
       </div>
       <div class="ts-search">
-        <input type="text" id="ts-search" placeholder="Buscar na transcrição…"/>
+        <input type="text" id="ts-search" placeholder="Buscar na transcrição…">
         <span class="ts-search-count" id="ts-search-count"></span>
       </div>
       <div class="ts-box" id="ts-box"></div>
@@ -739,8 +702,6 @@ select option{background:#fff;color:#2a1a22}
         <span id="ts-meta-words"></span>
         <span id="ts-meta-prov"></span>
       </div>
-
-      <!-- SELEÇÃO PANEL -->
       <div class="ts-sel-panel" id="ts-sel-panel">
         <div class="ts-sel-lbl">Trecho selecionado</div>
         <div class="ts-sel-text" id="ts-sel-text"></div>
@@ -752,11 +713,9 @@ select option{background:#fff;color:#2a1a22}
           <button class="ts-btn-ok-ol" id="ts-btn-clear-sel">Limpar</button>
         </div>
       </div>
-
-    </div><!-- /ts-result -->
+    </div>
   </div>
 </div>
-
 <script>
 // ── CONFIGURAÇÃO ──
 // Para trocar a senha: substitua o valor de ADMIN_HASH por btoa('nova_senha')
@@ -1681,833 +1640,591 @@ function mostrarErro(contexto, err) {
 }
 
 
-// ══════════ MÓDULO TRANSCRIÇÃO ══════════
-(function() {
-const TS_VOCAB = {
-  umbanda:  'Umbanda,terreiro,gira,sessão,incorporação,desenvolvimento,médium,Aruanda,ponto cantado,firmeza,defumação,pemba,quartinha,Mojubá',
-  quimbanda:'Quimbanda,Exu,Pombagira,Kalunga,encruzilhada,Exu Mirim,Tranca Ruas,Maria Padilha,Sete Encruzilhadas',
-  exus:     'Exu Caveira,Exu das Almas,Maria Padilha,Dama da Noite,Rosa Caveira,Cigana,Exu Veludo,Marabô,Pomba Gira',
-  preto:    'Preto Velho,Pai José,Vovó Maria Conga,Pai Joaquim,Caboclo,Jurema,Boiadeiro,Marinheiro,Baiano',
-  orixas:   'Orixá,Oxossi,Ogum,Xangô,Iemanjá,Oxum,Oxalá,Iansã,Nanã,Omulu,Ossanin,Logunedé',
-  pontos:   'ponto cantado,ponto de Exu,ponto de Pombagira,saravá,Laroyê,salve,firmeza na gira',
-  yoruba:   'Laroyê,Saravá,Mojubá,Axé,Kalunga,Pemba,Aruanda,Orixá,irmão da esquerda,irmão da direita,Okê Arô'
+// ══ MÓDULO TRANSCRIÇÃO ══
+(function(){
+'use strict';
+const TS_VOCAB={
+  umbanda:'Umbanda,terreiro,gira,sessão,incorporação,médium,Aruanda,ponto cantado,firmeza,defumação,pemba,quartinha,Mojubá',
+  quimbanda:'Quimbanda,Exu,Pombagira,Kalunga,encruzilhada,Exu Mirim,Tranca Ruas,Maria Padilha',
+  exus:'Exu Caveira,Exu das Almas,Maria Padilha,Dama da Noite,Rosa Caveira,Cigana,Exu Veludo,Marabô',
+  preto:'Preto Velho,Pai José,Vovó Maria Conga,Pai Joaquim,Caboclo,Jurema,Boiadeiro,Baiano',
+  orixas:'Orixá,Oxossi,Ogum,Xangô,Iemanjá,Oxum,Oxalá,Iansã,Nanã,Omulu,Ossanin',
+  pontos:'ponto cantado,ponto de Exu,ponto de Pombagira,saravá,Laroyê,salve,firmeza na gira',
+  yoruba:'Laroyê,Saravá,Mojubá,Axé,Kalunga,Pemba,Aruanda,irmão da esquerda,Okê Arô'
 };
-const TS_PROVS = {
-  deepgram:  {label:'Deepgram Nova-2', ph:'Cole sua chave Deepgram…',   hint:'console.deepgram.com → Settings → API Keys · $200 créditos'},
-  assemblyai:{label:'AssemblyAI',      ph:'Cole sua chave AssemblyAI…', hint:'assemblyai.com → Dashboard → API Keys'},
+const TS_PROVS={
+  deepgram:{label:'Deepgram Nova-2',ph:'Cole sua chave Deepgram…',hint:'console.deepgram.com → Settings → API Keys'},
+  assemblyai:{label:'AssemblyAI',ph:'Cole sua chave AssemblyAI…',hint:'assemblyai.com → Dashboard → API Keys'},
   elevenlabs:{label:'ElevenLabs Scribe',ph:'Cole sua chave ElevenLabs…',hint:'elevenlabs.io → Profile → API Keys'}
 };
-const TS_STORE = 'bolhasdeluz_sessions';
-const MARKER_COLORS = ['#c4396b','#2a7a60','#8c5a00','#6030a0','#b84040','#c88c00'];
-const WF_H = 140, RULER_H = 24, NUM_PEAKS = 5000;
+const TS_STORE='bolhasdeluz_sessions';
+const MCOLS=['#c4396b','#2a7a60','#8c5a00','#6030a0','#b84040','#c88c00'];
+const WF_H=140, RUL_H=24, PEAKS=5000;
 
-// ── State ──
-let tsProv='deepgram', tsFile=null, tsWords=[], tsR2Url='';
-let tsSelStartSec=null, tsSelEndSec=null, tsSelMode=false;
-let tsPeaks=[], tsWfDuration=0, tsZoom=1;
-let tsMarkers=[], tsMarkerColorIdx=0;
-let tsIsDragging=false, tsDragX0=null, tsDragCurX=null;
-let tsAnimFrame=null;
-const tsAudio = new Audio();
-const tg = id => document.getElementById(id);
+// ── state ──
+let prov='deepgram', tsFile=null, words=[], r2url='';
+let selS=null, selE=null, selMode=false, wordSelStart=null;
+let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
+let dragging=false, dragX0=null, dragX1=null;
+let gToken=null, gLoaded=false, driveFileId='', driveFileName='';
+const aud=new Audio();
+const g=id=>document.getElementById(id);
 
-// ── Abrir / Fechar ──
-window.tsAbrir = () => { abrirModal('ov-transcricao'); tsRenderSessions(); };
-tg('ts-close-btn').addEventListener('click', () => { tsAudio.pause(); fecharModal('ov-transcricao'); });
-tg('ov-transcricao').addEventListener('click', e => { if(e.target===tg('ov-transcricao')){ tsAudio.pause(); fecharModal('ov-transcricao'); }});
+// ── abrir/fechar ──
+window.tsAbrir=()=>{ abrirModal('ov-transcricao'); renderSess(); };
+g('ts-x').addEventListener('click',()=>{ aud.pause(); fecharModal('ov-transcricao'); });
+g('ov-transcricao').addEventListener('click',e=>{ if(e.target===g('ov-transcricao')){ aud.pause(); fecharModal('ov-transcricao'); }});
 
-// ── Provider ──
+// ── provedor ──
 document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(b=>b.classList.remove('ts-sel'));
-    btn.classList.add('ts-sel'); tsProv=btn.dataset.prov;
-    const p=TS_PROVS[tsProv]; tg('ts-api-key').placeholder=p.ph; tg('ts-key-hint').textContent=p.hint;
-    tsUpdateBtn();
+    btn.classList.add('ts-sel'); prov=btn.dataset.prov;
+    const p=TS_PROVS[prov]; g('ts-api-key').placeholder=p.ph; g('ts-key-hint').textContent=p.hint;
+    updateBtn();
   });
 });
-tg('ts-api-key').addEventListener('input',tsUpdateBtn);
+g('ts-api-key').addEventListener('input',updateBtn);
 
-// ── File ──
-function tsSetFile(f){
+// ── arquivo ──
+function setFile(f){
   const ext=(f.name.split('.').pop()||'').toLowerCase();
-  if(!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','mpga','aac'].includes(ext)){tsShowErr('Formato não reconhecido.');return;}
+  if(!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','aac'].includes(ext)){ showErr('Formato não reconhecido.'); return; }
   tsFile=f;
-  tg('ts-drop-name').textContent=f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)';
-  tg('ts-drop').classList.remove('ts-needs-audio');
-  tg('ts-drop').classList.add('ts-has-file');
-  const objUrl=URL.createObjectURL(f);
-  tsAudio.src=objUrl;
-  tg('ts-player-name').textContent=f.name;
-  tsHideErr(); tsUpdateBtn();
-  // Decode waveform in background
-  tsLoadWaveform(f);
+  g('ts-drop').classList.remove('ts-needs-audio');
+  g('ts-drop').classList.add('ts-has-file');
+  g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)</span>';
+  aud.src=URL.createObjectURL(f);
+  g('ts-player-name').textContent=f.name;
+  hideErr(); updateBtn();
+  loadWaveform(f);
 }
-tg('ts-file-input').addEventListener('change',e=>{if(e.target.files[0])tsSetFile(e.target.files[0]);});
-tg('ts-drop').addEventListener('dragover',e=>e.preventDefault());
-tg('ts-drop').addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])tsSetFile(e.dataTransfer.files[0]);});
+g('ts-file-input').addEventListener('change',e=>{ if(e.target.files[0]) setFile(e.target.files[0]); });
+g('ts-drop').addEventListener('dragover',e=>e.preventDefault());
+g('ts-drop').addEventListener('drop',e=>{ e.preventDefault(); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
 
-// ── Chips ──
-document.querySelectorAll('#ts-chips .ts-chip').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('active');tsRebuildCtx();}));
-function tsRebuildCtx(){tg('ts-ctx').value=Array.from(document.querySelectorAll('#ts-chips .ts-chip.active')).map(c=>TS_VOCAB[c.dataset.id]).filter(Boolean).join(', ');}
-tsRebuildCtx();
+// ── chips ──
+document.querySelectorAll('#ts-chips .ts-chip').forEach(c=>c.addEventListener('click',()=>{ c.classList.toggle('active'); rebuildCtx(); }));
+function rebuildCtx(){ g('ts-ctx').value=Array.from(document.querySelectorAll('#ts-chips .ts-chip.active')).map(c=>TS_VOCAB[c.dataset.id]).filter(Boolean).join(', '); }
+rebuildCtx();
 
-function tsUpdateBtn(){tg('ts-btn-transcribe').disabled=!(tsProv&&tsFile&&tg('ts-api-key').value.trim().length>8);}
-function tsShowErr(m){tg('ts-err').innerHTML=m;tg('ts-err').style.display='block';}
-function tsHideErr(){tg('ts-err').style.display='none';}
-function tsSetProg(p){tg('ts-prog-bar').style.width=p+'%';}
-function tsFmt(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
-function tsFmtField(s){if(s==null)return'';const m=Math.floor(s/60),sec=Math.floor(s%60),ms=Math.round((s%1)*10);return m+':'+(sec<10?'0':'')+sec+(ms>0?'.'+ms:'');}
-function tsCtxWords(){return tg('ts-ctx').value.trim().split(',').map(s=>s.trim()).filter(Boolean);}
-function tsCtxPrompt(){const c=tg('ts-ctx').value.trim();return c?'Transcrição de sessão de Umbanda/Quimbanda em português brasileiro. Termos: '+c+'. Preserve pontos cantados como versos.':'Sessão espiritual em português brasileiro.';}
+function updateBtn(){ g('ts-btn-transcribe').disabled=!(prov&&tsFile&&g('ts-api-key').value.trim().length>8); }
+function showErr(m){ g('ts-err').innerHTML=m; g('ts-err').style.display='block'; }
+function hideErr(){ g('ts-err').style.display='none'; }
+function setProg(p){ g('ts-prog-bar').style.width=p+'%'; }
+function fmt(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
+function fmtField(s){ if(s==null)return''; const m=Math.floor(s/60),sec=Math.floor(s%60),ms=Math.round((s%1)*10); return m+':'+(sec<10?'0':'')+sec+(ms>0?'.'+ms:''); }
+function ctxW(){ return g('ts-ctx').value.trim().split(',').map(s=>s.trim()).filter(Boolean); }
+function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Quimbanda PT-BR. Termos: '+c+'. Preserve pontos cantados.':'Sessão espiritual em português brasileiro.'; }
 
 // ══ WAVEFORM ══
-async function tsLoadWaveform(file){
-  const loading=tg('ts-wf-loading'); if(loading)loading.style.display='block';
-  tsPeaks=[]; tsWfDuration=0;
+async function loadWaveform(f){
+  g('ts-wf-loading').style.display='block'; peaks=[]; wfDur=0;
   try{
-    const arrayBuf=await file.arrayBuffer();
+    const buf=await f.arrayBuffer();
     const actx=new(window.AudioContext||window.webkitAudioContext)();
-    const audioBuf=await actx.decodeAudioData(arrayBuf);
-    await actx.close();
-    tsWfDuration=audioBuf.duration;
-    const data=audioBuf.getChannelData(0);
-    const blockSize=Math.max(1,Math.floor(data.length/NUM_PEAKS));
-    for(let i=0;i<NUM_PEAKS;i++){
-      let mn=0,mx=0;
-      const st=i*blockSize,en=Math.min(st+blockSize,data.length);
-      for(let j=st;j<en;j++){if(data[j]<mn)mn=data[j];if(data[j]>mx)mx=data[j];}
-      tsPeaks.push([mn,mx]);
-    }
-    tsDrawAll();
-  }catch(e){console.warn('Waveform decode:',e);}
-  finally{if(loading)loading.style.display='none';}
+    const ab=await actx.decodeAudioData(buf); await actx.close();
+    wfDur=ab.duration;
+    const data=ab.getChannelData(0);
+    const bs=Math.max(1,Math.floor(data.length/PEAKS));
+    for(let i=0;i<PEAKS;i++){ let mn=0,mx=0; const st=i*bs,en=Math.min(st+bs,data.length); for(let j=st;j<en;j++){if(data[j]<mn)mn=data[j];if(data[j]>mx)mx=data[j];} peaks.push([mn,mx]); }
+    drawAll();
+  }catch(e){ console.warn('wf:',e); }
+  finally{ g('ts-wf-loading').style.display='none'; }
 }
-
-function tsContainerW(){return tg('ts-wf-scroll')?.clientWidth||600;}
-function tsCanvasW(){return Math.round(tsContainerW()*tsZoom);}
-function tsSecsToX(s){return tsWfDuration>0?(s/tsWfDuration)*tsCanvasW():0;}
-function tsXToSecs(x){const w=tsCanvasW();return w>0?(x/w)*tsWfDuration:0;}
-
-function tsDrawAll(){
-  tsDrawRuler();
-  tsDrawWaveform();
-}
-
-function tsDrawRuler(){
-  const canvas=tg('ts-ruler-canvas');if(!canvas)return;
-  const w=tsCanvasW();canvas.width=w;canvas.height=RULER_H;
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#fdf0f3';ctx.fillRect(0,0,w,RULER_H);
-  if(!tsWfDuration)return;
-  const spp=tsWfDuration/w; // seconds per pixel
-  let interval=spp<0.05?1:spp<0.25?5:spp<1?30:spp<4?60:300;
-  ctx.strokeStyle='rgba(196,57,107,.3)';
-  ctx.fillStyle='rgba(80,30,50,.55)';
-  ctx.font='9px DM Sans,sans-serif';
-  ctx.textAlign='center';
-  for(let t=0;t<=tsWfDuration;t+=interval){
-    const x=tsSecsToX(t);
-    // Tick
-    ctx.beginPath();ctx.moveTo(x,10);ctx.lineTo(x,RULER_H);ctx.stroke();
-    // Label
-    const label=tsFmt(t);
-    if(x>15&&x<w-15)ctx.fillText(label,x,9);
-  }
-  // Minor ticks (half-interval)
-  const minor=interval/2;
-  ctx.strokeStyle='rgba(196,57,107,.12)';
-  for(let t=minor;t<=tsWfDuration;t+=interval){
-    const x=tsSecsToX(t);
-    ctx.beginPath();ctx.moveTo(x,15);ctx.lineTo(x,RULER_H);ctx.stroke();
+function cw(){ return g('ts-wf-scroll')?.clientWidth||600; }
+function canvW(){ return Math.round(cw()*zoom); }
+function sToX(s){ return wfDur>0?(s/wfDur)*canvW():0; }
+function xToS(x){ const w=canvW(); return w>0?(x/w)*wfDur:0; }
+function drawAll(){ drawRuler(); drawWf(); }
+function drawRuler(){
+  const cv=g('ts-ruler-canvas'); if(!cv)return;
+  const w=canvW(); cv.width=w; cv.height=RUL_H;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#fdf0f3'; ctx.fillRect(0,0,w,RUL_H);
+  if(!wfDur)return;
+  const spp=wfDur/w;
+  const iv=spp<0.05?1:spp<0.25?5:spp<1?30:spp<4?60:300;
+  ctx.strokeStyle='rgba(196,57,107,.3)'; ctx.fillStyle='rgba(80,30,50,.55)';
+  ctx.font='9px DM Sans,sans-serif'; ctx.textAlign='center';
+  for(let t=0;t<=wfDur;t+=iv){
+    const x=sToX(t);
+    ctx.beginPath(); ctx.moveTo(x,10); ctx.lineTo(x,RUL_H); ctx.stroke();
+    if(x>15&&x<w-15) ctx.fillText(fmt(t),x,9);
   }
 }
-
-function tsDrawWaveform(){
-  const canvas=tg('ts-wf-canvas');if(!canvas)return;
-  const w=tsCanvasW();canvas.width=w;canvas.height=WF_H;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,w,WF_H);
+function drawWf(){
+  const cv=g('ts-wf-canvas'); if(!cv)return;
+  const w=canvW(); cv.width=w; cv.height=WF_H;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,WF_H);
   const mid=WF_H/2;
-
-  // Background
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,w,WF_H);
-  // Center line
-  ctx.strokeStyle='rgba(196,57,107,.08)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(0,mid);ctx.lineTo(w,mid);ctx.stroke();
-
-  if(!tsPeaks.length){
-    ctx.fillStyle='rgba(196,57,107,.2)';ctx.fillRect(0,mid-1,w,2);
-    return;
+  ctx.strokeStyle='rgba(196,57,107,.07)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,mid); ctx.lineTo(w,mid); ctx.stroke();
+  if(!peaks.length){ return; }
+  // selection
+  if(selS!==null&&selE!==null){
+    const x1=sToX(Math.min(selS,selE)),x2=sToX(Math.max(selS,selE));
+    ctx.fillStyle='rgba(196,57,107,.12)'; ctx.fillRect(x1,0,x2-x1,WF_H);
+    ctx.strokeStyle='rgba(196,57,107,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x1,0); ctx.lineTo(x1,WF_H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2,0); ctx.lineTo(x2,WF_H); ctx.stroke();
   }
-
-  // Selection region
-  if(tsSelStartSec!==null&&tsSelEndSec!==null){
-    const x1=tsSecsToX(Math.min(tsSelStartSec,tsSelEndSec));
-    const x2=tsSecsToX(Math.max(tsSelStartSec,tsSelEndSec));
-    ctx.fillStyle='rgba(196,57,107,.12)';ctx.fillRect(x1,0,x2-x1,WF_H);
-    ctx.strokeStyle='rgba(196,57,107,.5)';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(x1,0);ctx.lineTo(x1,WF_H);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x2,0);ctx.lineTo(x2,WF_H);ctx.stroke();
-  }
-  // Drag in progress
-  if(tsIsDragging&&tsDragX0!==null&&tsDragCurX!==null){
-    const x1=Math.min(tsDragX0,tsDragCurX),x2=Math.max(tsDragX0,tsDragCurX);
-    ctx.fillStyle='rgba(196,57,107,.07)';ctx.fillRect(x1,0,x2-x1,WF_H);
-    ctx.strokeStyle='rgba(196,57,107,.35)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
-    ctx.beginPath();ctx.moveTo(x1,0);ctx.lineTo(x1,WF_H);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x2,0);ctx.lineTo(x2,WF_H);ctx.stroke();
+  // drag
+  if(dragging&&dragX0!==null&&dragX1!==null){
+    const x1=Math.min(dragX0,dragX1),x2=Math.max(dragX0,dragX1);
+    ctx.fillStyle='rgba(196,57,107,.07)'; ctx.fillRect(x1,0,x2-x1,WF_H);
+    ctx.strokeStyle='rgba(196,57,107,.35)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(x1,0); ctx.lineTo(x1,WF_H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2,0); ctx.lineTo(x2,WF_H); ctx.stroke();
     ctx.setLineDash([]);
   }
-
-  // Waveform bars
+  // bars
   for(let px=0;px<w;px++){
-    const pi=Math.floor((px/w)*NUM_PEAKS);
-    if(pi>=tsPeaks.length)break;
-    const [mn,mx]=tsPeaks[pi];
-    const t=tsXToSecs(px);
-    const inSel=tsSelStartSec!==null&&t>=Math.min(tsSelStartSec,tsSelEndSec)&&t<=Math.max(tsSelStartSec,tsSelEndSec);
-    ctx.strokeStyle=inSel?'#c4396b':'rgba(196,57,107,.5)';
-    ctx.lineWidth=1;
-    ctx.beginPath();
-    ctx.moveTo(px+0.5,mid+mn*mid*0.95);
-    ctx.lineTo(px+0.5,mid+mx*mid*0.95);
-    ctx.stroke();
+    const pi=Math.floor((px/w)*PEAKS); if(pi>=peaks.length)break;
+    const [mn,mx]=peaks[pi];
+    const t=xToS(px);
+    const inS=selS!==null&&t>=Math.min(selS,selE)&&t<=Math.max(selS,selE);
+    ctx.strokeStyle=inS?'#c4396b':'rgba(196,57,107,.45)'; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(px+.5,mid+mn*mid*.95); ctx.lineTo(px+.5,mid+mx*mid*.95); ctx.stroke();
   }
-
-  // Markers
-  tsMarkers.forEach(m=>{
-    const x=tsSecsToX(m.time);
-    ctx.strokeStyle=m.color;ctx.lineWidth=1.5;ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,WF_H);ctx.stroke();
-    // Pin head
-    ctx.fillStyle=m.color;
-    ctx.beginPath();ctx.moveTo(x-5,0);ctx.lineTo(x+5,0);ctx.lineTo(x,9);ctx.closePath();ctx.fill();
-    // Label
-    ctx.fillStyle=m.color;ctx.font='bold 9px DM Sans,sans-serif';ctx.textAlign='left';
-    ctx.fillText(tsFmt(m.time),x+3,WF_H-3);
+  // markers
+  markers.forEach(m=>{
+    const x=sToX(m.t);
+    ctx.strokeStyle=m.c; ctx.lineWidth=1.5; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WF_H); ctx.stroke();
+    ctx.fillStyle=m.c;
+    ctx.beginPath(); ctx.moveTo(x-5,0); ctx.lineTo(x+5,0); ctx.lineTo(x,9); ctx.closePath(); ctx.fill();
+    ctx.font='bold 9px DM Sans,sans-serif'; ctx.textAlign='left'; ctx.fillText(fmt(m.t),x+3,WF_H-3);
   });
-
-  // Playhead
-  if(tsWfDuration>0){
-    const x=tsSecsToX(tsAudio.currentTime||0);
-    ctx.strokeStyle='#b02d5a';ctx.lineWidth=2;ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,WF_H);ctx.stroke();
-    ctx.fillStyle='#b02d5a';ctx.beginPath();ctx.arc(x,5,5,0,Math.PI*2);ctx.fill();
+  // playhead
+  if(wfDur>0){
+    const x=sToX(aud.currentTime||0);
+    ctx.strokeStyle='#b02d5a'; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WF_H); ctx.stroke();
+    ctx.fillStyle='#b02d5a'; ctx.beginPath(); ctx.arc(x,5,5,0,Math.PI*2); ctx.fill();
   }
 }
 
-// Waveform interaction
-const wfScroll=tg('ts-wf-scroll');
-function tsGetCanvasX(e){
-  const rect=tg('ts-wf-canvas').getBoundingClientRect();
-  const clientX=e.touches?e.touches[0].clientX:e.clientX;
-  return clientX-rect.left+wfScroll.scrollLeft;
-}
-
-let tsClickTime=0,tsLastClickX=0;
-tg('ts-wf-canvas').addEventListener('mousedown',e=>{
+// wf interaction
+const scrl=g('ts-wf-scroll');
+function getX(e){ const r=g('ts-wf-canvas').getBoundingClientRect(); return (e.touches?e.touches[0].clientX:e.clientX)-r.left+scrl.scrollLeft; }
+let lastClick=0, lastX=0;
+g('ts-wf-canvas').addEventListener('mousedown',e=>{
   if(e.button!==0)return;
-  const x=tsGetCanvasX(e);
-  tsDragX0=x;tsDragCurX=x;tsIsDragging=true;
-  // Check double-click (within 300ms and 8px of last click)
-  const now=Date.now();
-  if(now-tsClickTime<350&&Math.abs(x-tsLastClickX)<12){
-    tsIsDragging=false;tsDragX0=null;tsDragCurX=null;
-    tsAddMarkerAt(tsXToSecs(x));return;
-  }
-  tsClickTime=now;tsLastClickX=x;
-  e.preventDefault();
+  const x=getX(e), now=Date.now();
+  if(now-lastClick<350&&Math.abs(x-lastX)<12){ addMarker(xToS(x)); dragging=false; return; }
+  lastClick=now; lastX=x;
+  dragX0=x; dragX1=x; dragging=true; e.preventDefault();
 });
 window.addEventListener('mousemove',e=>{
-  if(!tsIsDragging)return;
-  tsDragCurX=tsGetCanvasX(e);
-  tsDrawWaveform();
-  // Show time tooltip
-  const s1=Math.min(tsXToSecs(tsDragX0),tsXToSecs(tsDragCurX));
-  const s2=Math.max(tsXToSecs(tsDragX0),tsXToSecs(tsDragCurX));
-  if(Math.abs(tsDragCurX-tsDragX0)>5)tg('ts-wf-sel-info').textContent=tsFmt(s1)+' → '+tsFmt(s2)+' ('+tsFmt(s2-s1)+')';
+  if(!dragging)return;
+  dragX1=getX(e); drawWf();
+  const s1=xToS(Math.min(dragX0,dragX1)),s2=xToS(Math.max(dragX0,dragX1));
+  if(Math.abs(dragX1-dragX0)>5) g('ts-wf-sel-info').textContent=fmt(s1)+' → '+fmt(s2)+' ('+fmt(s2-s1)+')';
 });
 window.addEventListener('mouseup',e=>{
-  if(!tsIsDragging)return;
-  const dx=Math.abs(tsDragCurX-tsDragX0);
-  if(dx<8){
-    // Click → seek
-    tsAudio.currentTime=Math.max(0,tsXToSecs(tsDragX0));
-    if(tsAudio.paused)tsAudio.play();
-    tg('ts-play-btn').textContent='⏸';
-  }else{
-    // Drag → selection
-    const s1=Math.min(tsXToSecs(tsDragX0),tsXToSecs(tsDragCurX));
-    const s2=Math.max(tsXToSecs(tsDragX0),tsXToSecs(tsDragCurX));
-    tsSetSelection(s1,s2);
-  }
-  tsIsDragging=false;tsDragX0=null;tsDragCurX=null;
-  tsDrawWaveform();
+  if(!dragging)return;
+  const dx=Math.abs(dragX1-dragX0);
+  if(dx<8){ aud.currentTime=Math.max(0,xToS(dragX0)); if(aud.paused)aud.play(); g('ts-play-btn').textContent='⏸'; }
+  else{ const s1=xToS(Math.min(dragX0,dragX1)),s2=xToS(Math.max(dragX0,dragX1)); setSel(s1,s2); }
+  dragging=false; dragX0=null; dragX1=null; drawWf();
 });
 
-function tsSetSelection(s1,s2){
-  tsSelStartSec=s1;tsSelEndSec=s2;
-  tsDrawWaveform();
-  tsShowSelPanel(s1,s2);
-  // Sync waveform sel-info
-  tg('ts-wf-sel-info').textContent=tsFmt(s1)+' → '+tsFmt(s2)+' · '+tsFmt(s2-s1)+' de duração';
+function setSel(s1,s2){
+  selS=s1; selE=s2; drawWf();
+  showSelPanel(s1,s2);
+  g('ts-wf-sel-info').textContent=fmt(s1)+' → '+fmt(s2)+' · '+fmt(s2-s1)+' de duração';
 }
 
-// Zoom
+// zoom
 document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const prevZoom=tsZoom;
-    tsZoom=parseInt(btn.dataset.zoom);
-    // Keep playhead in view after zoom
-    const playX=tsSecsToX(tsAudio.currentTime||0);
-    tsDrawAll();
-    const newPlayX=tsSecsToX(tsAudio.currentTime||0);
-    wfScroll.scrollLeft=Math.max(0,newPlayX-tsContainerW()/2);
+    btn.classList.add('active'); zoom=parseInt(btn.dataset.zoom);
+    drawAll();
+    const px=sToX(aud.currentTime||0); scrl.scrollLeft=Math.max(0,px-cw()/2);
   });
 });
 
-// Markers
-function tsAddMarkerAt(time){
-  const comment=prompt('Marcação em '+tsFmt(time)+':\n(deixa em branco para cancelar)');
+// markers
+function addMarker(t){
+  const comment=prompt('Marcação em '+fmt(t)+':\n(Enter sem texto para só marcar o ponto)');
   if(comment===null)return;
-  const color=MARKER_COLORS[tsMarkerColorIdx%MARKER_COLORS.length];
-  tsMarkerColorIdx++;
-  tsMarkers.push({time,comment:comment||'',color});
-  tsMarkers.sort((a,b)=>a.time-b.time);
-  tsDrawWaveform();
-  tsRenderMarkers();
-  tg('ts-markers-section').style.display='block';
+  markers.push({t,c:MCOLS[mci%MCOLS.length],note:comment}); mci++;
+  markers.sort((a,b)=>a.t-b.t);
+  drawWf(); renderMarkers();
+  g('ts-markers-section').style.display='block';
 }
-
-function tsRenderMarkers(){
-  const list=tg('ts-markers-list');
-  if(!tsMarkers.length){list.innerHTML='<div class="ts-add-marker-hint">Nenhuma marcação ainda — duplo clique na waveform para adicionar</div>';return;}
-  list.innerHTML=tsMarkers.map((m,i)=>`
+function renderMarkers(){
+  const el=g('ts-markers-list');
+  if(!markers.length){ el.innerHTML=''; return; }
+  el.innerHTML=markers.map((m,i)=>`
     <div class="ts-marker-item">
-      <div class="ts-marker-dot" style="background:${m.color}"></div>
+      <div class="ts-marker-dot" style="background:${m.c}"></div>
       <div class="ts-marker-body">
-        <div class="ts-marker-time" data-time="${m.time}" onclick="tsSeekToTime(${m.time})">${tsFmt(m.time)}</div>
-        ${m.comment?`<div class="ts-marker-comment">${m.comment}</div>`:''}
+        <div class="ts-marker-time" onclick="tsSeek(${m.t})">${fmt(m.t)}</div>
+        ${m.note?`<div class="ts-marker-comment">${m.note}</div>`:''}
       </div>
-      <div class="ts-marker-actions">
-        <button class="ts-marker-btn" onclick="tsSelFromMarker(${i})">✂ trecho</button>
+      <div style="display:flex;gap:5px">
+        <button class="ts-marker-btn" onclick="tsSelMarker(${i})">✂ trecho</button>
         <button class="ts-marker-btn del" onclick="tsDelMarker(${i})">✕</button>
       </div>
     </div>`).join('');
 }
+window.tsSeek=t=>{ aud.currentTime=t; if(aud.paused)aud.play(); g('ts-play-btn').textContent='⏸'; };
+window.tsSelMarker=i=>{ const m=markers[i],nx=markers[i+1]; setSel(m.t,nx?nx.t:Math.min(m.t+30,wfDur)); };
+window.tsDelMarker=i=>{ markers.splice(i,1); drawWf(); renderMarkers(); if(!markers.length)g('ts-markers-section').style.display='none'; };
 
-window.tsSeekToTime=t=>{tsAudio.currentTime=t;if(tsAudio.paused)tsAudio.play();tg('ts-play-btn').textContent='⏸';};
-
-window.tsSelFromMarker=i=>{
-  // Select from this marker to the next (or +30s)
-  const m=tsMarkers[i];const next=tsMarkers[i+1];
-  const end=next?next.time:Math.min(m.time+30,tsWfDuration);
-  tsSetSelection(m.time,end);
-};
-
-window.tsDelMarker=i=>{
-  tsMarkers.splice(i,1);tsDrawWaveform();tsRenderMarkers();
-  if(!tsMarkers.length)tg('ts-markers-section').style.display='none';
-};
-
-// ══ AUDIO PLAYER ══
-tg('ts-play-btn').addEventListener('click',()=>{
-  if(tsAudio.paused){tsAudio.play();tg('ts-play-btn').textContent='⏸';}
-  else{tsAudio.pause();tg('ts-play-btn').textContent='▶';}
-});
-tsAudio.addEventListener('ended',()=>{tg('ts-play-btn').textContent='▶';});
-
-tsAudio.addEventListener('timeupdate',()=>{
-  const c=tsAudio.currentTime||0,d=tsAudio.duration||0;
-  tg('ts-player-time').textContent=tsFmt(c)+' / '+tsFmt(d);
-  tsDrawWaveform();
-  // Auto-scroll to keep playhead visible
-  if(!tsIsDragging&&tsWfDuration>0){
-    const x=tsSecsToX(c);const cw=tsContainerW();
-    const sl=wfScroll.scrollLeft;
-    if(x<sl+40||x>sl+cw-40)wfScroll.scrollLeft=Math.max(0,x-cw/2);
-  }
-  // Highlight word
-  const idx=tsWords.findIndex(w=>c>=w.start&&c<=w.end);
+// ── player ──
+g('ts-play-btn').addEventListener('click',()=>{ if(aud.paused){aud.play();g('ts-play-btn').textContent='⏸';}else{aud.pause();g('ts-play-btn').textContent='▶';} });
+aud.addEventListener('ended',()=>g('ts-play-btn').textContent='▶');
+aud.addEventListener('timeupdate',()=>{
+  const c=aud.currentTime||0,d=aud.duration||0;
+  g('ts-player-time').textContent=fmt(c)+' / '+fmt(d);
+  drawWf();
+  if(!dragging&&wfDur>0){ const x=sToX(c),sw=cw(),sl=scrl.scrollLeft; if(x<sl+40||x>sl+sw-40) scrl.scrollLeft=Math.max(0,x-sw/2); }
+  // palavra ativa
+  const idx=words.findIndex(w=>c>=w.start&&c<=w.end);
   document.querySelectorAll('#ts-box .ts-active-w').forEach(el=>el.classList.remove('ts-active-w'));
-  if(idx>=0){const el=document.querySelector('#ts-box .ts-word[data-idx="'+idx+'"]');if(el){el.classList.add('ts-active-w');el.scrollIntoView({behavior:'smooth',block:'nearest'});}}
+  if(idx>=0){ const el=document.querySelector('#ts-box .ts-word[data-idx="'+idx+'"]'); if(el){el.classList.add('ts-active-w');el.scrollIntoView({behavior:'smooth',block:'nearest'});} }
 });
-tsAudio.addEventListener('loadedmetadata',()=>{
-  const d=tsAudio.duration||0;
-  tg('ts-player-time').textContent='0:00 / '+tsFmt(d);
-  if(tsPeaks.length)tsDrawAll();
-});
+aud.addEventListener('loadedmetadata',()=>{ g('ts-player-time').textContent='0:00 / '+fmt(aud.duration||0); if(peaks.length)drawAll(); });
 
-// ══ TRANSCRIBE ══
-tg('ts-btn-transcribe').addEventListener('click',async()=>{
-  const key=tg('ts-api-key').value.trim();if(!key||!tsFile)return;
-  tsHideErr();tg('ts-btn-transcribe').disabled=true;
-  tg('ts-result').style.display='none';tg('ts-prog-wrap').style.display='block';tsSetProg(5);tsR2Url='';
-  uploadAudioToR2(tsFile).then(url=>{if(url)tsR2Url=url;});
+// ── transcrever ──
+g('ts-btn-transcribe').addEventListener('click',async()=>{
+  const key=g('ts-api-key').value.trim(); if(!key||!tsFile)return;
+  hideErr(); g('ts-btn-transcribe').disabled=true;
+  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(5); r2url='';
+  uploadAudioToR2(tsFile).then(u=>{ if(u)r2url=u; });
   const t0=Date.now();
   try{
-    if(tsProv==='deepgram')   await tsDeepgram(key,t0);
-    if(tsProv==='assemblyai') await tsAssemblyAI(key,t0);
-    if(tsProv==='elevenlabs') await tsElevenLabs(key,t0);
-  }catch(e){
-    tsShowErr('<strong>Erro:</strong> '+e.message);
-    tg('ts-status').textContent='';tg('ts-prog-wrap').style.display='none';
-  }finally{tsUpdateBtn();}
+    if(prov==='deepgram')    await doDeepgram(key,t0);
+    if(prov==='assemblyai')  await doAssembly(key,t0);
+    if(prov==='elevenlabs')  await doElevenLabs(key,t0);
+  }catch(e){ showErr('<strong>Erro:</strong> '+e.message); g('ts-status').textContent=''; g('ts-prog-wrap').style.display='none'; }
+  finally{ updateBtn(); }
 });
 
-function tsDone(words,t0){
-  if(!words||!words.length)throw new Error('Nenhuma fala detectada. Tenta um trecho com mais fala direta.');
-  tsWords=words;tsSetProg(100);
-  tg('ts-meta-dur').textContent='processado em '+((Date.now()-t0)/1000).toFixed(1)+'s';
-  tg('ts-meta-words').textContent='~'+words.length+' palavras';
-  tg('ts-meta-prov').textContent=TS_PROVS[tsProv].label;
-  tg('ts-status').textContent='';
-  tsRenderWords();
-  tg('ts-result').style.display='block';
-  tsSaveRowShow();
-  // Redraw waveform now that we have words
-  if(tsPeaks.length)tsDrawAll();
+function done(ws,t0){
+  if(!ws||!ws.length)throw new Error('Nenhuma fala detectada. Tenta com um trecho com mais fala direta.');
+  words=ws; setProg(100);
+  g('ts-meta-dur').textContent='processado em '+((Date.now()-t0)/1000).toFixed(1)+'s';
+  g('ts-meta-words').textContent='~'+ws.length+' palavras';
+  g('ts-meta-prov').textContent=TS_PROVS[prov].label;
+  g('ts-status').textContent='';
+  renderWords(); g('ts-result').style.display='block';
+  showSaveRow(); if(peaks.length)drawAll();
 }
 
-async function tsDeepgram(k,t0){
-  tg('ts-status').textContent='Enviando áudio…';tsSetProg(20);
-  const w=tsCtxWords();
-  let url='https://api.deepgram.com/v1/listen?language=pt&punctuate=true&model=nova-2&words=true';
+async function doDeepgram(k,t0){
+  g('ts-status').textContent='Enviando áudio…'; setProg(20);
+  const w=ctxW(); let url='https://api.deepgram.com/v1/listen?language=pt&punctuate=true&model=nova-2&words=true';
   if(w.length)url+='&keywords='+w.slice(0,200).map(encodeURIComponent).join('&keywords=');
-  tsSetProg(50);tg('ts-status').textContent='Transcrevendo…';
+  setProg(50); g('ts-status').textContent='Transcrevendo…';
   const res=await fetch(url,{method:'POST',headers:{'Authorization':'Token '+k,'Content-Type':tsFile.type||'audio/mpeg'},body:tsFile});
-  tsSetProg(90);
+  setProg(90);
   if(!res.ok){const e=await res.json().catch(()=>({}));if(res.status===401)throw new Error('Chave inválida');throw new Error(e.err_msg||'Erro '+res.status);}
   const d=await res.json();
   const raw=d?.results?.channels?.[0]?.alternatives?.[0]?.words||[];
   if(!raw.length)throw new Error('Nenhuma fala detectada.');
-  tsDone(raw.map(w=>({word:w.punctuated_word||w.word,start:w.start,end:w.end})),t0);
+  done(raw.map(w=>({word:w.punctuated_word||w.word,start:w.start,end:w.end})),t0);
 }
 
-async function tsAssemblyAI(k,t0){
-  tg('ts-status').textContent='Enviando áudio…';tsSetProg(15);
+async function doAssembly(k,t0){
+  g('ts-status').textContent='Enviando áudio…'; setProg(15);
   const up=await fetch('https://api.assemblyai.com/v2/upload',{method:'POST',headers:{'Authorization':k,'Content-Type':'application/octet-stream'},body:tsFile});
   if(!up.ok){const e=await up.json().catch(()=>({}));if(up.status===401)throw new Error('Chave inválida');throw new Error(e.error||'Erro '+up.status);}
-  const {upload_url}=await up.json();tsSetProg(30);
-  const cw=tsCtxWords();
-  const body={audio_url:upload_url,language_code:'pt',punctuate:true,format_text:true};
-  if(cw.length){body.word_boost=cw.slice(0,1000);body.boost_param='high';}
+  const {upload_url}=await up.json(); setProg(30);
+  const cw2=ctxW(),body={audio_url:upload_url,language_code:'pt',punctuate:true,format_text:true};
+  if(cw2.length){body.word_boost=cw2.slice(0,1000);body.boost_param='high';}
   const sub=await fetch('https://api.assemblyai.com/v2/transcript',{method:'POST',headers:{'Authorization':k,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!sub.ok){const e=await sub.json().catch(()=>({}));throw new Error(e.error||'Erro '+sub.status);}
-  const {id}=await sub.json();tsSetProg(45);
+  const {id}=await sub.json(); setProg(45);
   for(let i=0;i<200;i++){
     await new Promise(r=>setTimeout(r,3000));
     const poll=await fetch('https://api.assemblyai.com/v2/transcript/'+id,{headers:{'Authorization':k}});
     if(!poll.ok)continue;
     const d=await poll.json();
     const el=(Date.now()-t0)/1000;
-    tsSetProg(Math.min(45+(el/200)*50,93));tg('ts-status').textContent='Transcrevendo… '+Math.floor(el)+'s';
-    if(d.status==='completed'){
-      const raw=d.words||[];if(!raw.length)throw new Error('Nenhuma fala detectada.');
-      return tsDone(raw.map(w=>({word:w.text,start:w.start/1000,end:w.end/1000})),t0);
-    }
-    if(d.status==='error')throw new Error('Erro do modelo: '+(d.error||'desconhecido'));
+    setProg(Math.min(45+(el/200)*50,93)); g('ts-status').textContent='Transcrevendo… '+Math.floor(el)+'s';
+    if(d.status==='completed'){const raw=d.words||[];if(!raw.length)throw new Error('Nenhuma fala detectada.'); return done(raw.map(w=>({word:w.text,start:w.start/1000,end:w.end/1000})),t0);}
+    if(d.status==='error')throw new Error('Erro: '+(d.error||'desconhecido'));
   }
   throw new Error('Tempo limite.');
 }
 
-async function tsElevenLabs(k,t0){
-  tg('ts-status').textContent='Enviando para Scribe…';tsSetProg(20);
-  const fd=new FormData();fd.append('audio',tsFile,tsFile.name);
-  fd.append('model_id','scribe_v1');fd.append('timestamps_granularity','word');
-  tsCtxWords().slice(0,1000).forEach(w=>fd.append('keyterm',w));
-  tsSetProg(55);tg('ts-status').textContent='Processando…';
+async function doElevenLabs(k,t0){
+  g('ts-status').textContent='Enviando para Scribe…'; setProg(20);
+  const fd=new FormData(); fd.append('audio',tsFile,tsFile.name); fd.append('model_id','scribe_v1'); fd.append('timestamps_granularity','word');
+  ctxW().slice(0,1000).forEach(w=>fd.append('keyterm',w));
+  setProg(55); g('ts-status').textContent='Processando…';
   const res=await fetch('https://api.elevenlabs.io/v1/speech-to-text',{method:'POST',headers:{'xi-api-key':k},body:fd});
-  tsSetProg(90);
+  setProg(90);
   if(!res.ok){const e=await res.json().catch(()=>({}));if(res.status===401)throw new Error('Chave inválida');throw new Error(e.detail||e.message||'Erro '+res.status);}
   const d=await res.json();
-  const raw=(d.words||[]).filter(w=>w.type==='word');if(!raw.length)throw new Error('Nenhuma fala detectada.');
-  tsDone(raw.map(w=>({word:w.text,start:w.start,end:w.end})),t0);
+  const raw=(d.words||[]).filter(w=>w.type==='word');
+  if(!raw.length)throw new Error('Nenhuma fala detectada.');
+  done(raw.map(w=>({word:w.text,start:w.start,end:w.end})),t0);
 }
 
-// ══ RENDER WORDS ══
-function tsRenderWords(){
-  const box=tg('ts-box');box.innerHTML='';let lastMin=-1;
-  tsWords.forEach((w,i)=>{
-    const min=Math.floor(w.start/60);
-    if(min!==lastMin){
-      lastMin=min;
-      const badge=document.createElement('span');
-      badge.className='ts-ts-badge';badge.textContent=tsFmt(w.start);
-      badge.addEventListener('click',()=>tsSeekToTime(w.start));
-      box.appendChild(badge);box.appendChild(document.createTextNode(' '));
-    }
-    const span=document.createElement('span');
-    span.className='ts-word';span.textContent=w.word+' ';span.dataset.idx=i;
-    span.addEventListener('click',()=>tsWordClick(i));
-    box.appendChild(span);
+// ── palavras ──
+function renderWords(){
+  const box=g('ts-box'); box.innerHTML=''; let lm=-1;
+  words.forEach((w,i)=>{
+    const mn=Math.floor(w.start/60);
+    if(mn!==lm){ lm=mn; const b=document.createElement('span'); b.className='ts-ts-badge'; b.textContent=fmt(w.start); b.addEventListener('click',()=>tsSeek(w.start)); box.appendChild(b); box.appendChild(document.createTextNode(' ')); }
+    const sp=document.createElement('span'); sp.className='ts-word'; sp.textContent=w.word+' '; sp.dataset.idx=i;
+    sp.addEventListener('click',()=>{ if(selMode)handleWordSel(i); else tsSeek(words[i].start); });
+    box.appendChild(sp);
   });
 }
 
-// Word selection (word-click mode)
-function tsWordClick(i){
-  if(tsSelMode){tsHandleWordSel(i);}else{tsSeekToTime(tsWords[i].start);}
+function handleWordSel(i){
+  if(wordSelStart===null){ wordSelStart=i; document.querySelector('#ts-box .ts-word[data-idx="'+i+'"]')?.classList.add('ts-in-sel'); toast('Clica na última palavra do trecho'); }
+  else if(i>wordSelStart){ setSel(words[wordSelStart].start,words[i].end); wordSelStart=null; }
+  else{ wordSelStart=null; handleWordSel(i); }
 }
 
-let tsWordSelStart=null;
-function tsHandleWordSel(i){
-  if(tsWordSelStart===null){
-    tsWordSelStart=i;
-    document.querySelector('#ts-box .ts-word[data-idx="'+i+'"]')?.classList.add('ts-in-sel');
-    toast('Agora clica na última palavra do trecho');
-  }else if(i>tsWordSelStart){
-    const s1=tsWords[tsWordSelStart].start, s2=tsWords[i].end;
-    tsWordSelStart=null;
-    // Paint words
-    document.querySelectorAll('#ts-box .ts-in-sel').forEach(el=>el.classList.remove('ts-in-sel'));
-    document.querySelectorAll('#ts-box .ts-word').forEach(el=>{
-      const idx=parseInt(el.dataset.idx);
-      el.classList.toggle('ts-in-sel',idx>=tsWords.findIndex(w=>w.start===tsWords[Math.min(i,tsWordSelStart||0)].start)&&idx<=i);
-    });
-    tsSetSelection(s1,s2);
-  }else{
-    tsWordSelStart=null;
-    document.querySelectorAll('#ts-box .ts-in-sel').forEach(el=>el.classList.remove('ts-in-sel'));
-    tsWordSelStart=i;
-    document.querySelector('#ts-box .ts-word[data-idx="'+i+'"]')?.classList.add('ts-in-sel');
-  }
-}
-
-tg('ts-btn-sel').addEventListener('click',()=>{
-  tsSelMode=!tsSelMode;tsWordSelStart=null;
-  tg('ts-btn-sel').classList.toggle('ts-active-mode',tsSelMode);
-  tg('ts-btn-sel').textContent=tsSelMode?'✂ Cancelar seleção':'✂ Selecionar trecho';
-  if(!tsSelMode)tsClearSel();
-  else toast('Na waveform: arrastar=trecho · nos textos: clicar 1ª e última palavra');
+g('ts-btn-sel').addEventListener('click',()=>{
+  selMode=!selMode; wordSelStart=null;
+  g('ts-btn-sel').classList.toggle('ts-active-mode',selMode);
+  g('ts-btn-sel').textContent=selMode?'✂ Cancelar seleção':'✂ Selecionar trecho';
+  if(!selMode)clearSel();
+  else toast('Waveform: arrastar=trecho | Texto: clicar 1ª e última palavra');
 });
 
-function tsShowSelPanel(s1,s2){
-  // Find words in range
-  const inRange=tsWords.filter(w=>w.start>=s1&&w.end<=s2+0.1);
-  const text=inRange.length?inRange.map(w=>w.word).join(' '):'(trecho sem fala transcrita)';
-  tg('ts-sel-text').textContent=text;
-  tg('ts-sel-meta').textContent=tsFmt(s1)+' → '+tsFmt(s2)+' · duração: '+tsFmt(s2-s1);
-  tg('ts-sel-panel').classList.add('open');
-  tg('ts-sel-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
-  // Paint words
+function showSelPanel(s1,s2){
+  const ww=words.filter(w=>w.start>=s1&&w.end<=s2+0.1);
+  g('ts-sel-text').textContent=ww.length?ww.map(w=>w.word).join(' '):'(trecho sem fala transcrita)';
+  g('ts-sel-meta').textContent=fmt(s1)+' → '+fmt(s2)+' · '+fmt(s2-s1);
+  g('ts-sel-panel').classList.add('open');
+  g('ts-sel-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
   document.querySelectorAll('#ts-box .ts-in-sel').forEach(el=>el.classList.remove('ts-in-sel'));
-  document.querySelectorAll('#ts-box .ts-word').forEach(el=>{
-    const idx=parseInt(el.dataset.idx);
-    const w=tsWords[idx];if(w)el.classList.toggle('ts-in-sel',w.start>=s1&&w.end<=s2+0.1);
-  });
+  document.querySelectorAll('#ts-box .ts-word').forEach(el=>{ const w=words[parseInt(el.dataset.idx)]; if(w)el.classList.toggle('ts-in-sel',w.start>=s1&&w.end<=s2+0.1); });
 }
 
-function tsClearSel(){
-  tsSelStartSec=null;tsSelEndSec=null;tsWordSelStart=null;
+function clearSel(){
+  selS=null; selE=null; wordSelStart=null;
   document.querySelectorAll('#ts-box .ts-in-sel').forEach(el=>el.classList.remove('ts-in-sel'));
-  tg('ts-sel-panel').classList.remove('open');
-  tg('ts-wf-sel-info').textContent='';
-  tsSelMode=false;
-  tg('ts-btn-sel').classList.remove('ts-active-mode');
-  tg('ts-btn-sel').textContent='✂ Selecionar trecho';
-  tsDrawWaveform();
+  g('ts-sel-panel').classList.remove('open');
+  g('ts-wf-sel-info').textContent='';
+  selMode=false; g('ts-btn-sel').classList.remove('ts-active-mode'); g('ts-btn-sel').textContent='✂ Selecionar trecho';
+  drawWf();
 }
 
-tg('ts-btn-clear-sel').addEventListener('click',tsClearSel);
-
-tg('ts-btn-ouvir').addEventListener('click',()=>{
-  if(tsSelStartSec!==null)tsSeekToTime(tsSelStartSec);
+g('ts-btn-clear-sel').addEventListener('click',clearSel);
+g('ts-btn-ouvir').addEventListener('click',()=>{ if(selS!==null)tsSeek(selS); });
+g('ts-btn-copy-trecho').addEventListener('click',()=>{
+  if(selS===null)return;
+  const ww=words.filter(w=>w.start>=selS&&w.end<=selE+0.1);
+  navigator.clipboard.writeText('['+fmt(selS)+' → '+fmt(selE)+']\n'+ww.map(w=>w.word).join(' ')).then(()=>toast('Copiado ✓'));
 });
 
-tg('ts-btn-copy-trecho').addEventListener('click',()=>{
-  if(tsSelStartSec===null)return;
-  const inRange=tsWords.filter(w=>w.start>=tsSelStartSec&&w.end<=tsSelEndSec+0.1);
-  const text=inRange.map(w=>w.word).join(' ');
-  navigator.clipboard.writeText('['+tsFmt(tsSelStartSec)+' → '+tsFmt(tsSelEndSec)+']\n'+text).then(()=>toast('Legenda copiada ✓'));
-});
-
-// ══ USAR COMO PONTO ══
-tg('ts-btn-usar').addEventListener('click',()=>{
-  if(tsSelStartSec===null)return;
-  const s1=tsSelStartSec,s2=tsSelEndSec;
-  const inRange=tsWords.filter(w=>w.start>=s1&&w.end<=s2+0.1);
-  const text=inRange.map(w=>w.word).join(' ');
-  tsAudio.pause();fecharModal('ov-transcricao');openModal();
-  document.getElementById('fLetra').value=text;
-  document.getElementById('fAudioStart').value=tsFmtField(s1);
-  document.getElementById('fAudioEnd').value=tsFmtField(s2);
-  if(tsR2Url){
-    const urlEl=document.getElementById('audioCurrentUrl');
-    urlEl.textContent='🎵 Áudio da transcrição (já enviado)';
-    urlEl.dataset.url=tsR2Url;urlEl.style.display='block';
-    document.getElementById('edit-audio-player').src=tsR2Url+'#t='+s1.toFixed(1)+','+s2.toFixed(1);
+// ── usar como ponto ──
+g('ts-btn-usar').addEventListener('click',()=>{
+  if(selS===null)return;
+  const ww=words.filter(w=>w.start>=selS&&w.end<=selE+0.1);
+  aud.pause(); fecharModal('ov-transcricao'); openModal();
+  document.getElementById('fLetra').value=ww.map(w=>w.word).join(' ');
+  document.getElementById('fAudioStart').value=fmtField(selS);
+  document.getElementById('fAudioEnd').value=fmtField(selE);
+  if(r2url){
+    const ue=document.getElementById('audioCurrentUrl');
+    ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=r2url; ue.style.display='block';
+    document.getElementById('edit-audio-player').src=r2url+'#t='+selS.toFixed(1)+','+selE.toFixed(1);
     document.getElementById('edit-audio-preview').style.display='block';
     document.getElementById('seg-area').style.display='block';
     document.getElementById('seg-multi-wrap').style.display='none';
-    document.getElementById('audioFileName').textContent='✅ '+(tsFile?tsFile.name:'áudio carregado');
-  }else{toast('Upload em andamento — aguarda e usa o ponto novamente');}
+    document.getElementById('audioFileName').textContent='✅ '+(tsFile?tsFile.name:'áudio');
+  }else toast('Upload em andamento — aguarda e tenta novamente');
 });
 
-// ══ BUSCA ══
-tg('ts-search').addEventListener('input',e=>{
+// ── busca ──
+g('ts-search').addEventListener('input',e=>{
   const q=e.target.value.trim().toLowerCase();
   document.querySelectorAll('#ts-box .ts-word').forEach(el=>el.classList.remove('ts-highlight'));
-  if(!q){tg('ts-search-count').textContent='';return;}
+  if(!q){g('ts-search-count').textContent='';return;}
   const hits=[];
-  document.querySelectorAll('#ts-box .ts-word').forEach(el=>{
-    if(el.textContent.trim().toLowerCase().includes(q)){el.classList.add('ts-highlight');hits.push(el);}
-  });
-  tg('ts-search-count').textContent=hits.length+' resultado'+(hits.length!==1?'s':'');
+  document.querySelectorAll('#ts-box .ts-word').forEach(el=>{ if(el.textContent.trim().toLowerCase().includes(q)){el.classList.add('ts-highlight');hits.push(el);} });
+  g('ts-search-count').textContent=hits.length+' resultado'+(hits.length!==1?'s':'');
   if(hits.length)hits[0].scrollIntoView({behavior:'smooth',block:'nearest'});
 });
 
-// ══ COPY / DOWNLOAD ══
-tg('ts-btn-copy-all').addEventListener('click',()=>{navigator.clipboard.writeText(tsWords.map(w=>w.word).join(' ')).then(()=>toast('Texto copiado ✓'));});
-tg('ts-btn-dl-txt').addEventListener('click',()=>{
-  let out='';let lm=-1;
-  tsWords.forEach(w=>{const m=Math.floor(w.start/60);if(m!==lm){out+='\n['+tsFmt(w.start)+']\n';lm=m;}out+=w.word+' ';});
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.trim()],{type:'text/plain;charset=utf-8'}));
-  a.download=(tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_transcricao.txt';a.click();
+// ── copy/download ──
+g('ts-btn-copy-all').addEventListener('click',()=>navigator.clipboard.writeText(words.map(w=>w.word).join(' ')).then(()=>toast('Copiado ✓')));
+g('ts-btn-dl-txt').addEventListener('click',()=>{
+  let out=''; let lm=-1;
+  words.forEach(w=>{ const mn=Math.floor(w.start/60); if(mn!==lm){out+='\n['+fmt(w.start)+']\n';lm=mn;} out+=w.word+' '; });
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([out.trim()],{type:'text/plain;charset=utf-8'}));
+  a.download=(tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_transcricao.txt'; a.click();
 });
-tg('ts-btn-dl-srt').addEventListener('click',()=>{
+g('ts-btn-dl-srt').addEventListener('click',()=>{
   const pad=x=>String(x).padStart(2,'0');
-  const srtT=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=Math.floor(s%60),ms=Math.round((s%1)*1000);return pad(h)+':'+pad(m)+':'+pad(sec)+','+String(ms).padStart(3,'0');};
-  let srt='';let n=1;
-  for(let i=0;i<tsWords.length;i+=8){const ch=tsWords.slice(i,i+8);srt+=n+'\n'+srtT(ch[0].start)+' --> '+srtT(ch[ch.length-1].end)+'\n'+ch.map(w=>w.word).join(' ')+'\n\n';n++;}
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([srt],{type:'text/plain;charset=utf-8'}));
-  a.download=(tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_legenda.srt';a.click();
+  const st=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60),ms=Math.round((s%1)*1000);return pad(h)+':'+pad(m)+':'+pad(sc)+','+String(ms).padStart(3,'0');};
+  let srt=''; let n=1;
+  for(let i=0;i<words.length;i+=8){const ch=words.slice(i,i+8);srt+=n+'\n'+st(ch[0].start)+' --> '+st(ch[ch.length-1].end)+'\n'+ch.map(w=>w.word).join(' ')+'\n\n';n++;}
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([srt],{type:'text/plain;charset=utf-8'}));
+  a.download=(tsFile?tsFile.name.replace(/\.[^.]+$/,''):'sessao')+'_legenda.srt'; a.click();
 });
 
 // ══ SESSÕES ══
-function tsGetSess(){try{return JSON.parse(localStorage.getItem(TS_STORE)||'[]');}catch{return[];}}
-function tsPutSess(l){localStorage.setItem(TS_STORE,JSON.stringify(l));}
+function getSess(){try{return JSON.parse(localStorage.getItem(TS_STORE)||'[]');}catch{return[];}}
+function putSess(l){localStorage.setItem(TS_STORE,JSON.stringify(l));}
 
-function tsRenderSessions(){
-  const list=tsGetSess(),el=tg('ts-sess-list');
-  if(!list.length){el.innerHTML='<div class="ts-sess-empty">Nenhuma sessão salva ainda.</div>';return;}
+function renderSess(){
+  const list=getSess(), el=g('ts-sess-list');
+  if(!list.length){el.innerHTML='<span class="ts-sess-empty">Nenhuma sessão salva ainda.</span>';return;}
   el.innerHTML='<div class="ts-sess-list">'+list.map((s,i)=>`
     <div class="ts-sess-item">
-      <div class="ts-sess-info"><div class="ts-sess-name">${s.name}</div><div class="ts-sess-meta">${s.prov} · ${s.words} palavras · ${s.date}</div></div>
-      <button class="ts-btn-load" data-idx="${i}">Carregar</button>
-      <button class="ts-btn-del" data-idx="${i}">✕</button>
+      <div class="ts-sess-info"><div class="ts-sess-name">${s.name}</div><div class="ts-sess-meta">${s.prov} · ${s.words} palavras · ${s.date}${s.driveFileId?' · 💾 Drive':''}</div></div>
+      <button class="ts-btn-load" data-i="${i}">Carregar</button>
+      <button class="ts-btn-del" data-i="${i}">✕</button>
     </div>`).join('')+'</div>';
-  el.querySelectorAll('.ts-btn-load').forEach(b=>b.addEventListener('click',()=>tsLoadSess(parseInt(b.dataset.idx))));
-  el.querySelectorAll('.ts-btn-del').forEach(b=>b.addEventListener('click',()=>tsDelSess(parseInt(b.dataset.idx))));
+  el.querySelectorAll('.ts-btn-load').forEach(b=>b.addEventListener('click',()=>loadSess(parseInt(b.dataset.i))));
+  el.querySelectorAll('.ts-btn-del').forEach(b=>b.addEventListener('click',()=>delSess(parseInt(b.dataset.i))));
 }
 
-function tsSaveRowShow(){
-  tg('ts-save-row').style.display='flex';
-  if(!tg('ts-sess-name').value)tg('ts-sess-name').value='Sessão '+new Date().toLocaleDateString('pt-BR');
+function showSaveRow(){
+  g('ts-save-row').style.display='flex';
+  if(!g('ts-sess-name').value) g('ts-sess-name').value='Sessão '+new Date().toLocaleDateString('pt-BR');
 }
 
-tg('ts-btn-save-sess').addEventListener('click',()=>{
-  const name=tg('ts-sess-name').value.trim();if(!name||!tsWords.length)return;
-  const list=tsGetSess();
-  const entry={name,prov:TS_PROVS[tsProv]?.label||tsProv,words:tsWords.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:tsCurrentDriveFileId||'',driveFileName:tsCurrentDriveFileName||'',data:tsWords};
-  const idx=list.findIndex(s=>s.name===name);
-  if(idx>=0)list[idx]=entry;else list.unshift(entry);
-  try{tsPutSess(list);tsRenderSessions();tg('ts-sess-name').value='';toast('Sessão "'+name+'" salva ✓');}
+g('ts-btn-save-sess').addEventListener('click',()=>{
+  const name=g('ts-sess-name').value.trim(); if(!name||!words.length)return;
+  const list=getSess();
+  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',data:words};
+  const i=list.findIndex(s=>s.name===name);
+  if(i>=0)list[i]=entry; else list.unshift(entry);
+  try{putSess(list);renderSess();g('ts-sess-name').value='';toast('Sessão "'+name+'" salva ✓');}
   catch(e){toast('Erro ao salvar — localStorage pode estar cheio');}
 });
-tg('ts-sess-name').addEventListener('keydown',e=>{if(e.key==='Enter')tg('ts-btn-save-sess').click();});
+g('ts-sess-name').addEventListener('keydown',e=>{if(e.key==='Enter')g('ts-btn-save-sess').click();});
 
-function tsLoadSess(idx){
-  const s=tsGetSess()[idx];if(!s)return;
-  tsWords=s.data;
-  tg('ts-meta-dur').textContent='carregada do cache';
-  tg('ts-meta-words').textContent='~'+tsWords.length+' palavras';
-  tg('ts-meta-prov').textContent=s.prov;
-  tg('ts-player-name').textContent=s.driveFileName||s.filename||s.name;
-  tsRenderWords();tg('ts-result').style.display='block';
-  tsSaveRowShow();tg('ts-sess-name').value=s.name;
-  tg('ts-status').textContent='';
-  const drop=tg('ts-drop');
+function loadSess(i){
+  const s=getSess()[i]; if(!s)return;
+  words=s.data;
+  g('ts-meta-dur').textContent='cache';
+  g('ts-meta-words').textContent='~'+words.length+' palavras';
+  g('ts-meta-prov').textContent=s.prov;
+  g('ts-player-name').textContent=s.driveFileName||s.filename||s.name;
+  renderWords(); g('ts-result').style.display='block';
+  showSaveRow(); g('ts-sess-name').value=s.name;
+  // mostrar botão de reload
+  const drop=g('ts-drop');
   drop.classList.add('ts-needs-audio');
   if(s.driveFileId){
-    // Tem ID do Drive: mostra botão direto
-    tg('ts-drop-name').innerHTML=
-      '<span class="ts-needs-audio-badge">📂 Transcrição restaurada!<br>'+
-      'O áudio estava no Drive: <strong>'+s.driveFileName+'</strong></span>'+
-      '<br><button class="ts-reload-drive-btn" onclick="tsReloadFromDrive(''+s.driveFileId+'',''+s.driveFileName.replace(/'/g,"\'")+'')">'
-      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4.5 21L9 13.5M4.5 21H19.5M4.5 21L2 17L8 6.5M19.5 21L21 17L14 6.5M19.5 21L15 13.5M8 6.5H14M8 6.5L6 10M14 6.5L16 10M6 10L9 13.5M6 10H16M16 10L15 13.5M9 13.5H15" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>'
-      +' Recarregar do Drive</button>';
+    driveFileId=s.driveFileId; driveFileName=s.driveFileName;
+    g('ts-drop-name').innerHTML=
+      '<div class="ts-needs-badge">📂 <strong>'+s.driveFileName+'</strong><br><small>salvo do Drive — clica para recarregar</small></div>'+
+      '<button class="ts-reload-btn" id="ts-reload-btn" style="margin-top:8px">'+
+      '<svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#fff"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#fff"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#fff"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#fff"/></svg>'+
+      ' Recarregar do Drive</button>';
+    setTimeout(()=>{
+      const btn=document.getElementById('ts-reload-btn');
+      if(btn)btn.addEventListener('click',reloadDrive);
+    },50);
   }else{
-    // Sem Drive: pede pra arrastar
-    tg('ts-drop-name').innerHTML='<span class="ts-needs-audio-badge">📂 Transcrição restaurada!<br>Para tocar e ver a waveform, arrasta o arquivo <strong>'+(s.filename||'de áudio')+'</strong> aqui novamente.<br><em style="font-size:11px;opacity:.8">(o áudio não é salvo — só os timestamps)</em></span>';
+    g('ts-drop-name').innerHTML='<div class="ts-needs-badge">📂 <strong>'+(s.filename||'áudio')+'</strong><br><small>Arrasta o arquivo aqui novamente para sincronizar o player</small></div>';
   }
   drop.scrollIntoView({behavior:'smooth',block:'center'});
   toast('Sessão "'+s.name+'" carregada ✓');
 }
 
-function tsDelSess(idx){
-  const list=tsGetSess();const name=list[idx]?.name||'sessão';
-  list.splice(idx,1);tsPutSess(list);tsRenderSessions();toast('"'+name+'" excluída');
+function delSess(i){
+  const list=getSess(); const name=list[i]?.name||'sessão';
+  list.splice(i,1); putSess(list); renderSess(); toast('"'+name+'" excluída');
 }
 
-  // ══ GOOGLE DRIVE ══
-  let tsGoogleToken = null, tsGoogleApisLoaded = false;
-  let tsCurrentDriveFileId = '', tsCurrentDriveFileName = '';
+// ══ GOOGLE DRIVE ══
+function getDriveCfg(){ return {cid:localStorage.getItem('ts_gcid')||'', key:localStorage.getItem('ts_gapikey')||''}; }
 
-  function tsLoadGoogleAPIs() {
-    return new Promise((resolve, reject) => {
-      if (tsGoogleApisLoaded) { resolve(); return; }
-      const s1 = document.createElement('script');
-      s1.src = 'https://apis.google.com/js/api.js';
-      s1.onerror = () => reject(new Error('Falha ao carregar Google API'));
-      s1.onload = () => {
-        gapi.load('picker', () => {
-          const s2 = document.createElement('script');
-          s2.src = 'https://accounts.google.com/gsi/client';
-          s2.onerror = () => reject(new Error('Falha ao carregar Google Sign-In'));
-          s2.onload = () => { tsGoogleApisLoaded = true; resolve(); };
-          document.head.appendChild(s2);
-        });
-      };
-      document.head.appendChild(s1);
+g('ts-btn-drive').addEventListener('click',openDrive);
+g('ts-btn-drive-cfg').addEventListener('click',()=>{
+  const el=g('ts-drive-cfg'); el.classList.toggle('open');
+  if(el.classList.contains('open')){ const {cid,key}=getDriveCfg(); g('ts-gcid').value=cid; g('ts-gapikey').value=key; }
+});
+g('ts-drive-save-btn').addEventListener('click',()=>{
+  const cid=g('ts-gcid').value.trim(), key=g('ts-gapikey').value.trim();
+  if(!cid||!key){toast('Preenche Client ID e API Key');return;}
+  localStorage.setItem('ts_gcid',cid); localStorage.setItem('ts_gapikey',key);
+  g('ts-drive-cfg').classList.remove('open'); toast('Drive configurado ✓');
+});
+
+function loadGoogleAPIs(){
+  return new Promise((res,rej)=>{
+    if(gLoaded){res();return;}
+    const s1=document.createElement('script'); s1.src='https://apis.google.com/js/api.js';
+    s1.onerror=()=>rej(new Error('Falha ao carregar Google API'));
+    s1.onload=()=>gapi.load('picker',()=>{
+      const s2=document.createElement('script'); s2.src='https://accounts.google.com/gsi/client';
+      s2.onerror=()=>rej(new Error('Falha ao carregar Google Sign-In'));
+      s2.onload=()=>{gLoaded=true;res();};
+      document.head.appendChild(s2);
     });
-  }
+    document.head.appendChild(s1);
+  });
+}
 
-  function tsGetDriveCfg() {
-    return {
-      clientId: localStorage.getItem('ts_gclient_id') || '',
-      apiKey:   localStorage.getItem('ts_gapi_key') || ''
-    };
-  }
+async function openDrive(){
+  const {cid,key}=getDriveCfg();
+  if(!cid||!key){ g('ts-drive-cfg').classList.add('open'); toast('Configura Client ID e API Key primeiro'); return; }
+  g('ts-btn-drive').disabled=true;
+  try{
+    await loadGoogleAPIs();
+    const tc=google.accounts.oauth2.initTokenClient({
+      client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
+      callback:(r)=>{ if(r.error){toast('Erro OAuth: '+r.error);return;} gToken=r.access_token; showPicker(key); }
+    });
+    tc.requestAccessToken({prompt:gToken?'':'consent'});
+  }catch(e){ toast('Erro Drive: '+e.message); }
+  finally{ g('ts-btn-drive').disabled=false; }
+}
 
-  function tsSaveDriveCfg() {
-    const cid = tg('ts-gclient-id').value.trim();
-    const key = tg('ts-gapi-key').value.trim();
-    if (!cid || !key) { toast('Preenche Client ID e API Key'); return; }
-    localStorage.setItem('ts_gclient_id', cid);
-    localStorage.setItem('ts_gapi_key', key);
-    tg('ts-drive-config').classList.remove('open');
-    toast('Configuração salva ✓');
-  }
-  window.tsSaveDriveCfg = tsSaveDriveCfg;
+function showPicker(key){
+  const view=new google.picker.View(google.picker.ViewId.DOCS);
+  view.setMimeTypes('audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/flac,audio/webm,audio/aac,audio/x-m4a');
+  new google.picker.PickerBuilder()
+    .addView(view).setOAuthToken(gToken).setDeveloperKey(key)
+    .setTitle('Escolhe o áudio da sessão')
+    .setCallback(async d=>{ if(d.action===google.picker.Action.PICKED){ const f=d.docs[0]; await downloadDrive(f.id,f.name); }})
+    .build().setVisible(true);
+}
 
-  function tsToggleDriveCfg() {
-    const cfg = tg('ts-drive-config');
-    cfg.classList.toggle('open');
-    if (cfg.classList.contains('open')) {
-      const {clientId, apiKey} = tsGetDriveCfg();
-      tg('ts-gclient-id').value = clientId;
-      tg('ts-gapi-key').value   = apiKey;
-    }
-  }
-  window.tsToggleDriveCfg = tsToggleDriveCfg;
+async function downloadDrive(fid,fname){
+  const dl=g('ts-drive-dl'); dl.style.display='flex';
+  g('ts-drive-dl-msg').textContent='Baixando "'+fname+'"…';
+  try{
+    const res=await fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?alt=media',{headers:{Authorization:'Bearer '+gToken}});
+    if(!res.ok)throw new Error('Erro '+res.status+' ao baixar do Drive');
+    g('ts-drive-dl-msg').textContent='Processando…';
+    const blob=await res.blob();
+    const file=new File([blob],fname,{type:blob.type||'audio/mpeg'});
+    driveFileId=fid; driveFileName=fname;
+    setFile(file);
+    toast('"'+fname+'" carregado ✓');
+  }catch(e){ toast('Erro Drive: '+e.message); }
+  finally{ dl.style.display='none'; }
+}
 
-  async function tsOpenDrive() {
-    const {clientId, apiKey} = tsGetDriveCfg();
-    if (!clientId || !apiKey) {
-      tg('ts-drive-config').classList.add('open');
-      tg('ts-drive-config').scrollIntoView({behavior:'smooth',block:'start'});
-      toast('Configura o Client ID e API Key primeiro');
-      return;
-    }
-    tg('ts-btn-drive').disabled = true;
-    tg('ts-btn-drive').textContent = 'Carregando…';
-    try {
-      await tsLoadGoogleAPIs();
-      // Request OAuth token
-      const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.readonly',
-        callback: (resp) => {
-          if (resp.error) { toast('Erro de autenticação: ' + resp.error); return; }
-          tsGoogleToken = resp.access_token;
-          tsShowDrivePicker(apiKey);
-        }
+async function reloadDrive(){
+  if(!driveFileId)return;
+  const {cid,key}=getDriveCfg();
+  if(!cid||!key){ g('ts-drive-cfg').classList.add('open'); toast('Configura o Drive primeiro'); return; }
+  try{
+    await loadGoogleAPIs();
+    if(!gToken){
+      const tc=google.accounts.oauth2.initTokenClient({
+        client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
+        callback:async r=>{ if(r.error){toast('Erro OAuth: '+r.error);return;} gToken=r.access_token; await downloadDrive(driveFileId,driveFileName); }
       });
-      tokenClient.requestAccessToken({prompt: tsGoogleToken ? '' : 'consent'});
-    } catch(e) {
-      toast('Erro ao carregar Google APIs: ' + e.message);
-    } finally {
-      tg('ts-btn-drive').disabled = false;
-      tg('ts-btn-drive').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4.5 21L9 13.5M4.5 21H19.5M4.5 21L2 17L8 6.5M19.5 21L21 17L14 6.5M19.5 21L15 13.5M8 6.5H14M8 6.5L6 10M14 6.5L16 10M6 10L9 13.5M6 10H16M16 10L15 13.5M9 13.5H15" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Abrir do Google Drive';
-    }
-  }
-  window.tsOpenDrive = tsOpenDrive;
-
-  function tsShowDrivePicker(apiKey) {
-    const audioMimes = 'audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/flac,audio/webm,audio/aac,audio/x-m4a,video/mp4';
-    const view = new google.picker.View(google.picker.ViewId.DOCS);
-    view.setMimeTypes(audioMimes);
-    const picker = new google.picker.PickerBuilder()
-      .addView(view)
-      .addView(new google.picker.DocsUploadView())
-      .setOAuthToken(tsGoogleToken)
-      .setDeveloperKey(apiKey)
-      .setTitle('Escolhe o áudio da sessão')
-      .setCallback(async (data) => {
-        if (data.action === google.picker.Action.PICKED) {
-          const doc = data.docs[0];
-          await tsDownloadFromDrive(doc.id, doc.name);
-        }
-      })
-      .build();
-    picker.setVisible(true);
-  }
-
-  async function tsDownloadFromDrive(fileId, fileName) {
-    const dlEl = tg('ts-drive-dl');
-    const msgEl = tg('ts-drive-dl-msg');
-    dlEl.style.display = 'block';
-    msgEl.textContent = 'Baixando "' + fileName + '" do Drive…';
-    tg('ts-drop-name').textContent = '';
-    try {
-      const res = await fetch(
-        'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media',
-        { headers: { Authorization: 'Bearer ' + tsGoogleToken } }
-      );
-      if (!res.ok) {
-        if (res.status === 403) throw new Error('Sem permissão para baixar este arquivo. Verifica o escopo OAuth.');
-        throw new Error('Erro ' + res.status + ' ao baixar do Drive');
-      }
-      msgEl.textContent = 'Processando "' + fileName + '"…';
-      const blob = await res.blob();
-      const file = new File([blob], fileName, { type: blob.type || 'audio/mpeg' });
-      tsCurrentDriveFileId = fileId;
-      tsCurrentDriveFileName = fileName;
-      tsSetFile(file);
-      toast('"' + fileName + '" carregado do Drive ✓');
-    } catch(e) {
-      toast('Erro Drive: ' + e.message);
-      tg('ts-drop-name').textContent = '';
-    } finally {
-      dlEl.style.display = 'none';
-    }
-  }
-
-  window.tsReloadFromDrive = async (fileId, fileName) => {
-    const {clientId, apiKey} = tsGetDriveCfg();
-    if (!clientId || !apiKey) {
-      tg('ts-drive-config').classList.add('open');
-      toast('Configura o Client ID e API Key do Drive primeiro');
-      return;
-    }
-    try {
-      await tsLoadGoogleAPIs();
-      if (!tsGoogleToken) {
-        // Precisa autenticar primeiro
-        const tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/drive.readonly',
-          callback: async (resp) => {
-            if (resp.error) { toast('Erro de autenticação: ' + resp.error); return; }
-            tsGoogleToken = resp.access_token;
-            await tsDownloadFromDrive(fileId, fileName);
-          }
-        });
-        tokenClient.requestAccessToken({prompt: ''});
-      } else {
-        await tsDownloadFromDrive(fileId, fileName);
-      }
-    } catch(e) {
-      toast('Erro ao reconectar com Drive: ' + e.message);
-    }
-  };
-
-  // ══ /GOOGLE DRIVE ══
+      tc.requestAccessToken({prompt:''});
+    }else{ await downloadDrive(driveFileId,driveFileName); }
+  }catch(e){ toast('Erro: '+e.message); }
+}
 
 })();
-// ══════════ /MÓDULO TRANSCRIÇÃO ══════════
+// ══ /MÓDULO TRANSCRIÇÃO ══
 
 // ── INIT ──
 loadLinhas();
