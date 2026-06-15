@@ -177,9 +177,9 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .list-section-divider{height:1px;background:#f0d8de;margin:6px 0}
 
 /* ── OVERLAYS ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:2000;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top));backdrop-filter:blur(4px);overflow-y:auto}
+.overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:2000;align-items:flex-start;justify-content:center;padding:8px;padding-top:max(8px,env(safe-area-inset-top));backdrop-filter:blur(4px);overflow-y:auto}
 .overlay.open{display:flex}
-.modal{background:#fff;border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;box-shadow:0 8px 40px rgba(196,57,107,.15);width:100%;max-width:560px;max-height:calc(100vh - 48px);overflow-y:auto;padding:28px 24px;position:relative;margin:auto}
+.modal{background:#fff;border:1px solid var(--border);border-top:3px solid var(--gold);border-radius:12px;box-shadow:0 8px 40px rgba(196,57,107,.15);width:100%;max-width:560px;max-height:calc(100vh - 20px);overflow-y:auto;padding:28px 24px;position:relative;margin:auto}
 .modal h2{font-family:'Cinzel',serif;font-size:18px;color:#b02d5a;margin-bottom:22px;letter-spacing:.06em}
 .form-row{margin-bottom:16px}
 label{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
@@ -339,6 +339,11 @@ select option{background:#fff;color:#2a1a22}
 .ts-section{margin-bottom:14px}
 .ts-sec-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.ts-drop.ts-needs-audio{border-color:#8c5a00!important;background:#fffbe8!important;animation:ts-pulse-border 2s ease-in-out infinite}
+@keyframes ts-pulse-border{0%,100%{border-color:#c8a000;box-shadow:0 0 0 0 rgba(200,160,0,.2)}50%{border-color:#8c5a00;box-shadow:0 0 0 4px rgba(200,160,0,.1)}}
+.ts-needs-audio-badge{display:inline-block;background:#fffbe8;border:1px solid #e8d060;border-radius:6px;color:#8c5a00;font-size:12px;font-weight:500;padding:6px 12px;margin-top:8px;line-height:1.4}
+
 /* ══════════ /TRANSCRIÇÃO ══════════ */
 
 </style>
@@ -548,7 +553,7 @@ select option{background:#fff;color:#2a1a22}
 
 <!-- ── TRANSCRICAO ── -->
 <div class="overlay" id="ov-transcricao">
-  <div class="modal" style="max-width:700px">
+  <div class="modal" style="max-width:min(920px,96vw);padding:24px 20px">
     <button class="btn-close-modal" id="ts-close-btn">✕</button>
     <h2>Transcrever Sessão</h2>
 
@@ -648,8 +653,8 @@ select option{background:#fff;color:#2a1a22}
           <span class="ts-wf-hint">Arrasta=trecho · Duplo clique=marcação</span>
         </div>
         <div class="ts-wf-scroll" id="ts-wf-scroll">
-          <canvas id="ts-ruler-canvas" height="22"></canvas>
-          <canvas id="ts-wf-canvas" height="110"></canvas>
+          <canvas id="ts-ruler-canvas" height="24"></canvas>
+          <canvas id="ts-wf-canvas" height="140"></canvas>
         </div>
         <div class="ts-wf-loading" id="ts-wf-loading">Analisando forma de onda…</div>
         <div class="ts-wf-sel-info" id="ts-wf-sel-info"></div>
@@ -1641,7 +1646,7 @@ const TS_PROVS = {
 };
 const TS_STORE = 'bolhasdeluz_sessions';
 const MARKER_COLORS = ['#c4396b','#2a7a60','#8c5a00','#6030a0','#b84040','#c88c00'];
-const WF_H = 110, RULER_H = 22, NUM_PEAKS = 5000;
+const WF_H = 140, RULER_H = 24, NUM_PEAKS = 5000;
 
 // ── State ──
 let tsProv='deepgram', tsFile=null, tsWords=[], tsR2Url='';
@@ -1675,6 +1680,7 @@ function tsSetFile(f){
   if(!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','mpga','aac'].includes(ext)){tsShowErr('Formato não reconhecido.');return;}
   tsFile=f;
   tg('ts-drop-name').textContent=f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)';
+  tg('ts-drop').classList.remove('ts-needs-audio');
   tg('ts-drop').classList.add('ts-has-file');
   const objUrl=URL.createObjectURL(f);
   tsAudio.src=objUrl;
@@ -2258,7 +2264,13 @@ function tsLoadSess(idx){
   tg('ts-player-name').textContent=s.filename||s.name;
   tsRenderWords();tg('ts-result').style.display='block';
   tsSaveRowShow();tg('ts-sess-name').value=s.name;
-  tg('ts-status').textContent='Transcrição restaurada — carrega o áudio acima para o player e waveform sincronizarem.';
+  tg('ts-status').textContent='';
+  // Destacar drop zone pedindo o áudio
+  const drop=tg('ts-drop');
+  drop.classList.add('ts-needs-audio');
+  tg('ts-drop-name').innerHTML='<span class="ts-needs-audio-badge">📂 Transcrição restaurada!<br>Para tocar e ver a waveform, arrasta o arquivo <strong>'+(s.filename||'de áudio')+'</strong> aqui novamente.<br><em style="font-size:11px;opacity:.8">(o áudio não é salvo — só os timestamps)</em></span>';
+  // Scroll até o drop
+  drop.scrollIntoView({behavior:'smooth',block:'center'});
   toast('Sessão "'+s.name+'" carregada ✓');
 }
 
