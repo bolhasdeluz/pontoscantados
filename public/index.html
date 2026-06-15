@@ -573,6 +573,26 @@ select option{background:#fff;color:#2a1a22}
       </div>
     </div>
 
+
+    <div style="margin-bottom:14px;background:#f0f6ff;border:1px solid rgba(66,133,244,.25);border-radius:10px;padding:14px 16px">
+      <div class="ts-drive-cfg-title" style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1a73e8;margin-bottom:10px">
+        ⚙ Google Drive — configuração
+      </div>
+      <div class="ts-drive-hint" style="font-size:11px;color:var(--text-dim);line-height:1.55;margin-bottom:10px">
+        O Client ID é público por design — não é segredo.<br>
+        <a href="https://console.cloud.google.com/" target="_blank" style="color:#1a73e8">console.cloud.google.com</a> → ativa <strong>Drive API</strong> + <strong>Picker API</strong> → Credenciais → <strong>Client ID OAuth</strong> (tipo Web) e <strong>Chave de API</strong>.<br>
+        Em <em>Origens autorizadas</em> do Client ID adiciona: <code style="font-size:10px;background:#e8f0fe;padding:1px 4px;border-radius:3px">https://bolhasdeluz.pages.dev</code>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="ts-drive-cfg-row"><label>Client ID OAuth</label><input type="text" id="ts-gcid" placeholder="xxx.apps.googleusercontent.com"></div>
+        <div class="ts-drive-cfg-row"><label>API Key (para o Picker)</label><input type="text" id="ts-gapikey" placeholder="AIzaSy…"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="ts-drive-save-btn" id="ts-drive-save-btn" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff">Salvar</button>
+        <span id="ts-drive-cfg-status" style="font-size:12px;color:var(--text-dim);font-style:italic"></span>
+      </div>
+    </div>
+
     <div style="margin-bottom:14px">
       <div class="ts-sec-lbl">Provedor de IA</div>
       <div class="ts-prov-grid">
@@ -598,11 +618,9 @@ select option{background:#fff;color:#2a1a22}
           <a class="ts-prov-link" href="https://elevenlabs.io/app/sign-up" target="_blank" onclick="event.stopPropagation()">↗ Criar conta</a>
         </button>
       </div>
-      <div class="ts-key-wrap visible" id="ts-key-wrap">
-        <div class="ts-key-row">
-          <input type="password" id="ts-api-key" placeholder="Cole sua chave Deepgram…">
-        </div>
-        <p class="ts-key-hint" id="ts-key-hint">console.deepgram.com → Settings → API Keys</p>
+      <div style="font-size:12px;color:var(--text-dim);font-style:italic;padding:8px 2px;display:flex;align-items:center;gap:6px">
+        <span style="color:#2a7a60">✓</span>
+        Chaves gerenciadas pelo Worker do Cloudflare — nenhuma chave visível no browser.
       </div>
     </div>
 
@@ -620,17 +638,6 @@ select option{background:#fff;color:#2a1a22}
           <svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
           Abrir do Drive
         </button>
-        <button class="ts-btn-sm" id="ts-btn-drive-cfg" style="border-color:rgba(66,133,244,.3);color:#1a73e8">⚙ Config Drive</button>
-      </div>
-      <div class="ts-drive-cfg" id="ts-drive-cfg">
-        <div class="ts-drive-cfg-title">Google Drive — Configuração</div>
-        <div class="ts-drive-hint">
-          <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> → ativa <strong>Drive API</strong> + <strong>Picker API</strong> → Credenciais → cria <strong>Chave de API</strong> e <strong>Client ID OAuth Web</strong>.<br>
-          No Client ID adiciona o teu domínio em <em>Origens autorizadas</em>: <code>https://bolhasdeluz.pages.dev</code>
-        </div>
-        <div class="ts-drive-cfg-row"><label>Client ID OAuth</label><input type="text" id="ts-gcid" placeholder="xxx.apps.googleusercontent.com"></div>
-        <div class="ts-drive-cfg-row"><label>API Key</label><input type="text" id="ts-gapikey" placeholder="AIzaSy…"></div>
-        <button class="ts-drive-save-btn" id="ts-drive-save-btn">Salvar</button>
       </div>
       <div class="ts-drive-dl" id="ts-drive-dl"><span class="ts-spin"></span><span id="ts-drive-dl-msg">Baixando…</span></div>
     </div>
@@ -1671,7 +1678,14 @@ const aud=new Audio();
 const g=id=>document.getElementById(id);
 
 // ── abrir/fechar ──
-window.tsAbrir=()=>{ abrirModal('ov-transcricao'); renderSess(); };
+window.tsAbrir=()=>{
+  abrirModal('ov-transcricao'); renderSess();
+  // mostrar status drive
+  const {cid}=getDriveCfg();
+  const st=g('ts-drive-cfg-status');
+  if(st) st.textContent=cid?'✓ Configurado':'— não configurado (opcional)';
+  if(cid){ const ci=g('ts-gcid'); const gk=g('ts-gapikey'); if(ci)ci.value=getDriveCfg().cid; if(gk)gk.value=getDriveCfg().key; }
+};
 g('ts-x').addEventListener('click',()=>{ aud.pause(); fecharModal('ov-transcricao'); });
 g('ov-transcricao').addEventListener('click',e=>{ if(e.target===g('ov-transcricao')){ aud.pause(); fecharModal('ov-transcricao'); }});
 
@@ -1680,11 +1694,11 @@ document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(b=>b.classList.remove('ts-sel'));
     btn.classList.add('ts-sel'); prov=btn.dataset.prov;
-    const p=TS_PROVS[prov]; g('ts-api-key').placeholder=p.ph; g('ts-key-hint').textContent=p.hint;
+    const p=TS_PROVS[prov]; // chaves no Worker — sem input no browser
     updateBtn();
   });
 });
-g('ts-api-key').addEventListener('input',updateBtn);
+// sem input de chave — updateBtn chamado pelo setFile
 
 // ── arquivo ──
 function setFile(f){
@@ -1708,7 +1722,7 @@ document.querySelectorAll('#ts-chips .ts-chip').forEach(c=>c.addEventListener('c
 function rebuildCtx(){ g('ts-ctx').value=Array.from(document.querySelectorAll('#ts-chips .ts-chip.active')).map(c=>TS_VOCAB[c.dataset.id]).filter(Boolean).join(', '); }
 rebuildCtx();
 
-function updateBtn(){ g('ts-btn-transcribe').disabled=!(prov&&tsFile&&g('ts-api-key').value.trim().length>8); }
+function updateBtn(){ g('ts-btn-transcribe').disabled=!(prov&&tsFile); }
 function showErr(m){ g('ts-err').innerHTML=m; g('ts-err').style.display='block'; }
 function hideErr(){ g('ts-err').style.display='none'; }
 function setProg(p){ g('ts-prog-bar').style.width=p+'%'; }
@@ -1893,7 +1907,7 @@ aud.addEventListener('loadedmetadata',()=>{ g('ts-player-time').textContent='0:0
 
 // ── transcrever ──
 g('ts-btn-transcribe').addEventListener('click',async()=>{
-  const key=g('ts-api-key').value.trim(); if(!key||!tsFile)return;
+  if(!tsFile)return; const key='';
   hideErr(); g('ts-btn-transcribe').disabled=true;
   g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(5); r2url='';
   uploadAudioToR2(tsFile).then(u=>{ if(u)r2url=u; });
@@ -1917,55 +1931,53 @@ function done(ws,t0){
   showSaveRow(); if(peaks.length)drawAll();
 }
 
-async function doDeepgram(k,t0){
+// ── Via Worker /api/transcribe ──
+async function doDeepgram(_k,t0){
   g('ts-status').textContent='Enviando áudio…'; setProg(20);
-  const w=ctxW(); let url='https://api.deepgram.com/v1/listen?language=pt&punctuate=true&model=nova-2&words=true';
-  if(w.length)url+='&keywords='+w.slice(0,200).map(encodeURIComponent).join('&keywords=');
+  const kws=ctxW().slice(0,200).map(encodeURIComponent).join(',');
+  const url='/api/transcribe?provider=deepgram'+(kws?'&keywords='+kws:'');
   setProg(50); g('ts-status').textContent='Transcrevendo…';
-  const res=await fetch(url,{method:'POST',headers:{'Authorization':'Token '+k,'Content-Type':tsFile.type||'audio/mpeg'},body:tsFile});
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':tsFile.type||'audio/mpeg'},body:tsFile});
   setProg(90);
-  if(!res.ok){const e=await res.json().catch(()=>({}));if(res.status===401)throw new Error('Chave inválida');throw new Error(e.err_msg||'Erro '+res.status);}
   const d=await res.json();
-  const raw=d?.results?.channels?.[0]?.alternatives?.[0]?.words||[];
-  if(!raw.length)throw new Error('Nenhuma fala detectada.');
-  done(raw.map(w=>({word:w.punctuated_word||w.word,start:w.start,end:w.end})),t0);
+  if(!res.ok)throw new Error(d.error||'Worker: erro '+res.status);
+  if(!d.words?.length)throw new Error(d.error||'Nenhuma fala detectada.');
+  done(d.words,t0);
 }
 
-async function doAssembly(k,t0){
+async function doAssembly(_k,t0){
   g('ts-status').textContent='Enviando áudio…'; setProg(15);
-  const up=await fetch('https://api.assemblyai.com/v2/upload',{method:'POST',headers:{'Authorization':k,'Content-Type':'application/octet-stream'},body:tsFile});
-  if(!up.ok){const e=await up.json().catch(()=>({}));if(up.status===401)throw new Error('Chave inválida');throw new Error(e.error||'Erro '+up.status);}
-  const {upload_url}=await up.json(); setProg(30);
-  const cw2=ctxW(),body={audio_url:upload_url,language_code:'pt',punctuate:true,format_text:true};
-  if(cw2.length){body.word_boost=cw2.slice(0,1000);body.boost_param='high';}
-  const sub=await fetch('https://api.assemblyai.com/v2/transcript',{method:'POST',headers:{'Authorization':k,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!sub.ok){const e=await sub.json().catch(()=>({}));throw new Error(e.error||'Erro '+sub.status);}
-  const {id}=await sub.json(); setProg(45);
+  const kws=ctxW().join(',');
+  const url='/api/transcribe?provider=assemblyai'+(kws?'&keywords='+encodeURIComponent(kws):'');
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:tsFile});
+  const d=await res.json();
+  if(!res.ok)throw new Error(d.error||'Worker: erro '+res.status);
+  const {jobId}=d; setProg(40);
+  // Poll via worker
   for(let i=0;i<200;i++){
     await new Promise(r=>setTimeout(r,3000));
-    const poll=await fetch('https://api.assemblyai.com/v2/transcript/'+id,{headers:{'Authorization':k}});
-    if(!poll.ok)continue;
-    const d=await poll.json();
+    const p=await fetch('/api/transcribe?provider=assemblyai&action=poll&jobId='+jobId);
+    const pd=await p.json();
     const el=(Date.now()-t0)/1000;
-    setProg(Math.min(45+(el/200)*50,93)); g('ts-status').textContent='Transcrevendo… '+Math.floor(el)+'s';
-    if(d.status==='completed'){const raw=d.words||[];if(!raw.length)throw new Error('Nenhuma fala detectada.'); return done(raw.map(w=>({word:w.text,start:w.start/1000,end:w.end/1000})),t0);}
-    if(d.status==='error')throw new Error('Erro: '+(d.error||'desconhecido'));
+    setProg(Math.min(40+(el/200)*55,93)); g('ts-status').textContent='Transcrevendo… '+Math.floor(el)+'s';
+    if(pd.status==='completed'){if(!pd.words?.length)throw new Error('Nenhuma fala detectada.'); return done(pd.words,t0);}
+    if(pd.status==='error')throw new Error(pd.error||'Erro na transcrição');
   }
   throw new Error('Tempo limite.');
 }
 
-async function doElevenLabs(k,t0){
+async function doElevenLabs(_k,t0){
   g('ts-status').textContent='Enviando para Scribe…'; setProg(20);
-  const fd=new FormData(); fd.append('audio',tsFile,tsFile.name); fd.append('model_id','scribe_v1'); fd.append('timestamps_granularity','word');
-  ctxW().slice(0,1000).forEach(w=>fd.append('keyterm',w));
-  setProg(55); g('ts-status').textContent='Processando…';
-  const res=await fetch('https://api.elevenlabs.io/v1/speech-to-text',{method:'POST',headers:{'xi-api-key':k},body:fd});
+  const fd=new FormData(); fd.append('audio',tsFile,tsFile.name);
+  const kws=ctxW().join(',');
+  const url='/api/transcribe?provider=elevenlabs'+(kws?'&keywords='+encodeURIComponent(kws):'');
+  setProg(55); g('ts-status').textContent='Processando (Scribe)…';
+  const res=await fetch(url,{method:'POST',body:fd});
   setProg(90);
-  if(!res.ok){const e=await res.json().catch(()=>({}));if(res.status===401)throw new Error('Chave inválida');throw new Error(e.detail||e.message||'Erro '+res.status);}
   const d=await res.json();
-  const raw=(d.words||[]).filter(w=>w.type==='word');
-  if(!raw.length)throw new Error('Nenhuma fala detectada.');
-  done(raw.map(w=>({word:w.text,start:w.start,end:w.end})),t0);
+  if(!res.ok)throw new Error(d.error||'Worker: erro '+res.status);
+  if(!d.words?.length)throw new Error(d.error||'Nenhuma fala detectada.');
+  done(d.words,t0);
 }
 
 // ── palavras ──
@@ -2148,7 +2160,7 @@ g('ts-drive-save-btn').addEventListener('click',()=>{
   const cid=g('ts-gcid').value.trim(), key=g('ts-gapikey').value.trim();
   if(!cid||!key){toast('Preenche Client ID e API Key');return;}
   localStorage.setItem('ts_gcid',cid); localStorage.setItem('ts_gapikey',key);
-  g('ts-drive-cfg').classList.remove('open'); toast('Drive configurado ✓');
+  g('ts-drive-cfg-status') && (g('ts-drive-cfg-status').textContent='✓ Configurado'); toast('Drive configurado ✓');
 });
 
 function loadGoogleAPIs(){
@@ -2193,10 +2205,13 @@ function showPicker(key){
 
 async function downloadDrive(fid,fname){
   const dl=g('ts-drive-dl'); dl.style.display='flex';
-  g('ts-drive-dl-msg').textContent='Baixando "'+fname+'"…';
+  g('ts-drive-dl-msg').textContent='Baixando "'+fname+'" via worker…';
   try{
-    const res=await fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?alt=media',{headers:{Authorization:'Bearer '+gToken}});
-    if(!res.ok)throw new Error('Erro '+res.status+' ao baixar do Drive');
+    // Download via worker /api/transcribe?provider=drive (proxy seguro)
+    const res=await fetch('/api/transcribe?provider=drive&fileId='+encodeURIComponent(fid),{
+      headers:{Authorization:'Bearer '+gToken}
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Erro '+res.status+' ao baixar do Drive');}
     g('ts-drive-dl-msg').textContent='Processando…';
     const blob=await res.blob();
     const file=new File([blob],fname,{type:blob.type||'audio/mpeg'});
