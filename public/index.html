@@ -1684,7 +1684,9 @@ window.tsAbrir=()=>{
   const {cid}=getDriveCfg();
   const st=g('ts-drive-cfg-status');
   if(st) st.textContent=cid?'✓ Configurado':'— não configurado (opcional)';
-  if(cid){ const ci=g('ts-gcid'); const gk=g('ts-gapikey'); if(ci)ci.value=getDriveCfg().cid; if(gk)gk.value=getDriveCfg().key; }
+  // preenche o card de configuração ao abrir
+  const _ci=g('ts-gcid'); const _gk=g('ts-gapikey');
+  if(_ci)_ci.value=getDriveCfg().cid; if(_gk)_gk.value=getDriveCfg().key;
 };
 g('ts-x').addEventListener('click',()=>{ aud.pause(); fecharModal('ov-transcricao'); });
 g('ov-transcricao').addEventListener('click',e=>{ if(e.target===g('ov-transcricao')){ aud.pause(); fecharModal('ov-transcricao'); }});
@@ -2152,15 +2154,12 @@ function delSess(i){
 function getDriveCfg(){ return {cid:localStorage.getItem('ts_gcid')||'', key:localStorage.getItem('ts_gapikey')||''}; }
 
 g('ts-btn-drive').addEventListener('click',openDrive);
-g('ts-btn-drive-cfg').addEventListener('click',()=>{
-  const el=g('ts-drive-cfg'); el.classList.toggle('open');
-  if(el.classList.contains('open')){ const {cid,key}=getDriveCfg(); g('ts-gcid').value=cid; g('ts-gapikey').value=key; }
-});
+// Drive config card sempre visível — sem toggle
 g('ts-drive-save-btn').addEventListener('click',()=>{
   const cid=g('ts-gcid').value.trim(), key=g('ts-gapikey').value.trim();
   if(!cid||!key){toast('Preenche Client ID e API Key');return;}
   localStorage.setItem('ts_gcid',cid); localStorage.setItem('ts_gapikey',key);
-  g('ts-drive-cfg-status') && (g('ts-drive-cfg-status').textContent='✓ Configurado'); toast('Drive configurado ✓');
+  const _st=g('ts-drive-cfg-status'); if(_st)_st.textContent='✓ Configurado'; toast('Drive configurado ✓');
 });
 
 function loadGoogleAPIs(){
@@ -2180,7 +2179,7 @@ function loadGoogleAPIs(){
 
 async function openDrive(){
   const {cid,key}=getDriveCfg();
-  if(!cid||!key){ g('ts-drive-cfg').classList.add('open'); toast('Configura Client ID e API Key primeiro'); return; }
+  if(!cid||!key){ toast('Configura o Google Drive no card de configuração acima'); return; }
   g('ts-btn-drive').disabled=true;
   try{
     await loadGoogleAPIs();
@@ -2225,7 +2224,7 @@ async function downloadDrive(fid,fname){
 async function reloadDrive(){
   if(!driveFileId)return;
   const {cid,key}=getDriveCfg();
-  if(!cid||!key){ g('ts-drive-cfg').classList.add('open'); toast('Configura o Drive primeiro'); return; }
+  if(!cid||!key){ toast('Configura o Google Drive no card de configuração acima'); return; }
   try{
     await loadGoogleAPIs();
     if(!gToken){
