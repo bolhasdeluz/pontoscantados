@@ -212,6 +212,10 @@ select option{background:#fff;color:#2a1a22}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:600px){header{padding:10px 12px}header p{display:none}#searchInput{width:130px}.filter-btn{padding:4px 9px;font-size:.65rem}}
 
+
+/* Google Picker fica por baixo do modal — força acima */
+.picker-dialog,.picker-dialog-bg{z-index:99999!important}
+
 /* ══ TRANSCRIÇÃO ══ */
 .ts-prov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px}
 .ts-prov-btn{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:transparent;cursor:pointer;text-align:left;transition:all .15s;position:relative;width:100%}
@@ -280,7 +284,7 @@ select option{background:#fff;color:#2a1a22}
 .ts-btn-drive:disabled{opacity:.4;cursor:not-allowed}
 .ts-drive-cfg{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;display:none}
 .ts-drive-cfg.open{display:block}
-.ts-drive-cfg-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
+.ts-drive-cfg-body{display:none}.ts-drive-cfg-body.open{display:block}.ts-drive-cfg-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
 .ts-drive-cfg-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .ts-drive-cfg-row label{font-size:11px;color:var(--text-dim)}
 .ts-drive-cfg-row input{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;transition:border-color .18s}
@@ -575,21 +579,26 @@ select option{background:#fff;color:#2a1a22}
 
 
     <div style="margin-bottom:14px;background:#f0f6ff;border:1px solid rgba(66,133,244,.25);border-radius:10px;padding:14px 16px">
-      <div class="ts-drive-cfg-title" style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1a73e8;margin-bottom:10px">
-        ⚙ Google Drive — configuração
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="tsDriveCfgToggle()">
+        <div class="ts-drive-cfg-title" style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1a73e8;margin:0">
+          ⚙ Google Drive
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="ts-drive-cfg-status" style="font-size:12px;color:var(--text-dim);font-style:italic"></span>
+          <span id="ts-drive-cfg-arrow" style="color:#1a73e8;font-size:12px">▾</span>
+        </div>
       </div>
-      <div class="ts-drive-hint" style="font-size:11px;color:var(--text-dim);line-height:1.55;margin-bottom:10px">
-        O Client ID é público por design — não é segredo.<br>
-        <a href="https://console.cloud.google.com/" target="_blank" style="color:#1a73e8">console.cloud.google.com</a> → ativa <strong>Drive API</strong> + <strong>Picker API</strong> → Credenciais → <strong>Client ID OAuth</strong> (tipo Web) e <strong>Chave de API</strong>.<br>
-        Em <em>Origens autorizadas</em> do Client ID adiciona: <code style="font-size:10px;background:#e8f0fe;padding:1px 4px;border-radius:3px">https://bolhasdeluz.pages.dev</code>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div class="ts-drive-cfg-row"><label>Client ID OAuth</label><input type="text" id="ts-gcid" placeholder="xxx.apps.googleusercontent.com"></div>
-        <div class="ts-drive-cfg-row"><label>API Key (para o Picker)</label><input type="text" id="ts-gapikey" placeholder="AIzaSy…"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
+      <div class="ts-drive-cfg-body" id="ts-drive-cfg-body">
+        <div class="ts-drive-hint" style="font-size:11px;color:var(--text-dim);line-height:1.55;margin:10px 0">
+          O Client ID é público por design — não é segredo.<br>
+          <a href="https://console.cloud.google.com/" target="_blank" style="color:#1a73e8">console.cloud.google.com</a> → ativa <strong>Drive API</strong> + <strong>Picker API</strong> → Credenciais → <strong>Client ID OAuth</strong> (tipo Web) e <strong>Chave de API</strong>.<br>
+          Em <em>Origens autorizadas</em> adiciona: <code style="font-size:10px;background:#e8f0fe;padding:1px 4px;border-radius:3px">https://bolhasdeluz.pages.dev</code>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div class="ts-drive-cfg-row"><label>Client ID OAuth</label><input type="text" id="ts-gcid" placeholder="xxx.apps.googleusercontent.com"></div>
+          <div class="ts-drive-cfg-row"><label>API Key (para o Picker)</label><input type="text" id="ts-gapikey" placeholder="AIzaSy…"></div>
+        </div>
         <button class="ts-drive-save-btn" id="ts-drive-save-btn" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff">Salvar</button>
-        <span id="ts-drive-cfg-status" style="font-size:12px;color:var(--text-dim);font-style:italic"></span>
       </div>
     </div>
 
@@ -1680,13 +1689,19 @@ const g=id=>document.getElementById(id);
 // ── abrir/fechar ──
 window.tsAbrir=()=>{
   abrirModal('ov-transcricao'); renderSess();
-  // mostrar status drive
-  const {cid}=getDriveCfg();
-  const st=g('ts-drive-cfg-status');
-  if(st) st.textContent=cid?'✓ Configurado':'— não configurado (opcional)';
-  // preenche o card de configuração ao abrir
-  const _ci=g('ts-gcid'); const _gk=g('ts-gapikey');
-  if(_ci)_ci.value=getDriveCfg().cid; if(_gk)_gk.value=getDriveCfg().key;
+  const {cid, key} = getDriveCfg();
+  // status
+  const st = g('ts-drive-cfg-status');
+  if (st) st.textContent = cid ? '✓ Configurado' : '— clica para configurar';
+  // preenche campos
+  const _ci = g('ts-gcid'), _gk = g('ts-gapikey');
+  if (_ci) _ci.value = cid; if (_gk) _gk.value = key;
+  // abre o painel só se não estiver configurado
+  const body = g('ts-drive-cfg-body'), arrow = g('ts-drive-cfg-arrow');
+  if (body) {
+    if (!cid) { body.classList.add('open'); if (arrow) arrow.textContent = '▴'; }
+    else       { body.classList.remove('open'); if (arrow) arrow.textContent = '▾'; }
+  }
 };
 g('ts-x').addEventListener('click',()=>{ aud.pause(); fecharModal('ov-transcricao'); });
 g('ov-transcricao').addEventListener('click',e=>{ if(e.target===g('ov-transcricao')){ aud.pause(); fecharModal('ov-transcricao'); }});
@@ -2159,7 +2174,10 @@ g('ts-drive-save-btn').addEventListener('click',()=>{
   const cid=g('ts-gcid').value.trim(), key=g('ts-gapikey').value.trim();
   if(!cid||!key){toast('Preenche Client ID e API Key');return;}
   localStorage.setItem('ts_gcid',cid); localStorage.setItem('ts_gapikey',key);
-  const _st=g('ts-drive-cfg-status'); if(_st)_st.textContent='✓ Configurado'; toast('Drive configurado ✓');
+  const _st=g('ts-drive-cfg-status'); if(_st)_st.textContent='✓ Configurado';
+  const _b=g('ts-drive-cfg-body'),_a=g('ts-drive-cfg-arrow');
+  if(_b){_b.classList.remove('open');if(_a)_a.textContent='▾';}
+  toast('Drive configurado ✓');
 });
 
 function loadGoogleAPIs(){
@@ -2236,6 +2254,16 @@ async function reloadDrive(){
     }else{ await downloadDrive(driveFileId,driveFileName); }
   }catch(e){ toast('Erro: '+e.message); }
 }
+
+
+  // Drive config toggle
+  window.tsDriveCfgToggle = () => {
+    const body  = g('ts-drive-cfg-body');
+    const arrow = g('ts-drive-cfg-arrow');
+    if (!body) return;
+    body.classList.toggle('open');
+    if (arrow) arrow.textContent = body.classList.contains('open') ? '▴' : '▾';
+  };
 
 })();
 // ══ /MÓDULO TRANSCRIÇÃO ══
