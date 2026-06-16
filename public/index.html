@@ -1682,7 +1682,7 @@ let prov='deepgram', tsFile=null, words=[], r2url='';
 let selS=null, selE=null, selMode=false, wordSelStart=null;
 let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
 let dragging=false, dragX0=null, dragX1=null;
-let gToken=null, gLoaded=false, driveFileId='', driveFileName='';
+let gToken=null, gLoaded=false, driveFileId='', driveFileName='', driveResourceKey='';
 const aud=new Audio();
 const g=id=>document.getElementById(id);
 
@@ -2125,7 +2125,7 @@ function showSaveRow(){
 g('ts-btn-save-sess').addEventListener('click',()=>{
   const name=g('ts-sess-name').value.trim(); if(!name||!words.length)return;
   const list=getSess();
-  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',data:words};
+  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',driveResourceKey:driveResourceKey||'',data:words};
   const i=list.findIndex(s=>s.name===name);
   if(i>=0)list[i]=entry; else list.unshift(entry);
   try{putSess(list);renderSess();g('ts-sess-name').value='';toast('Sessão "'+name+'" salva ✓');}
@@ -2146,7 +2146,7 @@ function loadSess(i){
   const drop=g('ts-drop');
   drop.classList.add('ts-needs-audio');
   if(s.driveFileId){
-    driveFileId=s.driveFileId; driveFileName=s.driveFileName;
+    driveFileId=s.driveFileId; driveFileName=s.driveFileName; driveResourceKey=s.driveResourceKey||'';
     g('ts-drop-name').innerHTML=
       '<div class="ts-needs-badge">📂 <strong>'+s.driveFileName+'</strong><br><small>salvo do Drive — clica para recarregar</small></div>'+
       '<button class="ts-reload-btn" id="ts-reload-btn" style="margin-top:8px">'+
@@ -2229,26 +2229,35 @@ function showPicker(key){
   new google.picker.PickerBuilder()
     .addView(view).setOAuthToken(gToken).setDeveloperKey(key)
     .setTitle('Escolhe o áudio da sessão')
-    .setCallback(async d=>{ if(d.action===google.picker.Action.PICKED){ const f=d.docs[0]; await downloadDrive(f.id,f.name); }})
+    .setCallback(async d=>{
+      if(d.action===google.picker.Action.PICKED){
+        const f=d.docs[0];
+        const rk=f.resourceKey || f[google.picker.Document.RESOURCE_KEY] || '';
+        await downloadDrive(f.id,f.name,rk);
+      }
+    })
     .build().setVisible(true);
 }
 
-async function downloadDrive(fid,fname){
+async function downloadDrive(fid,fname,resourceKey){
   const dl=g('ts-drive-dl'); dl.style.display='flex';
   g('ts-drive-dl-msg').textContent='Baixando "'+fname+'" via worker…';
   try{
-    // Download via worker /api/transcribe?provider=drive (proxy seguro)
-    const res=await fetch('/api/transcribe?provider=drive&fileId='+encodeURIComponent(fid),{
-      headers:{Authorization:'Bearer '+gToken}
-    });
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Erro '+res.status+' ao baixar do Drive');}
+    let qs='/api/transcribe?provider=drive&fileId='+encodeURIComponent(fid);
+    if(resourceKey) qs+='&resourceKey='+encodeURIComponent(resourceKey);
+    const res=await fetch(qs,{ headers:{Authorization:'Bearer '+gToken} });
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      console.error('Drive download error:', res.status, e);
+      throw new Error(e.error||'Erro '+res.status+' ao baixar do Drive');
+    }
     g('ts-drive-dl-msg').textContent='Processando…';
     const blob=await res.blob();
     const file=new File([blob],fname,{type:blob.type||'audio/mpeg'});
-    driveFileId=fid; driveFileName=fname;
+    driveFileId=fid; driveFileName=fname; driveResourceKey=resourceKey||'';
     applyFile(file);
     toast('"'+fname+'" carregado ✓');
-  }catch(e){ toast('Erro Drive: '+e.message); }
+  }catch(e){ showErr('<strong>Erro Drive:</strong> '+e.message); toast('Erro Drive: '+e.message); }
   finally{ dl.style.display='none'; }
 }
 
@@ -2265,16 +2274,16 @@ async function reloadDrive(){
           if(r.error){
             const tc2=google.accounts.oauth2.initTokenClient({
               client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
-              callback:async r2=>{ if(r2.error){toast('Erro OAuth: '+r2.error);return;} gToken=r2.access_token; await downloadDrive(driveFileId,driveFileName); }
+              callback:async r2=>{ if(r2.error){toast('Erro OAuth: '+r2.error);return;} gToken=r2.access_token; await downloadDrive(driveFileId,driveFileName,driveResourceKey); }
             });
             tc2.requestAccessToken({prompt:'consent'});
             return;
           }
-          gToken=r.access_token; await downloadDrive(driveFileId,driveFileName);
+          gToken=r.access_token; await downloadDrive(driveFileId,driveFileName,driveResourceKey);
         }
       });
       tc.requestAccessToken({prompt:''});
-    }else{ await downloadDrive(driveFileId,driveFileName); }
+    }else{ await downloadDrive(driveFileId,driveFileName,driveResourceKey); }
   }catch(e){ toast('Erro: '+e.message); }
 }
 
