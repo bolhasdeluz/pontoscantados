@@ -1718,9 +1718,7 @@ document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn=>{
 // sem input de chave — updateBtn chamado pelo setFile
 
 // ── arquivo ──
-function setFile(f){
-  const ext=(f.name.split('.').pop()||'').toLowerCase();
-  if(!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','aac'].includes(ext)){ showErr('Formato não reconhecido.'); return; }
+function applyFile(f){
   tsFile=f;
   g('ts-drop').classList.remove('ts-needs-audio');
   g('ts-drop').classList.add('ts-has-file');
@@ -1729,6 +1727,11 @@ function setFile(f){
   g('ts-player-name').textContent=f.name;
   hideErr(); updateBtn();
   loadWaveform(f);
+}
+function setFile(f){
+  const ext=(f.name.split('.').pop()||'').toLowerCase();
+  if(!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','aac','opus','amr','3gp','wma','caf'].includes(ext)){ showErr('Formato não reconhecido: .'+ext); return; }
+  applyFile(f);
 }
 g('ts-file-input').addEventListener('change',e=>{ if(e.target.files[0]) setFile(e.target.files[0]); });
 g('ts-drop').addEventListener('dragover',e=>e.preventDefault());
@@ -1740,7 +1743,7 @@ function rebuildCtx(){ g('ts-ctx').value=Array.from(document.querySelectorAll('#
 rebuildCtx();
 
 function updateBtn(){ g('ts-btn-transcribe').disabled=!(prov&&tsFile); }
-function showErr(m){ g('ts-err').innerHTML=m; g('ts-err').style.display='block'; }
+function showErr(m){ g('ts-err').innerHTML=m; g('ts-err').style.display='block'; g('ts-err').scrollIntoView({behavior:'smooth',block:'center'}); }
 function hideErr(){ g('ts-err').style.display='none'; }
 function setProg(p){ g('ts-prog-bar').style.width=p+'%'; }
 function fmt(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
@@ -2203,9 +2206,19 @@ async function openDrive(){
     await loadGoogleAPIs();
     const tc=google.accounts.oauth2.initTokenClient({
       client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
-      callback:(r)=>{ if(r.error){toast('Erro OAuth: '+r.error);return;} gToken=r.access_token; showPicker(key); }
+      callback:(r)=>{
+        if(r.error){
+          const tc2=google.accounts.oauth2.initTokenClient({
+            client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
+            callback:(r2)=>{ if(r2.error){toast('Erro OAuth: '+r2.error);return;} gToken=r2.access_token; showPicker(key); }
+          });
+          tc2.requestAccessToken({prompt:'consent'});
+          return;
+        }
+        gToken=r.access_token; showPicker(key);
+      }
     });
-    tc.requestAccessToken({prompt:gToken?'':'consent'});
+    tc.requestAccessToken({prompt:''});
   }catch(e){ toast('Erro Drive: '+e.message); }
   finally{ g('ts-btn-drive').disabled=false; }
 }
@@ -2233,7 +2246,7 @@ async function downloadDrive(fid,fname){
     const blob=await res.blob();
     const file=new File([blob],fname,{type:blob.type||'audio/mpeg'});
     driveFileId=fid; driveFileName=fname;
-    setFile(file);
+    applyFile(file);
     toast('"'+fname+'" carregado ✓');
   }catch(e){ toast('Erro Drive: '+e.message); }
   finally{ dl.style.display='none'; }
@@ -2248,7 +2261,17 @@ async function reloadDrive(){
     if(!gToken){
       const tc=google.accounts.oauth2.initTokenClient({
         client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
-        callback:async r=>{ if(r.error){toast('Erro OAuth: '+r.error);return;} gToken=r.access_token; await downloadDrive(driveFileId,driveFileName); }
+        callback:async r=>{
+          if(r.error){
+            const tc2=google.accounts.oauth2.initTokenClient({
+              client_id:cid, scope:'https://www.googleapis.com/auth/drive.readonly',
+              callback:async r2=>{ if(r2.error){toast('Erro OAuth: '+r2.error);return;} gToken=r2.access_token; await downloadDrive(driveFileId,driveFileName); }
+            });
+            tc2.requestAccessToken({prompt:'consent'});
+            return;
+          }
+          gToken=r.access_token; await downloadDrive(driveFileId,driveFileName);
+        }
       });
       tc.requestAccessToken({prompt:''});
     }else{ await downloadDrive(driveFileId,driveFileName); }
