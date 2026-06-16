@@ -25,9 +25,10 @@ export async function onRequest(context) {
     }
     // Drive: proxy de download com token do browser
     if (prov === 'drive') {
-      const fileId = url.searchParams.get('fileId');
-      const token  = request.headers.get('Authorization');
-      return await driveDownload(fileId, token);
+      const fileId      = url.searchParams.get('fileId');
+      const resourceKey = url.searchParams.get('resourceKey') || '';
+      const token       = request.headers.get('Authorization');
+      return await driveDownload(fileId, token, resourceKey);
     }
 
     if (request.method !== 'POST') return json({ error: 'POST requerido' }, 405);
@@ -155,18 +156,27 @@ async function doElevenLabs(request, key, kws) {
 }
 
 // ── Google Drive proxy ───────────────────────────────────────────────────────
-async function driveDownload(fileId, token) {
+async function driveDownload(fileId, token, resourceKey) {
   if (!fileId) return json({ error: 'fileId obrigatório' }, 400);
   if (!token)  return json({ error: 'Authorization obrigatório' }, 401);
 
+  const headers = { Authorization: token };
+  if (resourceKey) headers['X-Goog-Drive-Resource-Keys'] = fileId + '/' + resourceKey;
+
   const res = await fetch(
     'https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media',
-    { headers: { Authorization: token } }
+    { headers }
   );
 
   if (!res.ok) {
-    if (res.status === 403) return json({ error: 'Sem permissão para este arquivo. Verifica o escopo OAuth.' }, 403);
-    return json({ error: 'Drive erro ' + res.status }, res.status);
+    // Expõe o erro real do Google em vez de esconder atrás de mensagem genérica
+    const errBody = await res.text().catch(() => '');
+    let detail = '';
+    try { detail = JSON.parse(errBody)?.error?.message || ''; } catch {}
+    return json({
+      error: 'Drive erro ' + res.status + (detail ? ': ' + detail : ''),
+      googleRaw: errBody.slice(0, 500),
+    }, res.status);
   }
 
   return new Response(res.body, {
