@@ -934,6 +934,41 @@ window.tsExtractClipBlob = async function (file, startSec, endSec, statusCb) {
     return null;
   }
 };
+
+// Versão pra WAVEFORM: recodifica (não usa -c copy) pra WAV mono 8kHz.
+// O recorte com -c copy é rápido mas às vezes corta o cabeçalho do arquivo de um jeito
+// que o navegador não consegue decodificar de volta (comum em M4A/AAC dependendo do
+// ponto de corte). Pra waveform não importa qualidade, só precisa ser sempre decodificável
+// — WAV/PCM bruto nunca tem esse problema. Reencodar é mais lento que copiar, mas ainda
+// rápido pra clipes de poucos minutos.
+window.tsExtractClipWav = async function (file, startSec, endSec, statusCb) {
+  try {
+    statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
+    const ff = await ensureFFmpeg();
+    const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
+    const inName = 'in.' + ext;
+    const outName = 'out.wav';
+
+    statusCb && statusCb('Lendo arquivo…');
+    const data = await fetchFile(file);
+    await ff.writeFile(inName, data);
+
+    statusCb && statusCb('Recortando e convertendo trecho…');
+    await ff.exec(['-ss', fmtFFTime(startSec), '-to', fmtFFTime(endSec), '-i', inName, '-ac', '1', '-ar', '8000', outName]);
+
+    const out = await ff.readFile(outName);
+    try { await ff.deleteFile(inName); } catch {}
+    try { await ff.deleteFile(outName); } catch {}
+
+    const blob = new Blob([out.buffer], { type: 'audio/wav' });
+    statusCb && statusCb('');
+    return { blob, ext: 'wav', mime: 'audio/wav' };
+  } catch (e) {
+    console.error('ffmpeg wav clip error:', e);
+    statusCb && statusCb('Erro: ' + e.message);
+    return null;
+  }
+};
 </script>
 
 <script>
@@ -2061,16 +2096,16 @@ async function generateRangeWaveform(start, end, forced){
 
   loading.style.display='block'; loading.textContent='Recortando e analisando esse trecho…';
   try{
-    const clip=await window.tsExtractClipBlob(tsFile, start, end, msg=>{ if(msg) loading.textContent=msg; });
-    if(!clip) throw new Error('Falha ao recortar o trecho');
+    const clip=await window.tsExtractClipWav(tsFile, start, end, msg=>{ if(msg) loading.textContent=msg; });
+    if(!clip) throw new Error('Falha ao recortar o trecho (ffmpeg)');
     const { peaksOut } = await genPeaksFromBlob(clip.blob);
     peaks=peaksOut; peaksRangeStart=start; peaksRangeEnd=end;
     loading.style.display='none';
     drawAll();
   }catch(e){
     console.warn('wf trecho:',e);
-    loading.textContent='Não foi possível gerar a waveform desse trecho. Player e transcrição funcionam normalmente.';
-    setTimeout(()=>{ loading.style.display='none'; },3500);
+    loading.innerHTML='Não foi possível gerar a waveform desse trecho.<br><small style="opacity:.75">'+(e.message||e)+'</small><br>Player e transcrição funcionam normalmente.'
+      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">Tentar de novo</button>';
   }
 }
 window.tsForceRangeWaveform=(s,e)=>generateRangeWaveform(s,e,true);
@@ -2096,8 +2131,8 @@ async function generateFullSessionWaveform(forced){
     drawAll();
   }catch(e){
     console.warn('wf sessão:',e);
-    loading.textContent='Não foi possível gerar a waveform completa. Tenta gerar por partes em vez disso.';
-    setTimeout(()=>{ loading.style.display='none'; },3500);
+    loading.innerHTML='Não foi possível gerar a waveform completa.<br><small style="opacity:.75">'+(e.message||e)+'</small><br>Tenta gerar por partes em vez disso.';
+    setTimeout(()=>{ loading.style.display='none'; },5000);
   }
 }
 window.tsForceFullWaveform=(forced)=>generateFullSessionWaveform(!!forced);
