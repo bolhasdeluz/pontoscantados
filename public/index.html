@@ -317,7 +317,11 @@ select option{background:#fff;color:#2a1a22}
 .ts-secchip-meta{font-size:10.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
 .ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
 .ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
-.ts-secfilter-bar{display:flex;align-items:center;justify-content:space-between;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 14px;margin-top:8px}
+.ts-secfilter-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 14px;margin-top:8px}
+.ts-clip-status{font-size:11.5px;color:var(--gold);font-style:italic;margin-top:8px;display:none;align-items:center;gap:6px}
+.ts-clip-status.show{display:flex}
+.ts-secchip-dl{font-size:12px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px;cursor:pointer}
+.ts-secchip-dl:hover{background:var(--gold-dim);color:var(--gold)}
 .ts-secfilter-bar span{font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:.05em;color:var(--gold);text-transform:uppercase}
 
 .ts-markers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
@@ -730,7 +734,11 @@ select option{background:#fff;color:#2a1a22}
         <div class="ts-seclist" id="ts-seclist"></div>
         <div class="ts-secfilter-bar" id="ts-secfilter-bar" style="display:none">
           <span id="ts-secfilter-label"></span>
-          <button class="ts-btn-sm" id="ts-btn-secfilter-clear">Ver sessão inteira</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="ts-btn-sm" id="ts-btn-secset-start" title="Usa o tempo atual do player como novo início">⏺ Início aqui</button>
+            <button class="ts-btn-sm" id="ts-btn-secset-end" title="Usa o tempo atual do player como novo fim">⏹ Fim aqui</button>
+            <button class="ts-btn-sm" id="ts-btn-secfilter-clear">Ver sessão inteira</button>
+          </div>
         </div>
       </div>
 
@@ -765,13 +773,90 @@ select option{background:#fff;color:#2a1a22}
         <div class="ts-sel-actions">
           <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como ponto</button>
           <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
+          <button class="ts-btn-ok-ol" id="ts-btn-dl-clip">⬇ Baixar áudio</button>
           <button class="ts-btn-ok-ol" id="ts-btn-copy-trecho">Copiar legenda</button>
           <button class="ts-btn-ok-ol" id="ts-btn-clear-sel">Limpar</button>
         </div>
+        <div class="ts-clip-status" id="ts-clip-status"></div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- ffmpeg.wasm — recorte de áudio sem recodificar, usado só sob demanda (carrega lazy) -->
+<script type="module">
+import { FFmpeg } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js';
+import { fetchFile, toBlobURL } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js';
+
+let ffmpegInstance = null;
+let ffmpegLoading = null;
+
+async function ensureFFmpeg(onLog) {
+  if (ffmpegInstance) return ffmpegInstance;
+  if (ffmpegLoading) return ffmpegLoading;
+  ffmpegLoading = (async () => {
+    const ff = new FFmpeg();
+    const base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
+    await ff.load({
+      coreURL: await toBlobURL(base + '/ffmpeg-core.js', 'text/javascript'),
+      wasmURL: await toBlobURL(base + '/ffmpeg-core.wasm', 'application/wasm'),
+    });
+    ffmpegInstance = ff;
+    return ff;
+  })();
+  return ffmpegLoading;
+}
+
+function fmtFFTime(s) {
+  s = Math.max(0, s);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = (s % 60).toFixed(3);
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(6, '0');
+}
+
+const MIME_BY_EXT = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', webm: 'audio/webm', aac: 'audio/aac', m4a: 'audio/mp4', mp4: 'audio/mp4' };
+
+// Recorta [startSec, endSec) do arquivo via stream-copy (sem decodificar/recodificar —
+// rápido e leve de memória mesmo em arquivos grandes) e devolve um Blob pronto pra download.
+window.tsExtractClip = async function (file, startSec, endSec, suggestedName, statusCb) {
+  try {
+    statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
+    const ff = await ensureFFmpeg();
+    const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
+    const inName = 'in.' + ext;
+    const outName = 'out.' + ext;
+
+    statusCb && statusCb('Lendo arquivo…');
+    const data = await fetchFile(file);
+    await ff.writeFile(inName, data);
+
+    statusCb && statusCb('Recortando trecho…');
+    await ff.exec(['-ss', fmtFFTime(startSec), '-to', fmtFFTime(endSec), '-i', inName, '-c', 'copy', outName]);
+
+    const out = await ff.readFile(outName);
+    try { await ff.deleteFile(inName); } catch {}
+    try { await ff.deleteFile(outName); } catch {}
+
+    const mime = MIME_BY_EXT[ext] || 'audio/mpeg';
+    const blob = new Blob([out.buffer], { type: mime });
+    const safeName = (suggestedName || 'trecho').replace(/[\\/:*?"<>|]/g, '').trim() || 'trecho';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = safeName + '.' + ext;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+
+    statusCb && statusCb('');
+    return true;
+  } catch (e) {
+    console.error('ffmpeg clip error:', e);
+    statusCb && statusCb('Erro: ' + e.message);
+    return false;
+  }
+};
+</script>
+
 <script>
 // ── CONFIGURAÇÃO ──
 // Para trocar a senha: substitua o valor de ADMIN_HASH por btoa('nova_senha')
@@ -1896,20 +1981,24 @@ async function loadWaveform(f, forced){
 window.tsForceWaveform=()=>{ if(tsFile) loadWaveform(tsFile,true); };
 function cw(){ return g('ts-wf-scroll')?.clientWidth||600; }
 function canvW(){ return Math.round(cw()*zoom); }
-function sToX(s){ return wfDur>0?(s/wfDur)*canvW():0; }
-function xToS(x){ const w=canvW(); return w>0?(x/w)*wfDur:0; }
+function curViewStart(){ const r=activeSecRange(); return r?r.start:0; }
+function curViewDuration(){ const r=activeSecRange(); const d=r?(r.end-r.start):wfDur; return (d&&isFinite(d)&&d>0)?d:(wfDur||0); }
+function sToX(s){ const d=curViewDuration(); return d>0?((s-curViewStart())/d)*canvW():0; }
+function xToS(x){ const w=canvW(); const d=curViewDuration(); return w>0?curViewStart()+(x/w)*d:0; }
 function drawAll(){ drawRuler(); drawWf(); }
 function drawRuler(){
   const cv=g('ts-ruler-canvas'); if(!cv)return;
   const w=canvW(); cv.width=w; cv.height=RUL_H;
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#fdf0f3'; ctx.fillRect(0,0,w,RUL_H);
-  if(!wfDur)return;
-  const spp=wfDur/w;
+  const dur=curViewDuration(); if(!dur)return;
+  const vStart=curViewStart();
+  const spp=dur/w;
   const iv=spp<0.05?1:spp<0.25?5:spp<1?30:spp<4?60:300;
   ctx.strokeStyle='rgba(196,57,107,.3)'; ctx.fillStyle='rgba(80,30,50,.55)';
   ctx.font='9px DM Sans,sans-serif'; ctx.textAlign='center';
-  for(let t=0;t<=wfDur;t+=iv){
+  const firstTick=Math.ceil(vStart/iv)*iv;
+  for(let t=firstTick;t<=vStart+dur;t+=iv){
     const x=sToX(t);
     ctx.beginPath(); ctx.moveTo(x,10); ctx.lineTo(x,RUL_H); ctx.stroke();
     if(x>15&&x<w-15) ctx.fillText(fmt(t),x,9);
@@ -1943,10 +2032,10 @@ function drawWf(){
     ctx.setLineDash([]);
   }
   // bars
-  if(peaks.length) for(let px=0;px<w;px++){
-    const pi=Math.floor((px/w)*PEAKS); if(pi>=peaks.length)break;
-    const [mn,mx]=peaks[pi];
+  if(peaks.length && wfDur>0) for(let px=0;px<w;px++){
     const t=xToS(px);
+    const pi=Math.floor((t/wfDur)*PEAKS); if(pi<0||pi>=peaks.length)continue;
+    const [mn,mx]=peaks[pi];
     const inS=selS!==null&&t>=Math.min(selS,selE)&&t<=Math.max(selS,selE);
     ctx.strokeStyle=inS?'#c4396b':'rgba(196,57,107,.45)'; ctx.lineWidth=1; ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(px+.5,mid+mn*mid*.95); ctx.lineTo(px+.5,mid+mx*mid*.95); ctx.stroke();
@@ -1956,12 +2045,13 @@ function drawWf(){
     const sorted=[...sections].sort((a,b)=>a.start-b.start);
     sorted.forEach((s,i)=>{
       const x1=sToX(s.start);
-      const next=sorted[i+1];
-      const x2=next?sToX(next.start):w;
+      const realEnd=sectionEnd(s,sorted,i);
+      const x2=sToX(realEnd);
       ctx.fillStyle=s.color+'1a';
       ctx.fillRect(x1,0,x2-x1,18);
       ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.setLineDash([]);
       ctx.beginPath(); ctx.moveTo(x1,0); ctx.lineTo(x1,WF_H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x2,0); ctx.lineTo(x2,WF_H); ctx.stroke();
       ctx.fillStyle=s.color; ctx.font='bold 10px Cinzel,serif'; ctx.textAlign='left';
       if(x2-x1>40) ctx.fillText(s.name.toUpperCase(),x1+5,13);
     });
@@ -2033,7 +2123,15 @@ function activeSecRange(){
   const sorted=[...sections].sort((a,b)=>a.start-b.start);
   const myPos=sorted.findIndex(x=>x===s);
   const next=sorted[myPos+1];
-  return { start:s.start, end: next ? next.start : (wfDur||Infinity) };
+  const autoEnd = next ? next.start : (wfDur||Infinity);
+  const end = (s.end!=null && s.end>s.start) ? s.end : autoEnd;
+  return { start:s.start, end };
+}
+
+function sectionEnd(s, sorted, i){
+  const next=sorted[i+1];
+  const autoEnd = next ? next.start : (wfDur||0);
+  return (s.end!=null && s.end>s.start) ? s.end : autoEnd;
 }
 
 function addSection(name, t){
@@ -2047,20 +2145,33 @@ function renderSections(){
   const el=g('ts-seclist');
   if(!sections.length){ el.innerHTML=''; return; }
   const sorted=[...sections].sort((a,b)=>a.start-b.start);
-  el.innerHTML=sorted.map((s)=>{
+  el.innerHTML=sorted.map((s,i)=>{
     const realIdx=sections.indexOf(s);
-    const next=sorted[sorted.indexOf(s)+1];
-    const dur=(next?next.start:wfDur||s.start)-s.start;
+    const realEnd=sectionEnd(s,sorted,i);
+    const dur=realEnd-s.start;
     const isActive=activeSecIdx===realIdx;
     return `<div class="ts-secchip${isActive?' active':''}" data-idx="${realIdx}">
       <span class="ts-secchip-dot" style="background:${s.color}"></span>
       <span class="ts-secchip-info">
         <span class="ts-secchip-name">${s.name}</span>
-        <span class="ts-secchip-meta">${fmt(s.start)} · ${fmt(dur)}</span>
+        <span class="ts-secchip-meta">${fmt(s.start)} → ${fmt(realEnd)} · ${fmt(dur)}</span>
       </span>
+      <span class="ts-secchip-dl" data-dl="${realIdx}">⬇</span>
       <span class="ts-secchip-del" data-del="${realIdx}">✕</span>
     </div>`;
   }).join('');
+
+  el.querySelectorAll('.ts-secchip-dl').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const idx=parseInt(btn.dataset.dl);
+      const s=sections[idx]; if(!s)return;
+      const sorted=[...sections].sort((a,b)=>a.start-b.start);
+      const pos=sorted.indexOf(s);
+      const end=sectionEnd(s,sorted,pos);
+      tsDownloadClip(s.start,end,s.name,btn);
+    });
+  });
 
   el.querySelectorAll('.ts-secchip').forEach(chip=>{
     chip.addEventListener('click',e=>{
@@ -2080,15 +2191,23 @@ function renderSections(){
   });
 }
 
+function resetViewport(){
+  zoom=1;
+  document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(b=>b.classList.toggle('active', b.dataset.zoom==='1'));
+  drawAll();
+  if(scrl) scrl.scrollLeft=0;
+}
+
 function toggleSecFilter(idx){
   activeSecIdx = activeSecIdx===idx ? -1 : idx;
   if(activeSecIdx>=0){
     const s=sections[activeSecIdx];
-    tsSeek(s.start);
+    try{ aud.currentTime=s.start; }catch{}
   }
   updateSecFilterBar();
   renderSections();
   renderWords();
+  resetViewport();
 }
 
 function updateSecFilterBar(){
@@ -2099,8 +2218,25 @@ function updateSecFilterBar(){
   g('ts-secfilter-label').textContent='Mostrando: '+s.name;
 }
 
+g('ts-btn-secset-start').addEventListener('click',()=>{
+  if(activeSecIdx<0)return;
+  const obj=sections[activeSecIdx];
+  obj.start=aud.currentTime||0;
+  sections.sort((a,b)=>a.start-b.start);
+  activeSecIdx=sections.indexOf(obj);
+  renderSections(); updateSecFilterBar(); renderWords(); drawAll();
+  toast('Início ajustado para '+fmt(obj.start));
+});
+g('ts-btn-secset-end').addEventListener('click',()=>{
+  if(activeSecIdx<0)return;
+  const obj=sections[activeSecIdx];
+  obj.end=aud.currentTime||0;
+  renderSections(); updateSecFilterBar(); renderWords(); drawAll();
+  toast('Fim ajustado para '+fmt(obj.end));
+});
+
 g('ts-btn-secfilter-clear').addEventListener('click',()=>{
-  activeSecIdx=-1; updateSecFilterBar(); renderSections(); renderWords();
+  activeSecIdx=-1; updateSecFilterBar(); renderSections(); renderWords(); resetViewport();
 });
 
 document.querySelectorAll('#ts-secquick .ts-secquick-btn:not(.ts-secquick-custom)').forEach(btn=>{
@@ -2367,6 +2503,32 @@ g('ts-btn-copy-trecho').addEventListener('click',()=>{
   if(selS===null)return;
   const ww=words.filter(w=>w.start>=selS&&w.end<=selE+0.1);
   navigator.clipboard.writeText('['+fmt(selS)+' → '+fmt(selE)+']\n'+ww.map(w=>w.word).join(' ')).then(()=>toast('Copiado ✓'));
+});
+
+// ── baixar trecho de áudio (recorte real, via ffmpeg.wasm) ──
+async function tsDownloadClip(start,end,name,btnEl){
+  if(!tsFile){ toast('Carrega o áudio primeiro'); return; }
+  if(end<=start){ toast('Trecho inválido'); return; }
+  const sizeMB=tsFile.size/1024/1024;
+  if(IS_MOBILE && sizeMB>120){
+    if(!confirm('Esse áudio é grande ('+sizeMB.toFixed(0)+'MB) e recortar no celular pode ser lento ou travar. Tentar mesmo assim?')) return;
+  }
+  const origLabel=btnEl?btnEl.textContent:'';
+  if(btnEl){ btnEl.textContent='⏳'; btnEl.style.pointerEvents='none'; }
+  const statusEl=g('ts-clip-status');
+  statusEl.classList.add('show');
+  const ok=await window.tsExtractClip(tsFile,start,end,name,msg=>{
+    statusEl.innerHTML = msg ? '<span class="ts-spin"></span> '+msg : '';
+    if(!msg) statusEl.classList.remove('show');
+  });
+  if(btnEl){ btnEl.textContent=origLabel; btnEl.style.pointerEvents=''; }
+  if(ok) toast('Áudio "'+name+'" baixado ✓');
+  else toast('Erro ao recortar o áudio — tenta de novo');
+}
+
+g('ts-btn-dl-clip').addEventListener('click',()=>{
+  if(selS===null)return;
+  tsDownloadClip(selS,selE,tsFile?tsFile.name.replace(/\.[^.]+$/,'')+'_trecho':'trecho',g('ts-btn-dl-clip'));
 });
 
 // ── usar como ponto ──
