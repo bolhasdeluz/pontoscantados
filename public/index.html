@@ -1718,16 +1718,54 @@ document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn=>{
 // sem input de chave — updateBtn chamado pelo setFile
 
 // ── arquivo ──
+let lastBlobUrl='';
+const MOBILE_LAZY_LIMIT_MB = 35; // acima disso em mobile, NADA toca o arquivo até o usuário pedir
+
 function applyFile(f){
   tsFile=f; wfDur=0; peaks=[];
   g('ts-drop').classList.remove('ts-needs-audio');
   g('ts-drop').classList.add('ts-has-file');
-  g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)</span>';
-  aud.src=URL.createObjectURL(f);
+  const sizeMB=f.size/1024/1024;
+
+  // Limpa blob URL anterior pra não vazar memória entre trocas de arquivo
+  if(lastBlobUrl){ try{URL.revokeObjectURL(lastBlobUrl);}catch{} lastBlobUrl=''; }
+
+  const heavy = IS_MOBILE && sizeMB>MOBILE_LAZY_LIMIT_MB;
+
+  if(heavy){
+    // Arquivo grande no celular: NÃO toca o arquivo agora (nem <audio>, nem waveform).
+    // O picker do iOS já deixa pouca memória sobrando logo após a transferência —
+    // carregar qualquer coisa nesse instante é o gatilho mais comum do "Out of Memory".
+    // Só inicializa o player quando o usuário pedir explicitamente.
+    g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+sizeMB.toFixed(0)+' MB)</span>'
+      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:8px" onclick="window.tsInitPlayer()">▶ Carregar player de áudio</button>'
+      +'<br><small style="color:var(--text-dim);font-style:italic">Arquivo grande — o player só carrega quando você pedir, pra evitar travar o celular. A transcrição funciona normalmente sem isso.</small>';
+    g('ts-player-name').textContent=f.name+' (player não carregado ainda)';
+    hideErr(); updateBtn();
+    return;
+  }
+
+  g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+sizeMB.toFixed(1)+' MB)</span>';
+  lastBlobUrl=URL.createObjectURL(f);
+  aud.src=lastBlobUrl;
   g('ts-player-name').textContent=f.name;
   hideErr(); updateBtn();
   loadWaveform(f);
 }
+
+window.tsInitPlayer=()=>{
+  if(!tsFile)return;
+  g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+tsFile.name+' ('+(tsFile.size/1024/1024).toFixed(0)+' MB) — carregando…</span>';
+  // Pequeno delay para o picker/UI assentar antes de tocar no arquivo
+  setTimeout(()=>{
+    if(lastBlobUrl){ try{URL.revokeObjectURL(lastBlobUrl);}catch{} }
+    lastBlobUrl=URL.createObjectURL(tsFile);
+    aud.src=lastBlobUrl;
+    g('ts-player-name').textContent=tsFile.name;
+    g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+tsFile.name+' ('+(tsFile.size/1024/1024).toFixed(0)+' MB)</span>';
+    loadWaveform(tsFile);
+  },150);
+};
 function setFile(f){
   const ext=(f.name.split('.').pop()||'').toLowerCase();
   if(!['mp3','wav','m4a','ogg','flac','webm','mp4','mpeg','aac','opus','amr','3gp','wma','caf'].includes(ext)){ showErr('Formato não reconhecido: .'+ext); return; }
