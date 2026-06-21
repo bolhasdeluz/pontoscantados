@@ -1719,7 +1719,7 @@ document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn=>{
 
 // ── arquivo ──
 function applyFile(f){
-  tsFile=f;
+  tsFile=f; wfDur=0; peaks=[];
   g('ts-drop').classList.remove('ts-needs-audio');
   g('ts-drop').classList.add('ts-has-file');
   g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+(f.size/1024/1024).toFixed(1)+' MB)</span>';
@@ -1752,20 +1752,50 @@ function ctxW(){ return g('ts-ctx').value.trim().split(',').map(s=>s.trim()).fil
 function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Quimbanda PT-BR. Termos: '+c+'. Preserve pontos cantados.':'Sessão espiritual em português brasileiro.'; }
 
 // ══ WAVEFORM ══
-async function loadWaveform(f){
-  g('ts-wf-loading').style.display='block'; peaks=[]; wfDur=0;
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+const WF_AUTO_LIMIT_MB = IS_MOBILE ? 20 : 150; // acima disso, waveform vira opt-in (botão)
+
+async function loadWaveform(f, forced){
+  const loading=g('ts-wf-loading');
+  const sizeMB=f.size/1024/1024;
+
+  // Em mobile (ou arquivos muito grandes em qualquer device), ler o arquivo inteiro
+  // pra memória + decodificar PCM pode estourar o limite por aba do navegador e
+  // derrubar/recarregar a página sozinha (especialmente no Safari iOS). Por isso,
+  // acima do limite a waveform vira opcional — o player e a timeline continuam
+  // funcionando normalmente via duração nativa do <audio>, sem decodificar nada.
+  if(!forced && sizeMB>WF_AUTO_LIMIT_MB){
+    loading.style.display='block';
+    loading.innerHTML='Áudio grande ('+sizeMB.toFixed(0)+'MB)'+(IS_MOBILE?' no celular':'')+' — waveform desativada por padrão para evitar travar a página.<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceWaveform()">Gerar waveform mesmo assim</button>';
+    return;
+  }
+
+  loading.style.display='block'; loading.textContent='Analisando forma de onda…';
+  peaks=[];
   try{
     const buf=await f.arrayBuffer();
-    const actx=new(window.AudioContext||window.webkitAudioContext)();
-    const ab=await actx.decodeAudioData(buf); await actx.close();
-    wfDur=ab.duration;
+    // Sample rate baixo (8kHz) — suficiente para envelope de amplitude, mas fração da memória.
+    let actx;
+    try{ actx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:8000}); }
+    catch{ actx=new(window.AudioContext||window.webkitAudioContext)(); }
+    const ab=await actx.decodeAudioData(buf);
+    await actx.close();
+    if(!wfDur) wfDur=ab.duration; // fallback caso o <audio> ainda não tenha disparado loadedmetadata
     const data=ab.getChannelData(0);
     const bs=Math.max(1,Math.floor(data.length/PEAKS));
     for(let i=0;i<PEAKS;i++){ let mn=0,mx=0; const st=i*bs,en=Math.min(st+bs,data.length); for(let j=st;j<en;j++){if(data[j]<mn)mn=data[j];if(data[j]>mx)mx=data[j];} peaks.push([mn,mx]); }
     drawAll();
-  }catch(e){ console.warn('wf:',e); }
-  finally{ g('ts-wf-loading').style.display='none'; }
+  }catch(e){
+    console.warn('wf:',e);
+    // Falha ao gerar waveform (áudio muito grande/formato exótico) — player e marcações
+    // continuam funcionando normalmente via duração do <audio>, só sem o desenho visual.
+    loading.textContent='Não foi possível gerar a waveform. Player e transcrição funcionam normalmente.';
+    setTimeout(()=>{ loading.style.display='none'; },3500);
+    return;
+  }
+  loading.style.display='none';
 }
+window.tsForceWaveform=()=>{ if(tsFile) loadWaveform(tsFile,true); };
 function cw(){ return g('ts-wf-scroll')?.clientWidth||600; }
 function canvW(){ return Math.round(cw()*zoom); }
 function sToX(s){ return wfDur>0?(s/wfDur)*canvW():0; }
@@ -1795,7 +1825,8 @@ function drawWf(){
   const mid=WF_H/2;
   ctx.strokeStyle='rgba(196,57,107,.07)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(0,mid); ctx.lineTo(w,mid); ctx.stroke();
-  if(!peaks.length){ return; }
+  // Sem peaks (waveform não decodificada — mobile/arquivo grande): segue desenhando
+  // seleção, drag, marcações e playhead normalmente, só pula as barras de amplitude.
   // selection
   if(selS!==null&&selE!==null){
     const x1=sToX(Math.min(selS,selE)),x2=sToX(Math.max(selS,selE));
@@ -1814,7 +1845,7 @@ function drawWf(){
     ctx.setLineDash([]);
   }
   // bars
-  for(let px=0;px<w;px++){
+  if(peaks.length) for(let px=0;px<w;px++){
     const pi=Math.floor((px/w)*PEAKS); if(pi>=peaks.length)break;
     const [mn,mx]=peaks[pi];
     const t=xToS(px);
@@ -1923,7 +1954,13 @@ aud.addEventListener('timeupdate',()=>{
   document.querySelectorAll('#ts-box .ts-active-w').forEach(el=>el.classList.remove('ts-active-w'));
   if(idx>=0){ const el=document.querySelector('#ts-box .ts-word[data-idx="'+idx+'"]'); if(el){el.classList.add('ts-active-w');el.scrollIntoView({behavior:'smooth',block:'nearest'});} }
 });
-aud.addEventListener('loadedmetadata',()=>{ g('ts-player-time').textContent='0:00 / '+fmt(aud.duration||0); if(peaks.length)drawAll(); });
+aud.addEventListener('loadedmetadata',()=>{
+  g('ts-player-time').textContent='0:00 / '+fmt(aud.duration||0);
+  // Usa a duração nativa do <audio> (rápida, sem decodificar PCM) como fonte de verdade
+  // pra timeline/zoom/seleção — funciona mesmo se a waveform visual falhar depois.
+  if(aud.duration && isFinite(aud.duration)) wfDur=aud.duration;
+  drawAll();
+});
 
 // ── transcrever ──
 g('ts-btn-transcribe').addEventListener('click',async()=>{
