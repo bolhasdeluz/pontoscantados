@@ -301,6 +301,25 @@ select option{background:#fff;color:#2a1a22}
 .ts-reload-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 16px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .15s;box-shadow:0 2px 8px rgba(26,115,232,.25);margin-top:8px}
 .ts-reload-btn:hover{opacity:.85}
 .ts-needs-badge{display:inline-block;background:#fffbe8;border:1px solid #e8d060;border-radius:6px;color:#8c5a00;font-size:12px;padding:6px 12px;margin-top:4px;line-height:1.4}
+/* ══ SEÇÕES / CAPÍTULOS ══ */
+.ts-secquick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ts-secquick-btn{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.05em;padding:6px 12px;border-radius:20px;border:1px dashed rgba(196,57,107,.35);background:transparent;color:var(--gold);cursor:pointer;transition:all .12s;text-transform:uppercase}
+.ts-secquick-btn:hover{background:var(--gold-dim);border-style:solid}
+.ts-secquick-custom{border-color:var(--text-dim);color:var(--text-dim)}
+.ts-secquick-custom:hover{border-color:var(--gold);color:var(--gold)}
+.ts-seclist{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.ts-secchip{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;cursor:pointer;transition:all .14s}
+.ts-secchip:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(196,57,107,.1)}
+.ts-secchip.active{border-color:var(--gold);background:var(--gold-dim)}
+.ts-secchip-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ts-secchip-info{display:flex;flex-direction:column;gap:1px}
+.ts-secchip-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:var(--text)}
+.ts-secchip-meta{font-size:10.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
+.ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
+.ts-secfilter-bar{display:flex;align-items:center;justify-content:space-between;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 14px;margin-top:8px}
+.ts-secfilter-bar span{font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:.05em;color:var(--gold);text-transform:uppercase}
+
 .ts-markers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
 .ts-marker-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)}
 .ts-marker-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
@@ -692,6 +711,27 @@ select option{background:#fff;color:#2a1a22}
         </div>
         <div class="ts-wf-loading" id="ts-wf-loading">Analisando forma de onda…</div>
         <div class="ts-wf-sel-info" id="ts-wf-sel-info"></div>
+      </div>
+
+      <div id="ts-sections-panel" style="display:none;margin-bottom:14px">
+        <div class="ts-sec-lbl">Partes da sessão</div>
+        <p style="font-size:11.5px;color:var(--text-dim);font-style:italic;margin-bottom:8px">
+          Toca o áudio e marca onde cada parte começa — depois é só clicar pra pular direto e ver só aquele trecho.
+        </p>
+        <div class="ts-secquick" id="ts-secquick">
+          <button class="ts-secquick-btn" data-name="Abertura">+ Abertura</button>
+          <button class="ts-secquick-btn" data-name="Passe">+ Passe</button>
+          <button class="ts-secquick-btn" data-name="Pontos Cantados">+ Pontos Cantados</button>
+          <button class="ts-secquick-btn" data-name="Consulta">+ Consulta</button>
+          <button class="ts-secquick-btn" data-name="Segunda Parte">+ Segunda Parte</button>
+          <button class="ts-secquick-btn" data-name="Encerramento">+ Encerramento</button>
+          <button class="ts-secquick-btn ts-secquick-custom" id="ts-secquick-custom">+ outro nome…</button>
+        </div>
+        <div class="ts-seclist" id="ts-seclist"></div>
+        <div class="ts-secfilter-bar" id="ts-secfilter-bar" style="display:none">
+          <span id="ts-secfilter-label"></span>
+          <button class="ts-btn-sm" id="ts-btn-secfilter-clear">Ver sessão inteira</button>
+        </div>
       </div>
 
       <div id="ts-markers-section" style="display:none;margin-bottom:14px">
@@ -1681,6 +1721,8 @@ const WF_H=140, RUL_H=24, PEAKS=5000;
 let prov='deepgram', tsFile=null, words=[], r2url='';
 let selS=null, selE=null, selMode=false, wordSelStart=null;
 let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
+let sections=[], activeSecIdx=-1;
+const SEC_COLORS=['#2a7a60','#6030a0','#c4396b','#8c5a00','#1a73e8','#b84040','#3a9a78'];
 let dragging=false, dragX0=null, dragX1=null;
 let gToken=null, gLoaded=false, driveFileId='', driveFileName='', driveResourceKey='';
 const aud=new Audio();
@@ -1909,6 +1951,21 @@ function drawWf(){
     ctx.strokeStyle=inS?'#c4396b':'rgba(196,57,107,.45)'; ctx.lineWidth=1; ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(px+.5,mid+mn*mid*.95); ctx.lineTo(px+.5,mid+mx*mid*.95); ctx.stroke();
   }
+  // seções (capítulos) — banda colorida + rótulo fixo no topo
+  if(sections.length){
+    const sorted=[...sections].sort((a,b)=>a.start-b.start);
+    sorted.forEach((s,i)=>{
+      const x1=sToX(s.start);
+      const next=sorted[i+1];
+      const x2=next?sToX(next.start):w;
+      ctx.fillStyle=s.color+'1a';
+      ctx.fillRect(x1,0,x2-x1,18);
+      ctx.strokeStyle=s.color; ctx.lineWidth=2; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x1,0); ctx.lineTo(x1,WF_H); ctx.stroke();
+      ctx.fillStyle=s.color; ctx.font='bold 10px Cinzel,serif'; ctx.textAlign='left';
+      if(x2-x1>40) ctx.fillText(s.name.toUpperCase(),x1+5,13);
+    });
+  }
   // markers
   markers.forEach(m=>{
     const x=sToX(m.t);
@@ -1969,6 +2026,96 @@ document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(btn=>{
 });
 
 // markers
+// ══ SEÇÕES / CAPÍTULOS ══
+function activeSecRange(){
+  if(activeSecIdx<0 || !sections[activeSecIdx]) return null;
+  const s=sections[activeSecIdx];
+  const sorted=[...sections].sort((a,b)=>a.start-b.start);
+  const myPos=sorted.findIndex(x=>x===s);
+  const next=sorted[myPos+1];
+  return { start:s.start, end: next ? next.start : (wfDur||Infinity) };
+}
+
+function addSection(name, t){
+  if(!name||!name.trim())return;
+  sections.push({ name:name.trim(), start:t, color:SEC_COLORS[sections.length%SEC_COLORS.length] });
+  sections.sort((a,b)=>a.start-b.start);
+  renderSections(); drawWf();
+}
+
+function renderSections(){
+  const el=g('ts-seclist');
+  if(!sections.length){ el.innerHTML=''; return; }
+  const sorted=[...sections].sort((a,b)=>a.start-b.start);
+  el.innerHTML=sorted.map((s)=>{
+    const realIdx=sections.indexOf(s);
+    const next=sorted[sorted.indexOf(s)+1];
+    const dur=(next?next.start:wfDur||s.start)-s.start;
+    const isActive=activeSecIdx===realIdx;
+    return `<div class="ts-secchip${isActive?' active':''}" data-idx="${realIdx}">
+      <span class="ts-secchip-dot" style="background:${s.color}"></span>
+      <span class="ts-secchip-info">
+        <span class="ts-secchip-name">${s.name}</span>
+        <span class="ts-secchip-meta">${fmt(s.start)} · ${fmt(dur)}</span>
+      </span>
+      <span class="ts-secchip-del" data-del="${realIdx}">✕</span>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.ts-secchip').forEach(chip=>{
+    chip.addEventListener('click',e=>{
+      if(e.target.dataset.del!==undefined && e.target.classList.contains('ts-secchip-del'))return;
+      const idx=parseInt(chip.dataset.idx);
+      toggleSecFilter(idx);
+    });
+  });
+  el.querySelectorAll('.ts-secchip-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const idx=parseInt(btn.dataset.del);
+      if(activeSecIdx===idx){ activeSecIdx=-1; updateSecFilterBar(); renderWords(); }
+      sections.splice(idx,1);
+      renderSections(); drawWf();
+    });
+  });
+}
+
+function toggleSecFilter(idx){
+  activeSecIdx = activeSecIdx===idx ? -1 : idx;
+  if(activeSecIdx>=0){
+    const s=sections[activeSecIdx];
+    tsSeek(s.start);
+  }
+  updateSecFilterBar();
+  renderSections();
+  renderWords();
+}
+
+function updateSecFilterBar(){
+  const bar=g('ts-secfilter-bar');
+  if(activeSecIdx<0){ bar.style.display='none'; return; }
+  const s=sections[activeSecIdx];
+  bar.style.display='flex';
+  g('ts-secfilter-label').textContent='Mostrando: '+s.name;
+}
+
+g('ts-btn-secfilter-clear').addEventListener('click',()=>{
+  activeSecIdx=-1; updateSecFilterBar(); renderSections(); renderWords();
+});
+
+document.querySelectorAll('#ts-secquick .ts-secquick-btn:not(.ts-secquick-custom)').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    let name=btn.dataset.name;
+    const existing=sections.filter(s=>s.name===name || s.name.startsWith(name+' ')).length;
+    if(existing>0) name=name+' '+(existing+1);
+    addSection(name, aud.currentTime||0);
+  });
+});
+g('ts-secquick-custom').addEventListener('click',()=>{
+  const name=prompt('Nome dessa parte da sessão:');
+  if(name) addSection(name, aud.currentTime||0);
+});
+
 function addMarker(t){
   const comment=prompt('Marcação em '+fmt(t)+':\n(Enter sem texto para só marcar o ponto)');
   if(comment===null)return;
@@ -2063,6 +2210,8 @@ g('ts-btn-transcribe').addEventListener('click',async()=>{
   if(!tsFile)return; const key='';
   hideErr(); g('ts-btn-transcribe').disabled=true;
   g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(2); r2url='';
+  sections=[]; activeSecIdx=-1; markers=[]; mci=0;
+  g('ts-markers-section').style.display='none'; g('ts-secfilter-bar').style.display='none';
   const t0=Date.now();
   try{
     const sizeMB=tsFile.size/1024/1024;
@@ -2095,6 +2244,7 @@ function done(ws,t0){
   g('ts-meta-prov').textContent=TS_PROVS[prov].label;
   g('ts-status').textContent='';
   renderWords(); g('ts-result').style.display='block';
+  g('ts-sections-panel').style.display='block';
   showSaveRow(); if(peaks.length)drawAll();
 }
 
@@ -2164,13 +2314,18 @@ async function doElevenLabs(_k,t0){
 // ── palavras ──
 function renderWords(){
   const box=g('ts-box'); box.innerHTML=''; let lm=-1;
+  const range=activeSecRange();
   words.forEach((w,i)=>{
+    if(range && (w.start<range.start || w.start>=range.end)) return;
     const mn=Math.floor(w.start/60);
     if(mn!==lm){ lm=mn; const b=document.createElement('span'); b.className='ts-ts-badge'; b.textContent=fmt(w.start); b.addEventListener('click',()=>tsSeek(w.start)); box.appendChild(b); box.appendChild(document.createTextNode(' ')); }
     const sp=document.createElement('span'); sp.className='ts-word'; sp.textContent=w.word+' '; sp.dataset.idx=i;
     sp.addEventListener('click',()=>{ if(selMode)handleWordSel(i); else tsSeek(words[i].start); });
     box.appendChild(sp);
   });
+  if(range && !box.children.length){
+    box.innerHTML='<span style="color:var(--text-dim);font-style:italic">Nenhuma fala transcrita nesse trecho (pode ser só música/tambor).</span>';
+  }
 }
 
 function handleWordSel(i){
@@ -2286,7 +2441,7 @@ function showSaveRow(){
 g('ts-btn-save-sess').addEventListener('click',()=>{
   const name=g('ts-sess-name').value.trim(); if(!name||!words.length)return;
   const list=getSess();
-  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',driveResourceKey:driveResourceKey||'',data:words};
+  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',driveResourceKey:driveResourceKey||'',sections:sections||[],markersData:markers||[],data:words};
   const i=list.findIndex(s=>s.name===name);
   if(i>=0)list[i]=entry; else list.unshift(entry);
   try{putSess(list);renderSess();g('ts-sess-name').value='';toast('Sessão "'+name+'" salva ✓');}
@@ -2297,11 +2452,15 @@ g('ts-sess-name').addEventListener('keydown',e=>{if(e.key==='Enter')g('ts-btn-sa
 function loadSess(i){
   const s=getSess()[i]; if(!s)return;
   words=s.data;
+  sections=s.sections||[]; markers=s.markersData||[]; activeSecIdx=-1;
   g('ts-meta-dur').textContent='cache';
   g('ts-meta-words').textContent='~'+words.length+' palavras';
   g('ts-meta-prov').textContent=s.prov;
   g('ts-player-name').textContent=s.driveFileName||s.filename||s.name;
   renderWords(); g('ts-result').style.display='block';
+  g('ts-sections-panel').style.display='block';
+  renderSections(); updateSecFilterBar();
+  if(markers.length){ renderMarkers(); g('ts-markers-section').style.display='block'; }
   showSaveRow(); g('ts-sess-name').value=s.name;
   // mostrar botão de reload
   const drop=g('ts-drop');
