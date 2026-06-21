@@ -1,6 +1,13 @@
 // functions/api/transcribe.js
 // Cloudflare Pages Function — proxy seguro para APIs de transcrição
-// Env vars: DEEPGRAM_KEY · ASSEMBLYAI_KEY · ELEVENLABS_KEY · GOOGLE_API_KEY
+// Env vars: DEEPGRAM_KEY · ASSEMBLYAI_KEY · ELEVENLABS_KEY
+//
+// Suporta dois modos de envio de áudio:
+//  1) Binário direto no corpo da requisição (arquivos pequenos, <80MB)
+//  2) Via audioUrl — uma URL pública (ex: R2) que o provedor busca sozinho.
+//     Usado para arquivos grandes, pois evita o limite de corpo de requisição
+//     do Cloudflare (100MB Free/Pro, 200MB Business) — nesse modo o Worker nunca
+//     recebe os bytes do áudio, só repassa a URL pro Deepgram/AssemblyAI.
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -12,11 +19,12 @@ export async function onRequest(context) {
   const { request, env } = context;
   if (request.method === 'OPTIONS') return new Response('', { status: 200, headers: CORS });
 
-  const url    = new URL(request.url);
-  const prov   = url.searchParams.get('provider') || 'deepgram';
-  const action = url.searchParams.get('action')   || 'transcribe';
-  const jobId  = url.searchParams.get('jobId');
-  const kws    = url.searchParams.get('keywords') || '';
+  const url      = new URL(request.url);
+  const prov     = url.searchParams.get('provider') || 'deepgram';
+  const action   = url.searchParams.get('action')   || 'transcribe';
+  const jobId    = url.searchParams.get('jobId');
+  const kws      = url.searchParams.get('keywords') || '';
+  const audioUrl = url.searchParams.get('audioUrl')  || '';
 
   try {
     // AssemblyAI: polling separado (GET)
@@ -33,8 +41,8 @@ export async function onRequest(context) {
 
     if (request.method !== 'POST') return json({ error: 'POST requerido' }, 405);
 
-    if (prov === 'deepgram')   return await doDeepgram(request, env.DEEPGRAM_KEY, kws);
-    if (prov === 'assemblyai') return await startAssembly(request, env.ASSEMBLYAI_KEY, kws);
+    if (prov === 'deepgram')   return await doDeepgram(request, env.DEEPGRAM_KEY, kws, audioUrl);
+    if (prov === 'assemblyai') return await startAssembly(request, env.ASSEMBLYAI_KEY, kws, audioUrl);
     if (prov === 'elevenlabs') return await doElevenLabs(request, env.ELEVENLABS_KEY, kws);
 
     return json({ error: 'Provedor desconhecido: ' + prov }, 400);
@@ -44,7 +52,7 @@ export async function onRequest(context) {
 }
 
 // ── Deepgram Nova-2 ──────────────────────────────────────────────────────────
-async function doDeepgram(request, key, kws) {
+async function doDeepgram(request, key, kws, audioUrl) {
   if (!key) return json({ error: 'DEEPGRAM_KEY não configurada nas variáveis do Worker' }, 500);
 
   let apiUrl = 'https://api.deepgram.com/v1/listen?language=pt&punctuate=true&model=nova-2&words=true';
@@ -53,14 +61,24 @@ async function doDeepgram(request, key, kws) {
     if (arr.length) apiUrl += '&keywords=' + arr.slice(0, 200).map(encodeURIComponent).join('&keywords=');
   }
 
-  const res = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Token ' + key,
-      'Content-Type': request.headers.get('Content-Type') || 'audio/mpeg',
-    },
-    body: request.body,
-  });
+  let res;
+  if (audioUrl) {
+    // Modo URL: Deepgram busca o arquivo sozinho — nenhum byte passa pelo Worker
+    res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Authorization': 'Token ' + key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: audioUrl }),
+    });
+  } else {
+    res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Token ' + key,
+        'Content-Type': request.headers.get('Content-Type') || 'audio/mpeg',
+      },
+      body: request.body,
+    });
+  }
 
   if (!res.ok) {
     const e = await res.json().catch(() => ({}));
@@ -75,22 +93,26 @@ async function doDeepgram(request, key, kws) {
 }
 
 // ── AssemblyAI: iniciar job ──────────────────────────────────────────────────
-async function startAssembly(request, key, kws) {
+async function startAssembly(request, key, kws, audioUrl) {
   if (!key) return json({ error: 'ASSEMBLYAI_KEY não configurada nas variáveis do Worker' }, 500);
 
-  // 1. Upload do áudio
-  const upRes = await fetch('https://api.assemblyai.com/v2/upload', {
-    method: 'POST',
-    headers: { 'Authorization': key, 'Content-Type': 'application/octet-stream' },
-    body: request.body,
-  });
-  if (!upRes.ok) {
-    const e = await upRes.json().catch(() => ({}));
-    return json({ error: e.error || 'AssemblyAI upload: erro ' + upRes.status }, upRes.status);
-  }
-  const { upload_url } = await upRes.json();
+  let upload_url = audioUrl;
 
-  // 2. Submeter transcrição
+  if (!upload_url) {
+    // Modo binário: só roda quando NÃO veio audioUrl (arquivo pequeno)
+    const upRes = await fetch('https://api.assemblyai.com/v2/upload', {
+      method: 'POST',
+      headers: { 'Authorization': key, 'Content-Type': 'application/octet-stream' },
+      body: request.body,
+    });
+    if (!upRes.ok) {
+      const e = await upRes.json().catch(() => ({}));
+      return json({ error: e.error || 'AssemblyAI upload: erro ' + upRes.status }, upRes.status);
+    }
+    ({ upload_url } = await upRes.json());
+  }
+  // Modo URL: pula o upload próprio da AssemblyAI e usa a URL do R2 direto como audio_url
+
   const arr  = kws ? kws.split(',').map(k => k.trim()).filter(Boolean) : [];
   const body = { audio_url: upload_url, language_code: 'pt', punctuate: true, format_text: true };
   if (arr.length) { body.word_boost = arr.slice(0, 1000); body.boost_param = 'high'; }
@@ -129,10 +151,12 @@ async function pollAssembly(jobId, key) {
 }
 
 // ── ElevenLabs Scribe ────────────────────────────────────────────────────────
+// Obs: ElevenLabs exige upload binário direto (sem modo URL nesta API), por isso
+// continua limitado ao corpo de requisição do Cloudflare — não usar pra áudios grandes.
 async function doElevenLabs(request, key, kws) {
   if (!key) return json({ error: 'ELEVENLABS_KEY não configurada nas variáveis do Worker' }, 500);
 
-  const fd  = await request.formData();
+  const fd    = await request.formData();
   const newFd = new FormData();
   newFd.append('audio', fd.get('audio'));
   newFd.append('model_id', 'scribe_v1');
@@ -169,7 +193,6 @@ async function driveDownload(fileId, token, resourceKey) {
   );
 
   if (!res.ok) {
-    // Expõe o erro real do Google em vez de esconder atrás de mensagem genérica
     const errBody = await res.text().catch(() => '');
     let detail = '';
     try { detail = JSON.parse(errBody)?.error?.message || ''; } catch {}
