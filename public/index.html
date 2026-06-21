@@ -1718,6 +1718,23 @@ document.querySelectorAll('#ov-transcricao .ts-prov-btn').forEach(btn=>{
 // sem input de chave — updateBtn chamado pelo setFile
 
 // ── arquivo ──
+function updateElevenLabsAvailability(sizeMB){
+  const elBtn=document.querySelector('#ov-transcricao .ts-prov-btn[data-prov="elevenlabs"]');
+  if(!elBtn)return;
+  const desc=elBtn.querySelector('.ts-prov-desc');
+  if(sizeMB>CF_BODY_LIMIT_MB){
+    elBtn.style.opacity='.4'; elBtn.style.pointerEvents='none';
+    if(desc) desc.textContent='Indisponível para áudios grandes (>'+CF_BODY_LIMIT_MB+'MB). Usa Deepgram ou AssemblyAI.';
+    if(prov==='elevenlabs'){
+      const dgBtn=document.querySelector('#ov-transcricao .ts-prov-btn[data-prov="deepgram"]');
+      if(dgBtn) dgBtn.click();
+    }
+  }else{
+    elBtn.style.opacity=''; elBtn.style.pointerEvents='';
+    if(desc) desc.textContent='96.7% accuracy, top de qualidade.';
+  }
+}
+
 let lastBlobUrl='';
 const MOBILE_LAZY_LIMIT_MB = 35; // acima disso em mobile, NADA toca o arquivo até o usuário pedir
 
@@ -1726,6 +1743,7 @@ function applyFile(f){
   g('ts-drop').classList.remove('ts-needs-audio');
   g('ts-drop').classList.add('ts-has-file');
   const sizeMB=f.size/1024/1024;
+  updateElevenLabsAvailability(sizeMB);
 
   // Limpa blob URL anterior pra não vazar memória entre trocas de arquivo
   if(lastBlobUrl){ try{URL.revokeObjectURL(lastBlobUrl);}catch{} lastBlobUrl=''; }
@@ -2001,15 +2019,69 @@ aud.addEventListener('loadedmetadata',()=>{
 });
 
 // ── transcrever ──
+const CF_BODY_LIMIT_MB = 80; // margem de segurança abaixo do limite real (100MB Free/Pro)
+const CHUNK_SIZE = 8*1024*1024; // 8MB por parte
+
+async function uploadChunkedToR2(file, onProgress){
+  const initRes=await fetch('/api/r2multipart?action=init',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({filename:file.name, contentType:file.type||'audio/mpeg'})
+  });
+  if(!initRes.ok){ const e=await initRes.json().catch(()=>({})); throw new Error(e.error||'Falha ao iniciar upload'); }
+  const {key,uploadId}=await initRes.json();
+
+  const totalParts=Math.ceil(file.size/CHUNK_SIZE);
+  const parts=[];
+  try{
+    for(let i=0;i<totalParts;i++){
+      const start=i*CHUNK_SIZE, end=Math.min(start+CHUNK_SIZE,file.size);
+      const chunk=file.slice(start,end);
+      const partNumber=i+1;
+      const partRes=await fetch('/api/r2multipart?action=part&key='+encodeURIComponent(key)+'&uploadId='+encodeURIComponent(uploadId)+'&partNumber='+partNumber,{
+        method:'POST', body:chunk
+      });
+      if(!partRes.ok) throw new Error('Falha ao enviar parte '+partNumber+' de '+totalParts);
+      const {etag}=await partRes.json();
+      parts.push({partNumber,etag});
+      if(onProgress) onProgress(Math.round(((i+1)/totalParts)*100));
+    }
+  }catch(e){
+    fetch('/api/r2multipart?action=abort',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,uploadId})}).catch(()=>{});
+    throw e;
+  }
+
+  const completeRes=await fetch('/api/r2multipart?action=complete',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key,uploadId,parts})
+  });
+  if(!completeRes.ok){ const e=await completeRes.json().catch(()=>({})); throw new Error(e.error||'Falha ao finalizar upload'); }
+  const {url}=await completeRes.json();
+  return url;
+}
+
 g('ts-btn-transcribe').addEventListener('click',async()=>{
   if(!tsFile)return; const key='';
   hideErr(); g('ts-btn-transcribe').disabled=true;
-  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(5); r2url='';
-  uploadAudioToR2(tsFile).then(u=>{ if(u)r2url=u; });
+  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(2); r2url='';
   const t0=Date.now();
   try{
-    if(prov==='deepgram')    await doDeepgram(key,t0);
-    if(prov==='assemblyai')  await doAssembly(key,t0);
+    const sizeMB=tsFile.size/1024/1024;
+    let audioUrlForProv='';
+
+    if(sizeMB>CF_BODY_LIMIT_MB){
+      if(prov==='elevenlabs') throw new Error('ElevenLabs não suporta áudios acima de '+CF_BODY_LIMIT_MB+'MB. Escolhe Deepgram ou AssemblyAI pra esse arquivo.');
+      g('ts-status').textContent='Enviando áudio em partes para o servidor…';
+      audioUrlForProv=await uploadChunkedToR2(tsFile,pct=>{
+        setProg(Math.min(2+pct*0.38,40));
+        g('ts-status').textContent='Enviando áudio… '+pct+'%';
+      });
+      r2url=audioUrlForProv; // reaproveita a mesma URL pro "Usar como ponto"
+    }else{
+      uploadAudioToR2(tsFile).then(u=>{ if(u)r2url=u; });
+    }
+
+    if(prov==='deepgram')    await doDeepgram(key,t0,audioUrlForProv);
+    if(prov==='assemblyai')  await doAssembly(key,t0,audioUrlForProv);
     if(prov==='elevenlabs')  await doElevenLabs(key,t0);
   }catch(e){ showErr('<strong>Erro:</strong> '+e.message); g('ts-status').textContent=''; g('ts-prog-wrap').style.display='none'; }
   finally{ updateBtn(); }
@@ -2027,12 +2099,19 @@ function done(ws,t0){
 }
 
 // ── Via Worker /api/transcribe ──
-async function doDeepgram(_k,t0){
-  g('ts-status').textContent='Enviando áudio…'; setProg(20);
+async function doDeepgram(_k,t0,audioUrl){
   const kws=ctxW().slice(0,200).map(encodeURIComponent).join(',');
-  const url='/api/transcribe?provider=deepgram'+(kws?'&keywords='+kws:'');
-  setProg(50); g('ts-status').textContent='Transcrevendo…';
-  const res=await fetch(url,{method:'POST',headers:{'Content-Type':tsFile.type||'audio/mpeg'},body:tsFile});
+  let url='/api/transcribe?provider=deepgram'+(kws?'&keywords='+kws:'');
+  let res;
+  if(audioUrl){
+    url+='&audioUrl='+encodeURIComponent(audioUrl);
+    g('ts-status').textContent='Transcrevendo (via URL)…'; setProg(60);
+    res=await fetch(url,{method:'POST'});
+  }else{
+    g('ts-status').textContent='Enviando áudio…'; setProg(20);
+    setProg(50); g('ts-status').textContent='Transcrevendo…';
+    res=await fetch(url,{method:'POST',headers:{'Content-Type':tsFile.type||'audio/mpeg'},body:tsFile});
+  }
   setProg(90);
   const d=await res.json();
   if(!res.ok)throw new Error(d.error||'Worker: erro '+res.status);
@@ -2040,21 +2119,28 @@ async function doDeepgram(_k,t0){
   done(d.words,t0);
 }
 
-async function doAssembly(_k,t0){
-  g('ts-status').textContent='Enviando áudio…'; setProg(15);
+async function doAssembly(_k,t0,audioUrl){
   const kws=ctxW().join(',');
-  const url='/api/transcribe?provider=assemblyai'+(kws?'&keywords='+encodeURIComponent(kws):'');
-  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:tsFile});
+  let url='/api/transcribe?provider=assemblyai'+(kws?'&keywords='+encodeURIComponent(kws):'');
+  let res;
+  if(audioUrl){
+    url+='&audioUrl='+encodeURIComponent(audioUrl);
+    g('ts-status').textContent='Iniciando transcrição (via URL)…'; setProg(45);
+    res=await fetch(url,{method:'POST'});
+  }else{
+    g('ts-status').textContent='Enviando áudio…'; setProg(15);
+    res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:tsFile});
+  }
   const d=await res.json();
   if(!res.ok)throw new Error(d.error||'Worker: erro '+res.status);
-  const {jobId}=d; setProg(40);
+  const {jobId}=d; setProg(audioUrl?55:40);
   // Poll via worker
   for(let i=0;i<200;i++){
     await new Promise(r=>setTimeout(r,3000));
     const p=await fetch('/api/transcribe?provider=assemblyai&action=poll&jobId='+jobId);
     const pd=await p.json();
     const el=(Date.now()-t0)/1000;
-    setProg(Math.min(40+(el/200)*55,93)); g('ts-status').textContent='Transcrevendo… '+Math.floor(el)+'s';
+    setProg(Math.min((audioUrl?55:40)+(el/200)*40,95)); g('ts-status').textContent='Transcrevendo… '+Math.floor(el)+'s';
     if(pd.status==='completed'){if(!pd.words?.length)throw new Error('Nenhuma fala detectada.'); return done(pd.words,t0);}
     if(pd.status==='error')throw new Error(pd.error||'Erro na transcrição');
   }
