@@ -838,40 +838,58 @@ const MIME_BY_EXT = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', fla
 
 // Recorta [startSec, endSec) do arquivo via stream-copy (sem decodificar/recodificar —
 // rápido e leve de memória mesmo em arquivos grandes) e devolve um Blob pronto pra download.
+// Núcleo: recorta e retorna { blob, ext, mime } sem disparar download.
+async function extractClipCore(file, startSec, endSec, statusCb) {
+  statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
+  const ff = await ensureFFmpeg();
+  const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
+  const inName = 'in.' + ext;
+  const outName = 'out.' + ext;
+
+  statusCb && statusCb('Lendo arquivo…');
+  const data = await fetchFile(file);
+  await ff.writeFile(inName, data);
+
+  statusCb && statusCb('Recortando trecho…');
+  await ff.exec(['-ss', fmtFFTime(startSec), '-to', fmtFFTime(endSec), '-i', inName, '-c', 'copy', outName]);
+
+  const out = await ff.readFile(outName);
+  try { await ff.deleteFile(inName); } catch {}
+  try { await ff.deleteFile(outName); } catch {}
+
+  const mime = MIME_BY_EXT[ext] || 'audio/mpeg';
+  const blob = new Blob([out.buffer], { type: mime });
+  statusCb && statusCb('');
+  return { blob, ext, mime };
+}
+
+// Versão pública que baixa o arquivo (botão "⬇ Baixar áudio").
 window.tsExtractClip = async function (file, startSec, endSec, suggestedName, statusCb) {
   try {
-    statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
-    const ff = await ensureFFmpeg();
-    const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
-    const inName = 'in.' + ext;
-    const outName = 'out.' + ext;
-
-    statusCb && statusCb('Lendo arquivo…');
-    const data = await fetchFile(file);
-    await ff.writeFile(inName, data);
-
-    statusCb && statusCb('Recortando trecho…');
-    await ff.exec(['-ss', fmtFFTime(startSec), '-to', fmtFFTime(endSec), '-i', inName, '-c', 'copy', outName]);
-
-    const out = await ff.readFile(outName);
-    try { await ff.deleteFile(inName); } catch {}
-    try { await ff.deleteFile(outName); } catch {}
-
-    const mime = MIME_BY_EXT[ext] || 'audio/mpeg';
-    const blob = new Blob([out.buffer], { type: mime });
+    const { blob, ext } = await extractClipCore(file, startSec, endSec, statusCb);
     const safeName = (suggestedName || 'trecho').replace(/[\\/:*?"<>|]/g, '').trim() || 'trecho';
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = safeName + '.' + ext;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 8000);
-
-    statusCb && statusCb('');
     return true;
   } catch (e) {
     console.error('ffmpeg clip error:', e);
     statusCb && statusCb('Erro: ' + e.message);
     return false;
+  }
+};
+
+// Versão que devolve o Blob direto, sem baixar — usada pra mandar pra separação de voz.
+window.tsExtractClipBlob = async function (file, startSec, endSec, statusCb) {
+  try {
+    const { blob, ext, mime } = await extractClipCore(file, startSec, endSec, statusCb);
+    return { blob, ext, mime };
+  } catch (e) {
+    console.error('ffmpeg clip error:', e);
+    statusCb && statusCb('Erro: ' + e.message);
+    return null;
   }
 };
 </script>
