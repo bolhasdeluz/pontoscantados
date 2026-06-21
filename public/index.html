@@ -275,6 +275,8 @@ select option{background:#fff;color:#2a1a22}
 .ts-wf-timeinfo{font-size:12px;color:var(--text-dim);font-variant-numeric:tabular-nums;flex:1;min-width:80px}
 .ts-wf-filename{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
 .ts-zoom-btns{display:flex;gap:3px;background:rgba(196,57,107,.08);border-radius:6px;padding:2px}
+.ts-speed-select{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.04em;color:var(--gold);background:rgba(196,57,107,.08);border:none;border-radius:6px;padding:5px 6px;cursor:pointer;outline:none;transition:background .12s}
+.ts-speed-select:hover,.ts-speed-select:focus{background:rgba(196,57,107,.16)}
 .ts-zoom-btn{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.05em;padding:3px 8px;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--text-dim);transition:all .12s}
 .ts-zoom-btn.active,.ts-zoom-btn:hover{background:#fff;color:var(--gold);box-shadow:0 1px 3px rgba(196,57,107,.15)}
 .ts-wf-hint{font-size:10.5px;color:var(--text-dim);font-style:italic}
@@ -730,7 +732,18 @@ select option{background:#fff;color:#2a1a22}
             <div class="ts-wf-filename" id="ts-player-name"></div>
             <div class="ts-wf-timeinfo" id="ts-player-time">0:00 / 0:00</div>
           </div>
-          <div class="ts-zoom-btns">
+          <select class="ts-speed-select" id="ts-speed-select" title="Velocidade de reprodução">
+            <option value="0.5">0.5×</option>
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+            <option value="1.75">1.75×</option>
+            <option value="2">2×</option>
+            <option value="2.5">2.5×</option>
+            <option value="3">3×</option>
+          </select>
+          <div class="ts-zoom-btns" id="ts-zoom-btns">
             <button class="ts-zoom-btn active" data-zoom="1">1×</button>
             <button class="ts-zoom-btn" data-zoom="2">2×</button>
             <button class="ts-zoom-btn" data-zoom="4">4×</button>
@@ -2264,13 +2277,18 @@ function setSel(s1,s2){
 }
 
 // zoom
-document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(btn=>{
+document.querySelectorAll('#ts-zoom-btns .ts-zoom-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#ts-zoom-btns .ts-zoom-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active'); zoom=parseInt(btn.dataset.zoom);
     drawAll();
     const px=sToX(aud.currentTime||0); scrl.scrollLeft=Math.max(0,px-cw()/2);
   });
+});
+
+// velocidade de reprodução
+g('ts-speed-select').addEventListener('change',e=>{
+  aud.playbackRate=parseFloat(e.target.value);
 });
 
 // markers
@@ -2351,7 +2369,7 @@ function renderSections(){
 
 function resetViewport(){
   zoom=1;
-  document.querySelectorAll('#ov-transcricao .ts-zoom-btn').forEach(b=>b.classList.toggle('active', b.dataset.zoom==='1'));
+  document.querySelectorAll('#ts-zoom-btns .ts-zoom-btn').forEach(b=>b.classList.toggle('active', b.dataset.zoom==='1'));
   drawAll();
   if(scrl) scrl.scrollLeft=0;
 }
