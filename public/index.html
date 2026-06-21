@@ -327,10 +327,10 @@ select option{background:#fff;color:#2a1a22}
 .ts-secchip-meta{font-size:10.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
 .ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
 .ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
-.ts-secfilter-bar{display:flex;flex-direction:column;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:10px;padding:12px 16px;margin-top:8px}
-.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.ts-focus-eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);opacity:.75}
-.ts-focus-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text)}
+.ts-secfilter-bar{display:flex;flex-direction:column;background:transparent;border:1px solid var(--border);border-left:3px solid rgba(196,57,107,.35);border-radius:8px;padding:9px 14px;margin-top:8px}
+.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.ts-focus-eyebrow{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);opacity:.7}
+.ts-focus-title{font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:var(--text-dim)}
 .ts-btn-exit-focus{background:#fff;border-color:rgba(196,57,107,.3)}
 .ts-btn-exit-focus:hover{background:var(--gold-dim)}
 .ts-time-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
@@ -353,7 +353,7 @@ select option{background:#fff;color:#2a1a22}
 .ts-clip-status.show{display:flex}
 .ts-secchip-dl{font-size:12px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px;cursor:pointer}
 .ts-secchip-dl:hover{background:var(--gold-dim);color:var(--gold)}
-.ts-secfilter-bar span{font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:.05em;color:var(--gold);text-transform:uppercase}
+.ts-secfilter-bar span{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.04em;color:var(--text-dim)}
 
 .ts-markers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
 .ts-marker-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)}
@@ -387,16 +387,17 @@ select option{background:#fff;color:#2a1a22}
 .ts-ts-badge:hover{border-color:var(--gold);color:var(--gold)}
 .ts-meta{display:flex;gap:1rem;margin-top:6px;flex-wrap:wrap}
 .ts-meta span{font-size:11.5px;color:var(--text-dim);font-style:italic}
-.ts-sel-panel{display:none;background:#e8f4f0;border:1px solid #b8ddd4;border-radius:10px;padding:12px 14px;margin-top:10px}
+.ts-sel-panel{display:none;background:linear-gradient(135deg,#fff5f7,#fde8ed);border:2px solid var(--gold);border-radius:12px;padding:16px 18px;margin-top:10px;box-shadow:0 4px 22px rgba(196,57,107,.18)}
 .ts-sel-panel.open{display:block}
-.ts-sel-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a7a60;margin-bottom:7px}
-.ts-sel-text{font-family:'Crimson Pro',serif;font-size:14.5px;line-height:1.65;color:var(--text);background:#fff;border:1px solid #b8ddd4;border-radius:7px;padding:10px 13px;margin-bottom:8px;white-space:pre-wrap;max-height:100px;overflow-y:auto}
-.ts-sel-meta{font-size:11.5px;color:#2a7a60;margin-bottom:8px;font-style:italic}
-.ts-sel-actions{display:flex;gap:8px;flex-wrap:wrap}
-.ts-btn-usar{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;border:none;background:var(--gold);color:#fff;transition:opacity .12s;box-shadow:0 2px 8px rgba(196,57,107,.2)}
-.ts-btn-usar:hover{opacity:.85}
-.ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid #b8ddd4;background:transparent;color:#2a7a60;transition:all .12s}
-.ts-btn-ok-ol:hover{background:#2a7a60;color:#fff}
+.ts-sel-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.ts-sel-text{font-family:'Crimson Pro',serif;font-size:14.5px;line-height:1.65;color:var(--text);background:#fff;border:1px solid rgba(196,57,107,.2);border-radius:7px;padding:10px 13px;margin-bottom:8px;white-space:pre-wrap;max-height:100px;overflow-y:auto}
+.ts-sel-meta{font-size:11.5px;color:var(--gold);margin-bottom:8px;font-style:italic}
+.ts-sel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ts-btn-usar{display:block;width:100%;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:14px 20px;border-radius:9px;cursor:pointer;border:none;background:linear-gradient(135deg,#c4396b,#e8688a);color:#fff;transition:all .15s;box-shadow:0 5px 16px rgba(196,57,107,.4)}
+.ts-btn-usar:hover{box-shadow:0 7px 22px rgba(196,57,107,.5);transform:translateY(-1px)}
+.ts-btn-usar:active{transform:translateY(0)}
+.ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(196,57,107,.3);background:#fff;color:var(--gold);transition:all .12s}
+.ts-btn-ok-ol:hover{background:var(--gold);color:#fff}
 .ts-sess-empty{font-size:13px;color:var(--text-dim);font-style:italic;padding:4px 0}
 .ts-sess-list{display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;margin-bottom:6px}
 .ts-sess-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
@@ -839,8 +840,8 @@ select option{background:#fff;color:#2a1a22}
           <button class="ts-btn-sm" id="ts-btn-sel-apply">Aplicar</button>
           <span class="ts-time-dur" id="ts-sel-dur"></span>
         </div>
+        <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como Ponto</button>
         <div class="ts-sel-actions">
-          <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como ponto</button>
           <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
           <button class="ts-btn-ok-ol" id="ts-btn-dl-clip">⬇ Baixar áudio</button>
           <button class="ts-btn-ok-ol" id="ts-btn-copy-trecho">Copiar legenda</button>
