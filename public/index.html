@@ -942,32 +942,28 @@ window.tsExtractClipBlob = async function (file, startSec, endSec, statusCb) {
 // — WAV/PCM bruto nunca tem esse problema. Reencodar é mais lento que copiar, mas ainda
 // rápido pra clipes de poucos minutos.
 window.tsExtractClipWav = async function (file, startSec, endSec, statusCb) {
-  try {
-    statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
-    const ff = await ensureFFmpeg();
-    const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
-    const inName = 'in.' + ext;
-    const outName = 'out.wav';
+  statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
+  const ff = await ensureFFmpeg();
+  const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
+  const inName = 'in.' + ext;
+  const outName = 'out.wav';
 
-    statusCb && statusCb('Lendo arquivo…');
-    const data = await fetchFile(file);
-    await ff.writeFile(inName, data);
+  statusCb && statusCb('Lendo arquivo…');
+  const data = await fetchFile(file);
+  await ff.writeFile(inName, data);
 
-    statusCb && statusCb('Recortando e convertendo trecho…');
-    await ff.exec(['-ss', fmtFFTime(startSec), '-to', fmtFFTime(endSec), '-i', inName, '-ac', '1', '-ar', '8000', outName]);
+  statusCb && statusCb('Recortando e convertendo trecho…');
+  await ff.exec(['-ss', fmtFFTime(startSec), '-to', fmtFFTime(endSec), '-i', inName, '-ac', '1', '-ar', '8000', outName]);
 
-    const out = await ff.readFile(outName);
-    try { await ff.deleteFile(inName); } catch {}
-    try { await ff.deleteFile(outName); } catch {}
+  const out = await ff.readFile(outName);
+  try { await ff.deleteFile(inName); } catch {}
+  try { await ff.deleteFile(outName); } catch {}
 
-    const blob = new Blob([out.buffer], { type: 'audio/wav' });
-    statusCb && statusCb('');
-    return { blob, ext: 'wav', mime: 'audio/wav' };
-  } catch (e) {
-    console.error('ffmpeg wav clip error:', e);
-    statusCb && statusCb('Erro: ' + e.message);
-    return null;
-  }
+  if (!out || !out.length) throw new Error('ffmpeg gerou um arquivo vazio — comando ou trecho inválido');
+
+  const blob = new Blob([out.buffer], { type: 'audio/wav' });
+  statusCb && statusCb('');
+  return { blob, ext: 'wav', mime: 'audio/wav' };
 };
 </script>
 
@@ -2097,7 +2093,6 @@ async function generateRangeWaveform(start, end, forced){
   loading.style.display='block'; loading.textContent='Recortando e analisando esse trecho…';
   try{
     const clip=await window.tsExtractClipWav(tsFile, start, end, msg=>{ if(msg) loading.textContent=msg; });
-    if(!clip) throw new Error('Falha ao recortar o trecho (ffmpeg)');
     const { peaksOut } = await genPeaksFromBlob(clip.blob);
     peaks=peaksOut; peaksRangeStart=start; peaksRangeEnd=end;
     loading.style.display='none';
