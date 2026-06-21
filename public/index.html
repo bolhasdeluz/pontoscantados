@@ -2055,7 +2055,6 @@ function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Qui
 // que está sendo visualizado (uma parte/seção), usando o mesmo recorte via ffmpeg já
 // usado pros downloads — assim o decode é sempre de um clipe pequeno, nunca da sessão toda.
 const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-const SECTION_WF_AUTO_LIMIT_MIN = IS_MOBILE ? 20 : 45; // acima disso, pede confirmação antes de gerar
 
 function showNoWaveformHint(){
   const loading=g('ts-wf-loading');
@@ -2063,6 +2062,18 @@ function showNoWaveformHint(){
   loading.style.display='block';
   loading.innerHTML='Waveform ainda não gerada — abre uma parte da sessão pra ver a forma de onda daquele trecho.'
     +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceFullWaveform()">Gerar da sessão inteira (pode ser lento)</button>';
+  drawAll();
+}
+
+// Mostra um convite (não-bloqueante) pra gerar a waveform desse trecho — NUNCA dispara
+// o ffmpeg sozinho. A régua, a grade e os cliques/arrastos já funcionam imediatamente,
+// sem esperar nada; a forma de onda em si é só um reforço visual opcional.
+function showWaveformPrompt(start, end){
+  const loading=g('ts-wf-loading');
+  peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
+  loading.style.display='block';
+  loading.innerHTML='Já dá pra clicar ou arrastar na linha do tempo acima pra navegar.'
+    +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">🌊 Gerar forma de onda desta parte</button>';
   drawAll();
 }
 
@@ -2081,22 +2092,12 @@ async function genPeaksFromBlob(blob){
   return { peaksOut:out, duration:ab.duration };
 }
 
-// Gera a waveform só do intervalo [start,end) — extrai o clipe via ffmpeg (rápido, leve)
-// e decodifica só ele. Usado automaticamente ao abrir uma parte da sessão.
-async function generateRangeWaveform(start, end, forced){
+// Gera a waveform do intervalo [start,end) — extrai o clipe via ffmpeg e decodifica só
+// ele. Sempre disparado manualmente pelo botão (nunca automático), já que a primeira
+// chamada precisa baixar o motor do ffmpeg.wasm (~30MB) e isso pode levar alguns segundos.
+async function generateRangeWaveform(start, end){
   if(!tsFile || end<=start) return;
-  const durMin=(end-start)/60;
   const loading=g('ts-wf-loading');
-
-  if(!forced && durMin>SECTION_WF_AUTO_LIMIT_MIN){
-    loading.style.display='block';
-    loading.innerHTML='Essa parte é longa ('+fmt(end-start)+') — waveform não gerada automaticamente pra evitar travar.'
-      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">Gerar waveform desta parte mesmo assim</button>';
-    peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
-    drawAll();
-    return;
-  }
-
   loading.style.display='block'; loading.textContent='Recortando e analisando esse trecho…';
   try{
     const clip=await window.tsExtractClipWav(tsFile, start, end, msg=>{ if(msg) loading.textContent=msg; });
@@ -2110,7 +2111,7 @@ async function generateRangeWaveform(start, end, forced){
       +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">Tentar de novo</button>';
   }
 }
-window.tsForceRangeWaveform=(s,e)=>generateRangeWaveform(s,e,true);
+window.tsForceRangeWaveform=(s,e)=>generateRangeWaveform(s,e);
 
 // Gera a waveform da SESSÃO INTEIRA — opcional, só sob pedido explícito. Mantém o
 // limite por tamanho de arquivo como segurança extra pra esse caminho específico.
@@ -2172,6 +2173,21 @@ function drawWf(){
   const mid=WF_H/2;
   ctx.strokeStyle='rgba(196,57,107,.07)'; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(0,mid); ctx.lineTo(w,mid); ctx.stroke();
+  // Grade vertical — sempre desenhada, alinhada com a régua, mesmo sem waveform gerada.
+  // É o que deixa claro que a linha do tempo já é clicável/arrastável de cara, sem
+  // depender de esperar a forma de onda carregar.
+  const gridDur=curViewDuration();
+  if(gridDur>0){
+    const gridStart=curViewStart();
+    const spp=gridDur/w;
+    const iv=spp<0.05?1:spp<0.25?5:spp<1?30:spp<4?60:300;
+    const firstTick=Math.ceil(gridStart/iv)*iv;
+    ctx.strokeStyle='rgba(196,57,107,.1)'; ctx.lineWidth=1;
+    for(let t=firstTick;t<=gridStart+gridDur;t+=iv){
+      const x=sToX(t);
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,WF_H); ctx.stroke();
+    }
+  }
   // Sem peaks (waveform não decodificada — mobile/arquivo grande): segue desenhando
   // seleção, drag, marcações e playhead normalmente, só pula as barras de amplitude.
   // selection
@@ -2365,7 +2381,7 @@ function toggleSecFilter(idx){
     const s=sections[activeSecIdx];
     try{ aud.currentTime=s.start; }catch{}
     const r=activeSecRange();
-    if(r) generateRangeWaveform(r.start, r.end);
+    if(r) showWaveformPrompt(r.start, r.end);
   }else{
     peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
     showNoWaveformHint();
@@ -2417,7 +2433,7 @@ function applySecTimeInputs(){
   sections.sort((a,b)=>a.start-b.start);
   activeSecIdx=sections.indexOf(obj);
   renderSections(); updateSecFilterBar(); renderWords(); drawAll();
-  generateRangeWaveform(s1,s2);
+  showWaveformPrompt(s1,s2);
   toast('Trecho ajustado: '+fmt(s1)+' → '+fmt(s2));
 }
 g('ts-btn-secedit-apply').addEventListener('click',applySecTimeInputs);
@@ -2431,7 +2447,7 @@ g('ts-btn-secset-start').addEventListener('click',()=>{
   sections.sort((a,b)=>a.start-b.start);
   activeSecIdx=sections.indexOf(obj);
   renderSections(); updateSecFilterBar(); renderWords(); drawAll();
-  const r=activeSecRange(); if(r) generateRangeWaveform(r.start,r.end);
+  const r=activeSecRange(); if(r) showWaveformPrompt(r.start,r.end);
   toast('Início ajustado para '+fmt(obj.start));
 });
 g('ts-btn-secset-end').addEventListener('click',()=>{
@@ -2439,7 +2455,7 @@ g('ts-btn-secset-end').addEventListener('click',()=>{
   const obj=sections[activeSecIdx];
   obj.end=aud.currentTime||0;
   renderSections(); updateSecFilterBar(); renderWords(); drawAll();
-  const r=activeSecRange(); if(r) generateRangeWaveform(r.start,r.end);
+  const r=activeSecRange(); if(r) showWaveformPrompt(r.start,r.end);
   toast('Fim ajustado para '+fmt(obj.end));
 });
 
