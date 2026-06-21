@@ -318,6 +318,13 @@ select option{background:#fff;color:#2a1a22}
 .ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
 .ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
 .ts-secfilter-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 14px;margin-top:8px}
+.ts-time-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.ts-time-input{width:78px;background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;text-align:center;padding:6px 4px;outline:none;transition:border-color .15s;font-variant-numeric:tabular-nums}
+.ts-time-input:focus{border-color:var(--gold)}
+.ts-time-input.ts-time-invalid{border-color:var(--red);background:var(--red-dim)}
+.ts-time-arrow{color:var(--text-dim);font-size:13px}
+.ts-time-dur{font-size:11.5px;color:var(--text-dim);font-style:italic;margin-left:4px}
+
 .ts-clip-status{font-size:11.5px;color:var(--gold);font-style:italic;margin-top:8px;display:none;align-items:center;gap:6px}
 .ts-clip-status.show{display:flex}
 .ts-secchip-dl{font-size:12px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px;cursor:pointer}
@@ -734,6 +741,12 @@ select option{background:#fff;color:#2a1a22}
         <div class="ts-seclist" id="ts-seclist"></div>
         <div class="ts-secfilter-bar" id="ts-secfilter-bar" style="display:none">
           <span id="ts-secfilter-label"></span>
+          <div class="ts-time-row" style="margin:0">
+            <input type="text" class="ts-time-input" id="ts-secedit-start-input" placeholder="0:00">
+            <span class="ts-time-arrow">→</span>
+            <input type="text" class="ts-time-input" id="ts-secedit-end-input" placeholder="0:00">
+            <button class="ts-btn-sm" id="ts-btn-secedit-apply">Aplicar</button>
+          </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="ts-btn-sm" id="ts-btn-secset-start" title="Usa o tempo atual do player como novo início">⏺ Início aqui</button>
             <button class="ts-btn-sm" id="ts-btn-secset-end" title="Usa o tempo atual do player como novo fim">⏹ Fim aqui</button>
@@ -769,7 +782,13 @@ select option{background:#fff;color:#2a1a22}
       <div class="ts-sel-panel" id="ts-sel-panel">
         <div class="ts-sel-lbl">Trecho selecionado</div>
         <div class="ts-sel-text" id="ts-sel-text"></div>
-        <div class="ts-sel-meta" id="ts-sel-meta"></div>
+        <div class="ts-time-row">
+          <input type="text" class="ts-time-input" id="ts-sel-start-input" placeholder="0:00">
+          <span class="ts-time-arrow">→</span>
+          <input type="text" class="ts-time-input" id="ts-sel-end-input" placeholder="0:00">
+          <button class="ts-btn-sm" id="ts-btn-sel-apply">Aplicar</button>
+          <span class="ts-time-dur" id="ts-sel-dur"></span>
+        </div>
         <div class="ts-sel-actions">
           <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como ponto</button>
           <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
@@ -1930,6 +1949,19 @@ function showErr(m){ g('ts-err').innerHTML=m; g('ts-err').style.display='block';
 function hideErr(){ g('ts-err').style.display='none'; }
 function setProg(p){ g('ts-prog-bar').style.width=p+'%'; }
 function fmt(s){ const m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; }
+function fmtPrecise(s){ const m=Math.floor(s/60),sec=(s%60); const secStr=sec<10?'0'+sec.toFixed(2):sec.toFixed(2); return m+':'+secStr.replace(/\.?0+$/,''); }
+function parseTimeStr(str){
+  if(str==null) return null;
+  str=String(str).trim().replace(',', '.');
+  if(!str) return null;
+  const parts=str.split(':').map(p=>p.trim());
+  if(parts.length>3 || parts.some(p=>p===''||isNaN(parseFloat(p)))) return null;
+  let secs=0;
+  if(parts.length===1) secs=parseFloat(parts[0]);
+  else if(parts.length===2) secs=parseFloat(parts[0])*60+parseFloat(parts[1]);
+  else secs=parseFloat(parts[0])*3600+parseFloat(parts[1])*60+parseFloat(parts[2]);
+  return (isFinite(secs)&&secs>=0) ? secs : null;
+}
 function fmtField(s){ if(s==null)return''; const m=Math.floor(s/60),sec=Math.floor(s%60),ms=Math.round((s%1)*10); return m+':'+(sec<10?'0':'')+sec+(ms>0?'.'+ms:''); }
 function ctxW(){ return g('ts-ctx').value.trim().split(',').map(s=>s.trim()).filter(Boolean); }
 function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Quimbanda PT-BR. Termos: '+c+'. Preserve pontos cantados.':'Sessão espiritual em português brasileiro.'; }
@@ -2214,9 +2246,32 @@ function updateSecFilterBar(){
   const bar=g('ts-secfilter-bar');
   if(activeSecIdx<0){ bar.style.display='none'; return; }
   const s=sections[activeSecIdx];
+  const r=activeSecRange();
   bar.style.display='flex';
   g('ts-secfilter-label').textContent='Mostrando: '+s.name;
+  g('ts-secedit-start-input').value=fmtPrecise(s.start);
+  g('ts-secedit-end-input').value=fmtPrecise(r?r.end:s.start);
+  g('ts-secedit-start-input').classList.remove('ts-time-invalid');
+  g('ts-secedit-end-input').classList.remove('ts-time-invalid');
 }
+
+function applySecTimeInputs(){
+  if(activeSecIdx<0)return;
+  const s1=parseTimeStr(g('ts-secedit-start-input').value);
+  const s2=parseTimeStr(g('ts-secedit-end-input').value);
+  g('ts-secedit-start-input').classList.toggle('ts-time-invalid', s1===null);
+  g('ts-secedit-end-input').classList.toggle('ts-time-invalid', s2===null || (s1!==null && s2<=s1));
+  if(s1===null||s2===null||s2<=s1){ toast('Tempo inválido — usa formato M:SS ou H:MM:SS'); return; }
+  const obj=sections[activeSecIdx];
+  obj.start=s1; obj.end=s2;
+  sections.sort((a,b)=>a.start-b.start);
+  activeSecIdx=sections.indexOf(obj);
+  renderSections(); updateSecFilterBar(); renderWords(); drawAll();
+  toast('Trecho ajustado: '+fmt(s1)+' → '+fmt(s2));
+}
+g('ts-btn-secedit-apply').addEventListener('click',applySecTimeInputs);
+g('ts-secedit-start-input').addEventListener('keydown',e=>{if(e.key==='Enter')applySecTimeInputs();});
+g('ts-secedit-end-input').addEventListener('keydown',e=>{if(e.key==='Enter')applySecTimeInputs();});
 
 g('ts-btn-secset-start').addEventListener('click',()=>{
   if(activeSecIdx<0)return;
@@ -2481,12 +2536,28 @@ g('ts-btn-sel').addEventListener('click',()=>{
 function showSelPanel(s1,s2){
   const ww=words.filter(w=>w.start>=s1&&w.end<=s2+0.1);
   g('ts-sel-text').textContent=ww.length?ww.map(w=>w.word).join(' '):'(trecho sem fala transcrita)';
-  g('ts-sel-meta').textContent=fmt(s1)+' → '+fmt(s2)+' · '+fmt(s2-s1);
+  g('ts-sel-start-input').value=fmtPrecise(s1);
+  g('ts-sel-end-input').value=fmtPrecise(s2);
+  g('ts-sel-start-input').classList.remove('ts-time-invalid');
+  g('ts-sel-end-input').classList.remove('ts-time-invalid');
+  g('ts-sel-dur').textContent='duração: '+fmt(s2-s1);
   g('ts-sel-panel').classList.add('open');
   g('ts-sel-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
   document.querySelectorAll('#ts-box .ts-in-sel').forEach(el=>el.classList.remove('ts-in-sel'));
   document.querySelectorAll('#ts-box .ts-word').forEach(el=>{ const w=words[parseInt(el.dataset.idx)]; if(w)el.classList.toggle('ts-in-sel',w.start>=s1&&w.end<=s2+0.1); });
 }
+
+function applySelTimeInputs(){
+  const s1=parseTimeStr(g('ts-sel-start-input').value);
+  const s2=parseTimeStr(g('ts-sel-end-input').value);
+  g('ts-sel-start-input').classList.toggle('ts-time-invalid', s1===null);
+  g('ts-sel-end-input').classList.toggle('ts-time-invalid', s2===null || (s1!==null && s2<=s1));
+  if(s1===null||s2===null||s2<=s1){ toast('Tempo inválido — usa formato M:SS ou H:MM:SS'); return; }
+  setSel(s1,s2);
+}
+g('ts-btn-sel-apply').addEventListener('click',applySelTimeInputs);
+g('ts-sel-start-input').addEventListener('keydown',e=>{if(e.key==='Enter')applySelTimeInputs();});
+g('ts-sel-end-input').addEventListener('keydown',e=>{if(e.key==='Enter')applySelTimeInputs();});
 
 function clearSel(){
   selS=null; selE=null; wordSelStart=null;
