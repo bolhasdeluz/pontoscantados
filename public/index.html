@@ -14,6 +14,14 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:12
 .header-row2::-webkit-scrollbar{display:none}
 .hfbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.85);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;padding:5px 13px;transition:all .18s;white-space:nowrap;flex-shrink:0}
 .hfbtn:hover,.hfbtn.active{background:rgba(255,255,255,.9);color:var(--gold);border-color:rgba(255,255,255,.9)}
+.admin-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;flex-shrink:0;user-select:none}
+.admin-toggle input{position:absolute;opacity:0;width:0;height:0}
+.admin-toggle-track{position:relative;width:36px;height:20px;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);border-radius:99px;transition:background .2s,border-color .2s;flex-shrink:0}
+.admin-toggle-knob{position:absolute;top:1px;left:1px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.admin-toggle input:checked + .admin-toggle-track{background:#fff;border-color:#fff}
+.admin-toggle input:checked + .admin-toggle-track .admin-toggle-knob{transform:translateX(16px);background:var(--gold)}
+.admin-toggle-text{color:rgba(255,255,255,.85);font-size:.75rem;font-weight:500;white-space:nowrap}
+.admin-toggle input:checked ~ .admin-toggle-text{color:#fff;font-weight:600}
 .hi{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;overflow:hidden}
 header h1{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:#fff;letter-spacing:-.01em;white-space:nowrap}
 header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
@@ -330,6 +338,15 @@ select option{background:#fff;color:#2a1a22}
 .ts-time-arrow{color:var(--text-dim);font-size:13px}
 .ts-time-dur{font-size:11.5px;color:var(--text-dim);font-style:italic;margin-left:4px}
 
+.ts-search-google{margin-top:10px}
+.ts-search-google-label{display:block;font-size:11.5px;color:var(--text-dim);font-style:italic;margin-bottom:6px;line-height:1.4}
+.ts-search-google .ts-time-row input{
+  flex:1;width:auto;text-align:left;font-family:'Crimson Pro',serif;font-size:14px;
+  background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 12px;
+  color:var(--text);outline:none;transition:border-color .15s;
+}
+.ts-search-google .ts-time-row input:focus{border-color:var(--gold)}
+
 .ts-clip-status{font-size:11.5px;color:var(--gold);font-style:italic;margin-top:8px;display:none;align-items:center;gap:6px}
 .ts-clip-status.show{display:flex}
 .ts-secchip-dl{font-size:12px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px;cursor:pointer}
@@ -407,11 +424,11 @@ select option{background:#fff;color:#2a1a22}
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCards()">
       </div>
-      <button class="hbtn" id="btn-admin">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span>Admin</span>
-        <span class="badge-admin" id="admin-badge" style="display:none">✓</span>
-      </button>
+      <label class="admin-toggle" id="admin-toggle" title="Modo edição">
+        <input type="checkbox" id="admin-toggle-input">
+        <span class="admin-toggle-track"><span class="admin-toggle-knob"></span></span>
+        <span class="admin-toggle-text">Editar</span>
+      </label>
     </div>
   </div>
   <div class="header-row2">
@@ -814,6 +831,13 @@ select option{background:#fff;color:#2a1a22}
           <button class="ts-btn-ok-ol" id="ts-btn-copy-trecho">Copiar legenda</button>
           <button class="ts-btn-ok-ol" id="ts-btn-clear-sel">Limpar</button>
         </div>
+        <div class="ts-search-google">
+          <label class="ts-search-google-label">Não reconheceu o que cantaram? Escreve o que você entende e busca a letra completa:</label>
+          <div class="ts-time-row" style="margin:0">
+            <input type="text" id="ts-sel-search-input" placeholder="ex: vovó cabocla das matas vem">
+            <button class="ts-btn-sm" id="ts-btn-search-google">🔍 Buscar letra completa</button>
+          </div>
+        </div>
         <div class="ts-clip-status" id="ts-clip-status"></div>
       </div>
     </div>
@@ -1010,33 +1034,15 @@ document.getElementById('nova-linha-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') adicionarLinha();
 });
 
-// ── ADMIN ──
-document.getElementById('btn-admin').addEventListener('click', () => {
-  if (adminMode) { sairAdmin(); return; }
-  abrirModal('ov-senha');
-  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+// ── ADMIN (toggle simples, sem senha) ──
+document.getElementById('admin-toggle-input').addEventListener('change', e => {
+  if (e.target.checked) ativarAdmin(); else sairAdmin();
 });
-
-document.getElementById('pin-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') verificarSenha();
-});
-
-function verificarSenha() {
-  if (btoa(document.getElementById('pin-input').value) === ADMIN_HASH) {
-    fecharModal('ov-senha');
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-error').style.display = 'none';
-    ativarAdmin();
-  } else {
-    document.getElementById('pin-error').style.display = 'block';
-    document.getElementById('pin-input').select();
-  }
-}
 
 function ativarAdmin() {
   adminMode = true;
   document.body.classList.add('admin-mode');
-  document.getElementById('admin-badge').style.display = '';
+  document.getElementById('admin-toggle-input').checked = true;
   document.getElementById('admin-bar').style.display = 'flex';
   document.getElementById('subtitle').textContent = '✏️ Modo edição ativo';
 }
@@ -1044,7 +1050,7 @@ function ativarAdmin() {
 function sairAdmin() {
   adminMode = false;
   document.body.classList.remove('admin-mode');
-  document.getElementById('admin-badge').style.display = 'none';
+  document.getElementById('admin-toggle-input').checked = false;
   document.getElementById('admin-bar').style.display = 'none';
   document.getElementById('subtitle').textContent = 'Bolhas de Luz';
   limparSelecao();
@@ -2605,7 +2611,9 @@ g('ts-btn-sel').addEventListener('click',()=>{
 
 function showSelPanel(s1,s2){
   const ww=words.filter(w=>w.start>=s1&&w.end<=s2+0.1);
-  g('ts-sel-text').textContent=ww.length?ww.map(w=>w.word).join(' '):'(trecho sem fala transcrita)';
+  const transcribedText = ww.length?ww.map(w=>w.word).join(' '):'';
+  g('ts-sel-text').textContent=transcribedText||'(trecho sem fala transcrita)';
+  g('ts-sel-search-input').value=transcribedText;
   g('ts-sel-start-input').value=fmtPrecise(s1);
   g('ts-sel-end-input').value=fmtPrecise(s2);
   g('ts-sel-start-input').classList.remove('ts-time-invalid');
@@ -2645,6 +2653,14 @@ g('ts-btn-copy-trecho').addEventListener('click',()=>{
   const ww=words.filter(w=>w.start>=selS&&w.end<=selE+0.1);
   navigator.clipboard.writeText('['+fmt(selS)+' → '+fmt(selE)+']\n'+ww.map(w=>w.word).join(' ')).then(()=>toast('Copiado ✓'));
 });
+
+g('ts-btn-search-google').addEventListener('click',()=>{
+  const txt=g('ts-sel-search-input').value.trim();
+  if(!txt){ toast('Escreve um trecho pra buscar'); return; }
+  const q=encodeURIComponent(txt+' ponto cantado letra umbanda');
+  window.open('https://www.google.com/search?q='+q,'_blank');
+});
+g('ts-sel-search-input').addEventListener('keydown',e=>{ if(e.key==='Enter') g('ts-btn-search-google').click(); });
 
 // ── baixar trecho de áudio (recorte real, via ffmpeg.wasm) ──
 async function tsDownloadClip(start,end,name,btnEl){
