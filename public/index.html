@@ -2047,98 +2047,78 @@ function fmtField(s){ if(s==null)return''; const m=Math.floor(s/60),sec=Math.flo
 function ctxW(){ return g('ts-ctx').value.trim().split(',').map(s=>s.trim()).filter(Boolean); }
 function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Quimbanda PT-BR. Termos: '+c+'. Preserve pontos cantados.':'Sessão espiritual em português brasileiro.'; }
 
-// ══ WAVEFORM ══
-// Princípio: NUNCA decodificar o arquivo inteiro automaticamente. Pra áudios longos
-// (horas), decodificar tudo gera um buffer de PCM gigante (duração × sampleRate × 4 bytes)
-// que estoura a memória da aba mesmo em desktop — o tamanho do ARQUIVO comprimido não
-// reflete o tamanho do áudio bruto decodificado. A waveform só é gerada para o TRECHO
-// que está sendo visualizado (uma parte/seção), usando o mesmo recorte via ffmpeg já
-// usado pros downloads — assim o decode é sempre de um clipe pequeno, nunca da sessão toda.
+// ══ WAVEFORM — CAPTURA AO VIVO (sem ffmpeg, sem decodificar nada) ══
+// Gerar a waveform decodificando o arquivo (inteiro ou em pedaços via ffmpeg.wasm)
+// depende de uma biblioteca pesada (~30MB) carregada via CDN, sujeita a falhas de
+// CORS/Worker que travam silenciosamente sem aviso — já tentamos contornar isso
+// duas vezes sem sucesso confiável. A alternativa robusta: ler a amplitude do áudio
+// AO VIVO, direto da Web Audio API nativa do navegador, enquanto ele toca. Sem
+// Worker, sem download de motor externo, sem decodificar nada antecipadamente —
+// a forma de onda vai sendo desenhada conforme você escuta ou arrasta o player.
 const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
+let liveCtx=null, liveAnalyser=null, liveSource=null, liveData=null;
+function ensureAnalyser(){
+  if(liveAnalyser) return true;
+  try{
+    liveCtx=new(window.AudioContext||window.webkitAudioContext)();
+    liveSource=liveCtx.createMediaElementSource(aud);
+    liveAnalyser=liveCtx.createAnalyser();
+    liveAnalyser.fftSize=2048;
+    liveData=new Uint8Array(liveAnalyser.fftSize);
+    liveSource.connect(liveAnalyser);
+    liveAnalyser.connect(liveCtx.destination); // reconecta a saída — senão o áudio fica mudo
+    return true;
+  }catch(e){
+    console.warn('analyser:',e);
+    return false;
+  }
+}
+aud.addEventListener('play',()=>{
+  ensureAnalyser();
+  if(liveCtx && liveCtx.state==='suspended') liveCtx.resume();
+});
+
+function liveCaptureTick(){
+  if(liveAnalyser && !aud.paused && peaksRangeStart!=null && peaksRangeEnd!=null){
+    liveAnalyser.getByteTimeDomainData(liveData);
+    let mn=128,mx=128;
+    for(let i=0;i<liveData.length;i++){ const v=liveData[i]; if(v<mn)mn=v; if(v>mx)mx=v; }
+    const nmn=(mn-128)/128, nmx=(mx-128)/128;
+    const t=aud.currentTime, dur=peaksRangeEnd-peaksRangeStart;
+    if(t>=peaksRangeStart && t<peaksRangeEnd && dur>0){
+      const pi=Math.floor(((t-peaksRangeStart)/dur)*PEAKS);
+      if(pi>=0 && pi<PEAKS){
+        const cur=peaks[pi];
+        peaks[pi]=cur?[Math.min(cur[0],nmn),Math.max(cur[1],nmx)]:[nmn,nmx];
+      }
+    }
+    drawWf();
+  }
+  requestAnimationFrame(liveCaptureTick);
+}
+requestAnimationFrame(liveCaptureTick);
+
+// Sem seção ativa: limpa a waveform e mostra dica simples.
 function showNoWaveformHint(){
-  const loading=g('ts-wf-loading');
   peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
+  const loading=g('ts-wf-loading');
   loading.style.display='block';
-  loading.innerHTML='Waveform ainda não gerada — abre uma parte da sessão pra ver a forma de onda daquele trecho.'
-    +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceFullWaveform()">Gerar da sessão inteira (pode ser lento)</button>';
+  loading.textContent='Abre uma parte da sessão pra desenhar a forma de onda ao vivo enquanto escuta.';
   drawAll();
 }
 
-// Mostra um convite (não-bloqueante) pra gerar a waveform desse trecho — NUNCA dispara
-// o ffmpeg sozinho. A régua, a grade e os cliques/arrastos já funcionam imediatamente,
-// sem esperar nada; a forma de onda em si é só um reforço visual opcional.
+// Entrando numa parte: prepara o "papel em branco" pra captura ao vivo — preenche
+// conforme você toca ou arrasta por aquele trecho.
 function showWaveformPrompt(start, end){
+  peaksRangeStart=start; peaksRangeEnd=end;
+  peaks=new Array(PEAKS).fill(null);
   const loading=g('ts-wf-loading');
-  peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
   loading.style.display='block';
-  loading.innerHTML='Já dá pra clicar ou arrastar na linha do tempo acima pra navegar.'
-    +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">🌊 Gerar forma de onda desta parte</button>';
+  loading.textContent='Toca o áudio — a forma de onda desenha ao vivo conforme você escuta.';
+  setTimeout(()=>{ if(loading.textContent.includes('desenha ao vivo')) loading.style.display='none'; },4000);
   drawAll();
 }
-
-// Decodifica um Blob JÁ PEQUENO (clipe extraído) em picos de amplitude.
-async function genPeaksFromBlob(blob){
-  const buf=await blob.arrayBuffer();
-  let actx;
-  try{ actx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:8000}); }
-  catch{ actx=new(window.AudioContext||window.webkitAudioContext)(); }
-  const ab=await actx.decodeAudioData(buf);
-  await actx.close();
-  const data=ab.getChannelData(0);
-  const bs=Math.max(1,Math.floor(data.length/PEAKS));
-  const out=[];
-  for(let i=0;i<PEAKS;i++){ let mn=0,mx=0; const st=i*bs,en=Math.min(st+bs,data.length); for(let j=st;j<en;j++){if(data[j]<mn)mn=data[j];if(data[j]>mx)mx=data[j];} out.push([mn,mx]); }
-  return { peaksOut:out, duration:ab.duration };
-}
-
-// Gera a waveform do intervalo [start,end) — extrai o clipe via ffmpeg e decodifica só
-// ele. Sempre disparado manualmente pelo botão (nunca automático), já que a primeira
-// chamada precisa baixar o motor do ffmpeg.wasm (~30MB) e isso pode levar alguns segundos.
-async function generateRangeWaveform(start, end){
-  if(!tsFile || end<=start) return;
-  const loading=g('ts-wf-loading');
-  loading.style.display='block'; loading.textContent='Recortando e analisando esse trecho…';
-  try{
-    const clip=await window.tsExtractClipWav(tsFile, start, end, msg=>{ if(msg) loading.textContent=msg; });
-    const { peaksOut } = await genPeaksFromBlob(clip.blob);
-    peaks=peaksOut; peaksRangeStart=start; peaksRangeEnd=end;
-    loading.style.display='none';
-    drawAll();
-  }catch(e){
-    console.warn('wf trecho:',e);
-    loading.innerHTML='Não foi possível gerar a waveform desse trecho.<br><small style="opacity:.75">'+(e.message||e)+'</small><br>Player e transcrição funcionam normalmente.'
-      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">Tentar de novo</button>';
-  }
-}
-window.tsForceRangeWaveform=(s,e)=>generateRangeWaveform(s,e);
-
-// Gera a waveform da SESSÃO INTEIRA — opcional, só sob pedido explícito. Mantém o
-// limite por tamanho de arquivo como segurança extra pra esse caminho específico.
-const FULL_WF_LIMIT_MB = IS_MOBILE ? 20 : 150;
-async function generateFullSessionWaveform(forced){
-  if(!tsFile) return;
-  const sizeMB=tsFile.size/1024/1024;
-  const loading=g('ts-wf-loading');
-  if(!forced && sizeMB>FULL_WF_LIMIT_MB){
-    loading.style.display='block';
-    loading.innerHTML='Áudio grande ('+sizeMB.toFixed(0)+'MB) — gerar a waveform da sessão inteira pode travar a página.'
-      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceFullWaveform(true)">Gerar mesmo assim (arriscado)</button>';
-    return;
-  }
-  loading.style.display='block'; loading.textContent='Analisando forma de onda da sessão inteira…';
-  try{
-    const { peaksOut, duration }=await genPeaksFromBlob(tsFile);
-    peaks=peaksOut; peaksRangeStart=0; peaksRangeEnd=wfDur||duration;
-    loading.style.display='none';
-    drawAll();
-  }catch(e){
-    console.warn('wf sessão:',e);
-    loading.innerHTML='Não foi possível gerar a waveform completa.<br><small style="opacity:.75">'+(e.message||e)+'</small><br>Tenta gerar por partes em vez disso.';
-    setTimeout(()=>{ loading.style.display='none'; },5000);
-  }
-}
-window.tsForceFullWaveform=(forced)=>generateFullSessionWaveform(!!forced);
 
 function cw(){ return g('ts-wf-scroll')?.clientWidth||600; }
 function canvW(){ return Math.round(cw()*zoom); }
@@ -2210,9 +2190,10 @@ function drawWf(){
   // bars
   if(peaks.length && peaksRangeStart!=null && peaksRangeEnd!=null && peaksRangeEnd>peaksRangeStart) for(let px=0;px<w;px++){
     const t=xToS(px);
-    if(t<peaksRangeStart || t>peaksRangeEnd) continue; // fora do trecho decodificado — sem barra aqui
+    if(t<peaksRangeStart || t>peaksRangeEnd) continue; // fora do trecho — sem barra aqui
     const pi=Math.floor(((t-peaksRangeStart)/(peaksRangeEnd-peaksRangeStart))*PEAKS); if(pi<0||pi>=peaks.length)continue;
-    const [mn,mx]=peaks[pi];
+    const bucket=peaks[pi]; if(!bucket) continue; // ainda não capturado (não tocou esse pedaço ainda)
+    const [mn,mx]=bucket;
     const inS=selS!==null&&t>=Math.min(selS,selE)&&t<=Math.max(selS,selE);
     ctx.strokeStyle=inS?'#c4396b':'rgba(196,57,107,.45)'; ctx.lineWidth=1; ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(px+.5,mid+mn*mid*.95); ctx.lineTo(px+.5,mid+mx*mid*.95); ctx.stroke();
