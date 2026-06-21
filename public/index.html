@@ -1867,6 +1867,7 @@ const WF_H=140, RUL_H=24, PEAKS=5000;
 let prov='deepgram', tsFile=null, words=[], r2url='';
 let selS=null, selE=null, selMode=false, wordSelStart=null;
 let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
+let peaksRangeStart=null, peaksRangeEnd=null; // intervalo absoluto [start,end) que `peaks` representa
 let sections=[], activeSecIdx=-1;
 const SEC_COLORS=['#2a7a60','#6030a0','#c4396b','#8c5a00','#1a73e8','#b84040','#3a9a78'];
 let dragging=false, dragX0=null, dragX1=null;
@@ -1956,7 +1957,7 @@ function applyFile(f){
   aud.src=lastBlobUrl;
   g('ts-player-name').textContent=f.name;
   hideErr(); updateBtn();
-  loadWaveform(f);
+  showNoWaveformHint();
 }
 
 window.tsInitPlayer=()=>{
@@ -1969,7 +1970,7 @@ window.tsInitPlayer=()=>{
     aud.src=lastBlobUrl;
     g('ts-player-name').textContent=tsFile.name;
     g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+tsFile.name+' ('+(tsFile.size/1024/1024).toFixed(0)+' MB)</span>';
-    loadWaveform(tsFile);
+    showNoWaveformHint();
   },150);
 };
 function setFile(f){
@@ -2009,50 +2010,98 @@ function ctxW(){ return g('ts-ctx').value.trim().split(',').map(s=>s.trim()).fil
 function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Quimbanda PT-BR. Termos: '+c+'. Preserve pontos cantados.':'Sessão espiritual em português brasileiro.'; }
 
 // ══ WAVEFORM ══
+// Princípio: NUNCA decodificar o arquivo inteiro automaticamente. Pra áudios longos
+// (horas), decodificar tudo gera um buffer de PCM gigante (duração × sampleRate × 4 bytes)
+// que estoura a memória da aba mesmo em desktop — o tamanho do ARQUIVO comprimido não
+// reflete o tamanho do áudio bruto decodificado. A waveform só é gerada para o TRECHO
+// que está sendo visualizado (uma parte/seção), usando o mesmo recorte via ffmpeg já
+// usado pros downloads — assim o decode é sempre de um clipe pequeno, nunca da sessão toda.
 const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-const WF_AUTO_LIMIT_MB = IS_MOBILE ? 20 : 150; // acima disso, waveform vira opt-in (botão)
+const SECTION_WF_AUTO_LIMIT_MIN = IS_MOBILE ? 20 : 45; // acima disso, pede confirmação antes de gerar
 
-async function loadWaveform(f, forced){
+function showNoWaveformHint(){
   const loading=g('ts-wf-loading');
-  const sizeMB=f.size/1024/1024;
+  peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
+  loading.style.display='block';
+  loading.innerHTML='Waveform ainda não gerada — abre uma parte da sessão pra ver a forma de onda daquele trecho.'
+    +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceFullWaveform()">Gerar da sessão inteira (pode ser lento)</button>';
+  drawAll();
+}
 
-  // Em mobile (ou arquivos muito grandes em qualquer device), ler o arquivo inteiro
-  // pra memória + decodificar PCM pode estourar o limite por aba do navegador e
-  // derrubar/recarregar a página sozinha (especialmente no Safari iOS). Por isso,
-  // acima do limite a waveform vira opcional — o player e a timeline continuam
-  // funcionando normalmente via duração nativa do <audio>, sem decodificar nada.
-  if(!forced && sizeMB>WF_AUTO_LIMIT_MB){
+// Decodifica um Blob JÁ PEQUENO (clipe extraído) em picos de amplitude.
+async function genPeaksFromBlob(blob){
+  const buf=await blob.arrayBuffer();
+  let actx;
+  try{ actx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:8000}); }
+  catch{ actx=new(window.AudioContext||window.webkitAudioContext)(); }
+  const ab=await actx.decodeAudioData(buf);
+  await actx.close();
+  const data=ab.getChannelData(0);
+  const bs=Math.max(1,Math.floor(data.length/PEAKS));
+  const out=[];
+  for(let i=0;i<PEAKS;i++){ let mn=0,mx=0; const st=i*bs,en=Math.min(st+bs,data.length); for(let j=st;j<en;j++){if(data[j]<mn)mn=data[j];if(data[j]>mx)mx=data[j];} out.push([mn,mx]); }
+  return { peaksOut:out, duration:ab.duration };
+}
+
+// Gera a waveform só do intervalo [start,end) — extrai o clipe via ffmpeg (rápido, leve)
+// e decodifica só ele. Usado automaticamente ao abrir uma parte da sessão.
+async function generateRangeWaveform(start, end, forced){
+  if(!tsFile || end<=start) return;
+  const durMin=(end-start)/60;
+  const loading=g('ts-wf-loading');
+
+  if(!forced && durMin>SECTION_WF_AUTO_LIMIT_MIN){
     loading.style.display='block';
-    loading.innerHTML='Áudio grande ('+sizeMB.toFixed(0)+'MB)'+(IS_MOBILE?' no celular':'')+' — waveform desativada por padrão para evitar travar a página.<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceWaveform()">Gerar waveform mesmo assim</button>';
+    loading.innerHTML='Essa parte é longa ('+fmt(end-start)+') — waveform não gerada automaticamente pra evitar travar.'
+      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceRangeWaveform('+start+','+end+')">Gerar waveform desta parte mesmo assim</button>';
+    peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
+    drawAll();
     return;
   }
 
-  loading.style.display='block'; loading.textContent='Analisando forma de onda…';
-  peaks=[];
+  loading.style.display='block'; loading.textContent='Recortando e analisando esse trecho…';
   try{
-    const buf=await f.arrayBuffer();
-    // Sample rate baixo (8kHz) — suficiente para envelope de amplitude, mas fração da memória.
-    let actx;
-    try{ actx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:8000}); }
-    catch{ actx=new(window.AudioContext||window.webkitAudioContext)(); }
-    const ab=await actx.decodeAudioData(buf);
-    await actx.close();
-    if(!wfDur) wfDur=ab.duration; // fallback caso o <audio> ainda não tenha disparado loadedmetadata
-    const data=ab.getChannelData(0);
-    const bs=Math.max(1,Math.floor(data.length/PEAKS));
-    for(let i=0;i<PEAKS;i++){ let mn=0,mx=0; const st=i*bs,en=Math.min(st+bs,data.length); for(let j=st;j<en;j++){if(data[j]<mn)mn=data[j];if(data[j]>mx)mx=data[j];} peaks.push([mn,mx]); }
+    const clip=await window.tsExtractClipBlob(tsFile, start, end, msg=>{ if(msg) loading.textContent=msg; });
+    if(!clip) throw new Error('Falha ao recortar o trecho');
+    const { peaksOut } = await genPeaksFromBlob(clip.blob);
+    peaks=peaksOut; peaksRangeStart=start; peaksRangeEnd=end;
+    loading.style.display='none';
     drawAll();
   }catch(e){
-    console.warn('wf:',e);
-    // Falha ao gerar waveform (áudio muito grande/formato exótico) — player e marcações
-    // continuam funcionando normalmente via duração do <audio>, só sem o desenho visual.
-    loading.textContent='Não foi possível gerar a waveform. Player e transcrição funcionam normalmente.';
+    console.warn('wf trecho:',e);
+    loading.textContent='Não foi possível gerar a waveform desse trecho. Player e transcrição funcionam normalmente.';
     setTimeout(()=>{ loading.style.display='none'; },3500);
+  }
+}
+window.tsForceRangeWaveform=(s,e)=>generateRangeWaveform(s,e,true);
+
+// Gera a waveform da SESSÃO INTEIRA — opcional, só sob pedido explícito. Mantém o
+// limite por tamanho de arquivo como segurança extra pra esse caminho específico.
+const FULL_WF_LIMIT_MB = IS_MOBILE ? 20 : 150;
+async function generateFullSessionWaveform(forced){
+  if(!tsFile) return;
+  const sizeMB=tsFile.size/1024/1024;
+  const loading=g('ts-wf-loading');
+  if(!forced && sizeMB>FULL_WF_LIMIT_MB){
+    loading.style.display='block';
+    loading.innerHTML='Áudio grande ('+sizeMB.toFixed(0)+'MB) — gerar a waveform da sessão inteira pode travar a página.'
+      +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:6px" onclick="window.tsForceFullWaveform(true)">Gerar mesmo assim (arriscado)</button>';
     return;
   }
-  loading.style.display='none';
+  loading.style.display='block'; loading.textContent='Analisando forma de onda da sessão inteira…';
+  try{
+    const { peaksOut, duration }=await genPeaksFromBlob(tsFile);
+    peaks=peaksOut; peaksRangeStart=0; peaksRangeEnd=wfDur||duration;
+    loading.style.display='none';
+    drawAll();
+  }catch(e){
+    console.warn('wf sessão:',e);
+    loading.textContent='Não foi possível gerar a waveform completa. Tenta gerar por partes em vez disso.';
+    setTimeout(()=>{ loading.style.display='none'; },3500);
+  }
 }
-window.tsForceWaveform=()=>{ if(tsFile) loadWaveform(tsFile,true); };
+window.tsForceFullWaveform=(forced)=>generateFullSessionWaveform(!!forced);
+
 function cw(){ return g('ts-wf-scroll')?.clientWidth||600; }
 function canvW(){ return Math.round(cw()*zoom); }
 function curViewStart(){ const r=activeSecRange(); return r?r.start:0; }
@@ -2106,9 +2155,10 @@ function drawWf(){
     ctx.setLineDash([]);
   }
   // bars
-  if(peaks.length && wfDur>0) for(let px=0;px<w;px++){
+  if(peaks.length && peaksRangeStart!=null && peaksRangeEnd!=null && peaksRangeEnd>peaksRangeStart) for(let px=0;px<w;px++){
     const t=xToS(px);
-    const pi=Math.floor((t/wfDur)*PEAKS); if(pi<0||pi>=peaks.length)continue;
+    if(t<peaksRangeStart || t>peaksRangeEnd) continue; // fora do trecho decodificado — sem barra aqui
+    const pi=Math.floor(((t-peaksRangeStart)/(peaksRangeEnd-peaksRangeStart))*PEAKS); if(pi<0||pi>=peaks.length)continue;
     const [mn,mx]=peaks[pi];
     const inS=selS!==null&&t>=Math.min(selS,selE)&&t<=Math.max(selS,selE);
     ctx.strokeStyle=inS?'#c4396b':'rgba(196,57,107,.45)'; ctx.lineWidth=1; ctx.setLineDash([]);
@@ -2277,6 +2327,11 @@ function toggleSecFilter(idx){
   if(activeSecIdx>=0){
     const s=sections[activeSecIdx];
     try{ aud.currentTime=s.start; }catch{}
+    const r=activeSecRange();
+    if(r) generateRangeWaveform(r.start, r.end);
+  }else{
+    peaks=[]; peaksRangeStart=null; peaksRangeEnd=null;
+    showNoWaveformHint();
   }
   updateSecFilterBar();
   renderSections();
@@ -2325,6 +2380,7 @@ function applySecTimeInputs(){
   sections.sort((a,b)=>a.start-b.start);
   activeSecIdx=sections.indexOf(obj);
   renderSections(); updateSecFilterBar(); renderWords(); drawAll();
+  generateRangeWaveform(s1,s2);
   toast('Trecho ajustado: '+fmt(s1)+' → '+fmt(s2));
 }
 g('ts-btn-secedit-apply').addEventListener('click',applySecTimeInputs);
@@ -2338,6 +2394,7 @@ g('ts-btn-secset-start').addEventListener('click',()=>{
   sections.sort((a,b)=>a.start-b.start);
   activeSecIdx=sections.indexOf(obj);
   renderSections(); updateSecFilterBar(); renderWords(); drawAll();
+  const r=activeSecRange(); if(r) generateRangeWaveform(r.start,r.end);
   toast('Início ajustado para '+fmt(obj.start));
 });
 g('ts-btn-secset-end').addEventListener('click',()=>{
@@ -2345,6 +2402,7 @@ g('ts-btn-secset-end').addEventListener('click',()=>{
   const obj=sections[activeSecIdx];
   obj.end=aud.currentTime||0;
   renderSections(); updateSecFilterBar(); renderWords(); drawAll();
+  const r=activeSecRange(); if(r) generateRangeWaveform(r.start,r.end);
   toast('Fim ajustado para '+fmt(obj.end));
 });
 
