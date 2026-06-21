@@ -317,7 +317,12 @@ select option{background:#fff;color:#2a1a22}
 .ts-secchip-meta{font-size:10.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
 .ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
 .ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
-.ts-secfilter-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 14px;margin-top:8px}
+.ts-secfilter-bar{display:flex;flex-direction:column;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:10px;padding:12px 16px;margin-top:8px}
+.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.ts-focus-eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);opacity:.75}
+.ts-focus-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text)}
+.ts-btn-exit-focus{background:#fff;border-color:rgba(196,57,107,.3)}
+.ts-btn-exit-focus:hover{background:var(--gold-dim)}
 .ts-time-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .ts-time-input{width:78px;background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;text-align:center;padding:6px 4px;outline:none;transition:border-color .15s;font-variant-numeric:tabular-nums}
 .ts-time-input:focus{border-color:var(--gold)}
@@ -725,22 +730,30 @@ select option{background:#fff;color:#2a1a22}
       </div>
 
       <div id="ts-sections-panel" style="display:none;margin-bottom:14px">
-        <div class="ts-sec-lbl">Partes da sessão</div>
-        <p style="font-size:11.5px;color:var(--text-dim);font-style:italic;margin-bottom:8px">
-          Toca o áudio e marca onde cada parte começa — depois é só clicar pra pular direto e ver só aquele trecho.
-        </p>
-        <div class="ts-secquick" id="ts-secquick">
-          <button class="ts-secquick-btn" data-name="Abertura">+ Abertura</button>
-          <button class="ts-secquick-btn" data-name="Passe">+ Passe</button>
-          <button class="ts-secquick-btn" data-name="Pontos Cantados">+ Pontos Cantados</button>
-          <button class="ts-secquick-btn" data-name="Consulta">+ Consulta</button>
-          <button class="ts-secquick-btn" data-name="Segunda Parte">+ Segunda Parte</button>
-          <button class="ts-secquick-btn" data-name="Encerramento">+ Encerramento</button>
-          <button class="ts-secquick-btn ts-secquick-custom" id="ts-secquick-custom">+ outro nome…</button>
+        <div id="ts-sections-wide" >
+          <div class="ts-sec-lbl">Partes da sessão</div>
+          <p style="font-size:11.5px;color:var(--text-dim);font-style:italic;margin-bottom:8px">
+            Toca o áudio e marca onde cada parte começa — depois é só clicar pra pular direto e ver só aquele trecho.
+          </p>
+          <div class="ts-secquick" id="ts-secquick">
+            <button class="ts-secquick-btn" data-name="Abertura">+ Abertura</button>
+            <button class="ts-secquick-btn" data-name="Passe">+ Passe</button>
+            <button class="ts-secquick-btn" data-name="Pontos Cantados">+ Pontos Cantados</button>
+            <button class="ts-secquick-btn" data-name="Consulta">+ Consulta</button>
+            <button class="ts-secquick-btn" data-name="Segunda Parte">+ Segunda Parte</button>
+            <button class="ts-secquick-btn" data-name="Encerramento">+ Encerramento</button>
+            <button class="ts-secquick-btn ts-secquick-custom" id="ts-secquick-custom">+ outro nome…</button>
+          </div>
+          <div class="ts-seclist" id="ts-seclist"></div>
         </div>
-        <div class="ts-seclist" id="ts-seclist"></div>
         <div class="ts-secfilter-bar" id="ts-secfilter-bar" style="display:none">
-          <span id="ts-secfilter-label"></span>
+          <div class="ts-focus-header">
+            <div>
+              <div class="ts-focus-eyebrow">Trabalhando em</div>
+              <div class="ts-focus-title" id="ts-secfilter-label"></div>
+            </div>
+            <button class="ts-btn-sm ts-btn-exit-focus" id="ts-btn-secfilter-clear">↩ Ver sessão inteira</button>
+          </div>
           <div class="ts-time-row" style="margin:0">
             <input type="text" class="ts-time-input" id="ts-secedit-start-input" placeholder="0:00">
             <span class="ts-time-arrow">→</span>
@@ -750,10 +763,15 @@ select option{background:#fff;color:#2a1a22}
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="ts-btn-sm" id="ts-btn-secset-start" title="Usa o tempo atual do player como novo início">⏺ Início aqui</button>
             <button class="ts-btn-sm" id="ts-btn-secset-end" title="Usa o tempo atual do player como novo fim">⏹ Fim aqui</button>
-            <button class="ts-btn-sm" id="ts-btn-secfilter-clear">Ver sessão inteira</button>
+            <button class="ts-btn-sm" id="ts-btn-mark-ponto" title="Marca um ponto cantado no tempo atual do player">🎵 Marcar ponto aqui</button>
           </div>
         </div>
-      </div>
+
+        <div id="ts-focus-markers" style="display:none">
+          <div class="ts-sec-lbl">Pontos marcados nessa parte</div>
+          <div class="ts-markers-list" id="ts-focus-markers-list"></div>
+        </div>
+        </div>
 
       <div id="ts-markers-section" style="display:none;margin-bottom:14px">
         <div class="ts-sec-lbl">Marcações</div>
@@ -2262,16 +2280,32 @@ function toggleSecFilter(idx){
 
 function updateSecFilterBar(){
   const bar=g('ts-secfilter-bar');
-  if(activeSecIdx<0){ bar.style.display='none'; return; }
+  const wide=g('ts-sections-wide');
+  const focusMarkers=g('ts-focus-markers');
+  if(activeSecIdx<0){
+    bar.style.display='none';
+    wide.style.display='block';
+    focusMarkers.style.display='none';
+    renderMarkers(); // volta a lista global completa
+    return;
+  }
   const s=sections[activeSecIdx];
   const r=activeSecRange();
   bar.style.display='flex';
-  g('ts-secfilter-label').textContent='Mostrando: '+s.name;
+  wide.style.display='none';
+  focusMarkers.style.display='block';
+  g('ts-secfilter-label').textContent=s.name;
   g('ts-secedit-start-input').value=fmtPrecise(s.start);
   g('ts-secedit-end-input').value=fmtPrecise(r?r.end:s.start);
   g('ts-secedit-start-input').classList.remove('ts-time-invalid');
   g('ts-secedit-end-input').classList.remove('ts-time-invalid');
+  renderMarkers();
 }
+
+g('ts-btn-mark-ponto').addEventListener('click',()=>{
+  if(activeSecIdx<0)return;
+  addMarker(aud.currentTime||sections[activeSecIdx].start);
+});
 
 function applySecTimeInputs(){
   if(activeSecIdx<0)return;
@@ -2331,23 +2365,41 @@ function addMarker(t){
   markers.push({t,c:MCOLS[mci%MCOLS.length],note:comment}); mci++;
   markers.sort((a,b)=>a.t-b.t);
   drawWf(); renderMarkers();
-  g('ts-markers-section').style.display='block';
 }
 function renderMarkers(){
-  const el=g('ts-markers-list');
-  if(!markers.length){ el.innerHTML=''; return; }
-  el.innerHTML=markers.map((m,i)=>`
-    <div class="ts-marker-item">
-      <div class="ts-marker-dot" style="background:${m.c}"></div>
-      <div class="ts-marker-body">
-        <div class="ts-marker-time" onclick="tsSeek(${m.t})">${fmt(m.t)}</div>
-        ${m.note?`<div class="ts-marker-comment">${m.note}</div>`:''}
-      </div>
-      <div style="display:flex;gap:5px">
-        <button class="ts-marker-btn" onclick="tsSelMarker(${i})">✂ trecho</button>
-        <button class="ts-marker-btn del" onclick="tsDelMarker(${i})">✕</button>
-      </div>
-    </div>`).join('');
+  const r=activeSecRange();
+  const targetId = r ? 'ts-focus-markers-list' : 'ts-markers-list';
+  const el=g(targetId);
+  if(!el)return;
+  // índices originais preservados pra tsSelMarker/tsDelMarker continuarem funcionando certo
+  const items = markers
+    .map((m,i)=>({m,i}))
+    .filter(({m})=> !r || (m.t>=r.start && m.t<r.end));
+
+  if(!items.length){
+    el.innerHTML = r
+      ? '<div class="ts-add-marker-hint">Nenhum ponto marcado ainda — duplo clique na waveform ou "🎵 Marcar ponto aqui"</div>'
+      : '';
+    if(!r) return;
+  } else {
+    el.innerHTML=items.map(({m,i})=>`
+      <div class="ts-marker-item">
+        <div class="ts-marker-dot" style="background:${m.c}"></div>
+        <div class="ts-marker-body">
+          <div class="ts-marker-time" onclick="tsSeek(${m.t})">${fmt(m.t)}</div>
+          ${m.note?`<div class="ts-marker-comment">${m.note}</div>`:''}
+        </div>
+        <div style="display:flex;gap:5px">
+          <button class="ts-marker-btn" onclick="tsSelMarker(${i})">✂ trecho</button>
+          <button class="ts-marker-btn del" onclick="tsDelMarker(${i})">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // a lista NÃO-focada (global) some quando vazia e sem seção ativa, igual antes
+  if(!r){
+    g('ts-markers-section').style.display = markers.length ? 'block' : 'none';
+  }
 }
 window.tsSeek=t=>{ aud.currentTime=t; if(aud.paused)aud.play(); g('ts-play-btn').textContent='⏸'; };
 window.tsSelMarker=i=>{ const m=markers[i],nx=markers[i+1]; setSel(m.t,nx?nx.t:Math.min(m.t+30,wfDur)); };
