@@ -1418,11 +1418,18 @@ function renderSegmentos() {
   });
 }
 
+// normaliza qualquer URL antiga do r2.dev pra rota da mesma origem (que serve do R2 pelo binding)
+function audioSrc(u) {
+  if (!u) return u;
+  const m = /r2\.dev\/(.+)$/.exec(u);
+  return m ? '/api/audio/' + m[1] : u;
+}
+
 function buildAudioPlayer(p) {
   const pid = 'cp' + String(p.id).replace(/[^a-z0-9]/gi, '').slice(-8);
   const start = p.audioStart != null ? Number(p.audioStart) : null;
   const end = p.audioEnd != null ? Number(p.audioEnd) : null;
-  let src = p.audioUrl;
+  let src = audioSrc(p.audioUrl);
   if (start != null) {
     src += '#t=' + start.toFixed(1);
     if (end != null) src += ',' + end.toFixed(1);
@@ -1819,7 +1826,7 @@ window.openEdit = id => {
     urlEl.style.display = 'block';
     const prev = document.getElementById('edit-audio-preview');
     const player = document.getElementById('edit-audio-player');
-    player.src = p.audioUrl;
+    player.src = audioSrc(p.audioUrl);
     prev.style.display = 'block';
     document.getElementById('seg-area').style.display = 'block';
     // Edição: sem multi-seg
@@ -1861,7 +1868,7 @@ window.attachSessAudio = () => {
   ue.style.display = 'block';
   const s = parseTime(document.getElementById('fAudioStart').value);
   const e = parseTime(document.getElementById('fAudioEnd').value);
-  let src = r2url; if (s != null) { src += '#t=' + s.toFixed(1); if (e != null) src += ',' + e.toFixed(1); }
+  let src = audioSrc(r2url); if (s != null) { src += '#t=' + s.toFixed(1); if (e != null) src += ',' + e.toFixed(1); }
   const player = document.getElementById('edit-audio-player');
   player.src = src;
   document.getElementById('edit-audio-preview').style.display = 'block';
@@ -2970,7 +2977,7 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
   if(url){
     r2url=url;
     ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=url;
-    player.src=url+'#t='+sStart.toFixed(1)+','+sEnd.toFixed(1);
+    player.src=audioSrc(url)+'#t='+sStart.toFixed(1)+','+sEnd.toFixed(1);
     prev.style.display='block';
     document.getElementById('audioFileName').textContent='✅ '+(currentAudioName||(tsFile?tsFile.name:'áudio'));
   }else{
@@ -3063,7 +3070,7 @@ function loadSess(i){
   drop.classList.add('ts-needs-audio');
   // player direto da nuvem (R2) — ouvir e criar pontos sem reanexar o arquivo
   let cloudLoaded=false;
-  if(r2url && !liveSource){ try{ audCloud=true; aud.src=r2url; aud.load(); cloudLoaded=true; }catch(e){ cloudLoaded=false; } }
+  if(r2url){ try{ audCloud=false; aud.src=audioSrc(r2url); aud.load(); cloudLoaded=true; }catch(e){ cloudLoaded=false; } }
   if(s.driveFileId){
     driveFileId=s.driveFileId; driveFileName=s.driveFileName; driveResourceKey=s.driveResourceKey||'';
     g('ts-drop-name').innerHTML=
@@ -3077,7 +3084,7 @@ function loadSess(i){
     },50);
   }else if(cloudLoaded){
     drop.classList.remove('ts-needs-audio');
-    g('ts-drop-name').innerHTML='<div class="ts-needs-badge" style="border-color:#cfe6df;background:#eef6f3;color:#2a7a60">🎵 <strong>'+(s.filename||'áudio')+'</strong><br><small>tocando da nuvem — ouça e crie pontos sem reanexar. Arraste o arquivo só se quiser a forma de onda desenhada.</small></div>';
+    g('ts-drop-name').innerHTML='<div class="ts-needs-badge" style="border-color:#cfe6df;background:#eef6f3;color:#2a7a60">🎵 <strong>'+(s.filename||'áudio')+'</strong><br><small>tocando da nuvem ✓ — a forma de onda vai aparecendo conforme você escuta. Não precisa reanexar o arquivo.</small></div>';
   }else{
     g('ts-drop-name').innerHTML='<div class="ts-needs-badge">📂 <strong>'+(s.filename||'áudio')+'</strong><br><small>Arrasta o arquivo aqui novamente para sincronizar o player</small></div>';
   }
