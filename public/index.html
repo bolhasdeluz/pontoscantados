@@ -1519,25 +1519,46 @@ async function previewAudio(input) {
   }
 }
 
-async function uploadAudioToR2(file) {
+let r2uploadPct = 0;
+function uploadAudioToR2(file) {
   const progressWrap = document.getElementById('uploadProgress');
   const progressBar = document.getElementById('uploadProgressBar');
-  progressWrap.style.display = 'block';
-  progressBar.style.width = '30%';
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    const res = await fetch('/api/upload', { method:'POST', body:formData });
-    progressBar.style.width = '100%';
-    setTimeout(() => { progressWrap.style.display = 'none'; progressBar.style.width = '0'; }, 800);
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload falhou'); }
-    const { url } = await res.json();
-    return url;
-  } catch (e) {
-    progressWrap.style.display = 'none';
-    mostrarErro('Erro no upload de áudio', e);
-    return null;
-  }
+  if (progressWrap) progressWrap.style.display = 'block';
+  if (progressBar) progressBar.style.width = '0%';
+  r2uploadPct = 0;
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        r2uploadPct = Math.round((e.loaded / e.total) * 100);
+        if (progressBar) progressBar.style.width = r2uploadPct + '%';
+      }
+    };
+    xhr.onload = () => {
+      let url = null;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { url = JSON.parse(xhr.responseText).url; } catch {}
+      }
+      r2uploadPct = 100;
+      if (progressBar) progressBar.style.width = '100%';
+      setTimeout(() => { if (progressWrap) progressWrap.style.display = 'none'; if (progressBar) progressBar.style.width = '0'; }, 800);
+      if (url) { resolve(url); }
+      else {
+        let msg = 'Upload falhou'; try { msg = JSON.parse(xhr.responseText).error || msg; } catch {}
+        if (progressWrap) progressWrap.style.display = 'none';
+        mostrarErro('Erro no upload de áudio', new Error(msg));
+        resolve(null);
+      }
+    };
+    xhr.onerror = () => {
+      if (progressWrap) progressWrap.style.display = 'none';
+      mostrarErro('Erro no upload de áudio', new Error('Erro de rede no upload'));
+      resolve(null);
+    };
+    const fd = new FormData(); fd.append('file', file);
+    xhr.send(fd);
+  });
 }
 
 // ── RENDER ──
@@ -1838,15 +1859,27 @@ window.savePonto = async () => {
   const audioStart = parseTime(document.getElementById('fAudioStart').value);
   const audioEnd = parseTime(document.getElementById('fAudioEnd').value);
   const multiSeg = document.getElementById('fMultiSeg').checked;
-  // trava: ponto-trecho sem áudio anexado não salva mudo — espera o upload terminar
+  // trava: ponto-trecho sem áudio — em vez de salvar mudo, espera/sobe o áudio mostrando o %
   const ehTrecho = (audioStart != null || audioEnd != null) || (multiSeg && segmentos.length > 0);
   if (ehTrecho && !audioUrl) {
-    if (typeof r2uploadPromise !== 'undefined' && r2uploadPromise) {
-      toast('Aguardando o áudio terminar de enviar…');
-      try { const u = await r2uploadPromise; if (u) { audioUrl = u; document.getElementById('audioCurrentUrl').dataset.url = u; } } catch {}
+    const btn = document.querySelector('.modal-footer .btn-save');
+    const oldLabel = btn ? btn.textContent : 'Salvar Ponto';
+    const setLbl = t => { if (btn) btn.textContent = t; };
+    const waitWithPct = async (prom) => {
+      if (btn) btn.disabled = true;
+      const tick = setInterval(() => setLbl('⏳ Enviando áudio… ' + (r2uploadPct || 0) + '%'), 200);
+      let u = ''; try { u = await prom; } catch {}
+      clearInterval(tick); if (btn) btn.disabled = false; setLbl(oldLabel);
+      return u;
+    };
+    if (r2uploadPromise) { const u = await waitWithPct(r2uploadPromise); if (u) audioUrl = u; }
+    if (!audioUrl && typeof tsFile !== 'undefined' && tsFile) {
+      r2uploadPromise = uploadAudioToR2(tsFile).then(u => { if (u) r2url = u; return u; }).catch(() => '');
+      const u = await waitWithPct(r2uploadPromise); if (u) audioUrl = u;
     }
+    if (audioUrl) document.getElementById('audioCurrentUrl').dataset.url = audioUrl;
     if (!audioUrl) {
-      const segue = confirm('O áudio deste trecho ainda não terminou de enviar.\nSe salvar agora, o ponto fica SEM som.\n\nMelhor: espera o "Enviando…" terminar e usa "Usar como Ponto" de novo.\n\nSalvar mesmo assim, sem áudio?');
+      const segue = confirm('Não consegui anexar o áudio — a gravação não está carregada no estúdio ou o envio falhou.\n\nOs tempos do trecho já estão preenchidos. Salvar sem som por enquanto? (dá pra anexar depois pelo filtro "🔇 Sem áudio")');
       if (!segue) return;
     }
   }
