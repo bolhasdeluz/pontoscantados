@@ -88,6 +88,9 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .cplayer-btn{background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all .18s}
 .cplayer-btn:hover{background:#b02d5a}
 .cplayer-segment{font-size:.7rem;color:#8c5a00;background:#fffbe8;border:1px solid #e8c860;border-radius:6px;padding:3px 8px;flex:1;text-align:center}
+.cplayer-loop{background:transparent;border:1.5px solid var(--gold);color:var(--gold)}
+.cplayer-loop:hover{background:var(--gold-dim);color:var(--gold)}
+.cplayer-loop.loop-on{background:var(--gold);color:#fff;border-color:var(--gold)}
 
 /* ── SEGMENTOS ── */
 .seg-toggle{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fdf5f7;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;cursor:pointer;transition:all .18s}
@@ -1293,6 +1296,16 @@ function cpReady(pid, start) {
   if (start != null) a.currentTime = start;
 }
 
+function cpLoop(pid) {
+  const a = document.getElementById(pid);
+  if (!a) return;
+  const on = a.dataset.loop !== '1';
+  a.dataset.loop = on ? '1' : '';
+  if (!a.dataset.end) a.loop = on; // trecho sem fim definido (áudio inteiro) → loop nativo
+  const btn = document.getElementById(pid + '-loopbtn');
+  if (btn) btn.classList.toggle('loop-on', on);
+}
+
 function cpToggle(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
@@ -1313,9 +1326,14 @@ function cpUpdate(pid, start, end) {
   const t = a.currentTime;
   const dur = a.duration || 0;
   if (end != null && t >= end - 0.08) {
-    a.pause();
-    a.currentTime = start != null ? start : 0;
-    document.getElementById(pid + '-playbtn').textContent = '▶';
+    if (a.dataset.loop === '1') {
+      a.currentTime = start != null ? start : 0;
+      a.play().catch(() => {});
+    } else {
+      a.pause();
+      a.currentTime = start != null ? start : 0;
+      document.getElementById(pid + '-playbtn').textContent = '▶';
+    }
   }
   if (dur > 0) {
     const pct = (t / dur * 100).toFixed(2);
@@ -1413,7 +1431,7 @@ function buildAudioPlayer(p) {
     ? `▶ ${formatTime(start)}${end != null ? ' — ' + formatTime(end) : ''}`
     : '';
   return `<div class="cplayer" id="${pid}-wrap">
-    <audio id="${pid}" preload="metadata" src="${src}"
+    <audio id="${pid}" preload="metadata" src="${src}" data-end="${end != null ? end : ''}"
       ontimeupdate="cpUpdate('${pid}',${start || 'null'},${end || 'null'})"
       onloadedmetadata="cpReady('${pid}',${start || 'null'})">
     </audio>
@@ -1431,6 +1449,7 @@ function buildAudioPlayer(p) {
     </div>
     <div class="cplayer-controls">
       <button class="cplayer-btn" onclick="cpToggle('${pid}',${start || 'null'})" id="${pid}-playbtn">▶</button>
+      <button class="cplayer-btn cplayer-loop" onclick="cpLoop('${pid}')" id="${pid}-loopbtn" title="Repetir o trecho">🔁</button>
       ${segLabel ? `<span class="cplayer-segment">${segLabel}</span>` : ''}
     </div>
   </div>`;
