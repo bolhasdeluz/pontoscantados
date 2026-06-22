@@ -327,10 +327,10 @@ select option{background:#fff;color:#2a1a22}
 .ts-secchip-meta{font-size:10.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
 .ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
 .ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
-.ts-secfilter-bar{display:flex;flex-direction:column;background:transparent;border:1px solid var(--border);border-left:3px solid rgba(196,57,107,.35);border-radius:8px;padding:9px 14px;margin-top:8px}
-.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
-.ts-focus-eyebrow{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);opacity:.7}
-.ts-focus-title{font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:var(--text-dim)}
+.ts-secfilter-bar{display:flex;flex-direction:column;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 12px;margin-top:8px}
+.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.ts-focus-eyebrow{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);opacity:.75}
+.ts-focus-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--text)}
 .ts-btn-exit-focus{background:#fff;border-color:rgba(196,57,107,.3)}
 .ts-btn-exit-focus:hover{background:var(--gold-dim)}
 .ts-time-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
@@ -353,7 +353,7 @@ select option{background:#fff;color:#2a1a22}
 .ts-clip-status.show{display:flex}
 .ts-secchip-dl{font-size:12px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px;cursor:pointer}
 .ts-secchip-dl:hover{background:var(--gold-dim);color:var(--gold)}
-.ts-secfilter-bar span{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.04em;color:var(--text-dim)}
+.ts-secfilter-bar span{font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:.05em;color:var(--gold);text-transform:uppercase}
 
 .ts-markers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
 .ts-marker-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)}
@@ -387,17 +387,16 @@ select option{background:#fff;color:#2a1a22}
 .ts-ts-badge:hover{border-color:var(--gold);color:var(--gold)}
 .ts-meta{display:flex;gap:1rem;margin-top:6px;flex-wrap:wrap}
 .ts-meta span{font-size:11.5px;color:var(--text-dim);font-style:italic}
-.ts-sel-panel{display:none;background:linear-gradient(135deg,#fff5f7,#fde8ed);border:2px solid var(--gold);border-radius:12px;padding:16px 18px;margin-top:10px;box-shadow:0 4px 22px rgba(196,57,107,.18)}
+.ts-sel-panel{display:none;background:#e8f4f0;border:1px solid #b8ddd4;border-radius:10px;padding:12px 14px;margin-top:10px}
 .ts-sel-panel.open{display:block}
-.ts-sel-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
-.ts-sel-text{font-family:'Crimson Pro',serif;font-size:14.5px;line-height:1.65;color:var(--text);background:#fff;border:1px solid rgba(196,57,107,.2);border-radius:7px;padding:10px 13px;margin-bottom:8px;white-space:pre-wrap;max-height:100px;overflow-y:auto}
-.ts-sel-meta{font-size:11.5px;color:var(--gold);margin-bottom:8px;font-style:italic}
+.ts-sel-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a7a60;margin-bottom:7px}
+.ts-sel-text{font-family:'Crimson Pro',serif;font-size:14.5px;line-height:1.65;color:var(--text);background:#fff;border:1px solid #b8ddd4;border-radius:7px;padding:10px 13px;margin-bottom:8px;white-space:pre-wrap;max-height:100px;overflow-y:auto}
+.ts-sel-meta{font-size:11.5px;color:#2a7a60;margin-bottom:8px;font-style:italic}
 .ts-sel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.ts-btn-usar{display:block;width:100%;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:14px 20px;border-radius:9px;cursor:pointer;border:none;background:linear-gradient(135deg,#c4396b,#e8688a);color:#fff;transition:all .15s;box-shadow:0 5px 16px rgba(196,57,107,.4)}
-.ts-btn-usar:hover{box-shadow:0 7px 22px rgba(196,57,107,.5);transform:translateY(-1px)}
-.ts-btn-usar:active{transform:translateY(0)}
-.ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid rgba(196,57,107,.3);background:#fff;color:var(--gold);transition:all .12s}
-.ts-btn-ok-ol:hover{background:var(--gold);color:#fff}
+.ts-btn-usar{display:block;width:100%;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:11px 16px;border-radius:7px;cursor:pointer;border:none;background:var(--gold);color:#fff;transition:opacity .12s;box-shadow:0 2px 8px rgba(196,57,107,.2)}
+.ts-btn-usar:hover{opacity:.85}
+.ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid #b8ddd4;background:transparent;color:#2a7a60;transition:all .12s}
+.ts-btn-ok-ol:hover{background:#2a7a60;color:#fff}
 .ts-sess-empty{font-size:13px;color:var(--text-dim);font-style:italic;padding:4px 0}
 .ts-sess-list{display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;margin-bottom:6px}
 .ts-sess-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
@@ -811,25 +810,6 @@ select option{background:#fff;color:#2a1a22}
         <div class="ts-markers-list" id="ts-markers-list"></div>
       </div>
 
-      <div class="ts-hdr">
-        <span class="ts-lbl">Transcrição</span>
-        <div class="ts-actions">
-          <button class="ts-btn-sm" id="ts-btn-sel">✂ Selecionar trecho</button>
-          <button class="ts-btn-sm" id="ts-btn-copy-all">Copiar tudo</button>
-          <button class="ts-btn-sm" id="ts-btn-dl-txt">Baixar .txt</button>
-          <button class="ts-btn-sm" id="ts-btn-dl-srt">Baixar .srt</button>
-        </div>
-      </div>
-      <div class="ts-search">
-        <input type="text" id="ts-search" placeholder="Buscar na transcrição…">
-        <span class="ts-search-count" id="ts-search-count"></span>
-      </div>
-      <div class="ts-box" id="ts-box"></div>
-      <div class="ts-meta">
-        <span id="ts-meta-dur"></span>
-        <span id="ts-meta-words"></span>
-        <span id="ts-meta-prov"></span>
-      </div>
       <div class="ts-sel-panel" id="ts-sel-panel">
         <div class="ts-sel-lbl">Trecho selecionado</div>
         <div class="ts-sel-text" id="ts-sel-text"></div>
@@ -855,6 +835,26 @@ select option{background:#fff;color:#2a1a22}
           </div>
         </div>
         <div class="ts-clip-status" id="ts-clip-status"></div>
+      </div>
+
+      <div class="ts-hdr">
+        <span class="ts-lbl">Transcrição</span>
+        <div class="ts-actions">
+          <button class="ts-btn-sm" id="ts-btn-sel">✂ Selecionar trecho</button>
+          <button class="ts-btn-sm" id="ts-btn-copy-all">Copiar tudo</button>
+          <button class="ts-btn-sm" id="ts-btn-dl-txt">Baixar .txt</button>
+          <button class="ts-btn-sm" id="ts-btn-dl-srt">Baixar .srt</button>
+        </div>
+      </div>
+      <div class="ts-search">
+        <input type="text" id="ts-search" placeholder="Buscar na transcrição…">
+        <span class="ts-search-count" id="ts-search-count"></span>
+      </div>
+      <div class="ts-box" id="ts-box"></div>
+      <div class="ts-meta">
+        <span id="ts-meta-dur"></span>
+        <span id="ts-meta-words"></span>
+        <span id="ts-meta-prov"></span>
       </div>
     </div>
   </div>
