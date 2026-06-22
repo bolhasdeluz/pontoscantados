@@ -1928,7 +1928,7 @@ const MCOLS=['#c4396b','#2a7a60','#8c5a00','#6030a0','#b84040','#c88c00'];
 const WF_H=140, RUL_H=24, PEAKS=5000;
 
 // ── state ──
-let prov='deepgram', tsFile=null, words=[], r2url='', currentAudioName='';
+let prov='deepgram', tsFile=null, words=[], r2url='', currentAudioName='', r2uploadPromise=null;
 let selS=null, selE=null, selMode=false, wordSelStart=null;
 let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
 let peaksRangeStart=null, peaksRangeEnd=null; // intervalo absoluto [start,end) que `peaks` representa
@@ -2626,7 +2626,7 @@ async function uploadChunkedToR2(file, onProgress){
 g('ts-btn-transcribe').addEventListener('click',async()=>{
   if(!tsFile)return; const key='';
   hideErr(); g('ts-btn-transcribe').disabled=true;
-  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(2); r2url='';
+  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(2); r2url=''; r2uploadPromise=null;
   sections=[]; activeSecIdx=-1; markers=[]; mci=0;
   g('ts-markers-section').style.display='none'; g('ts-secfilter-bar').style.display='none';
   const t0=Date.now();
@@ -2643,7 +2643,7 @@ g('ts-btn-transcribe').addEventListener('click',async()=>{
       });
       r2url=audioUrlForProv; // reaproveita a mesma URL pro "Usar como ponto"
     }else{
-      uploadAudioToR2(tsFile).then(u=>{ if(u)r2url=u; });
+      r2uploadPromise=uploadAudioToR2(tsFile).then(u=>{ if(u)r2url=u; return u; }).catch(()=>'');
     }
 
     if(prov==='deepgram')    await doDeepgram(key,t0,audioUrlForProv);
@@ -2839,22 +2839,40 @@ g('ts-btn-dl-clip').addEventListener('click',()=>{
 });
 
 // ── usar como ponto ──
-g('ts-btn-usar').addEventListener('click',()=>{
+g('ts-btn-usar').addEventListener('click',async ()=>{
   if(selS===null)return;
-  const ww=words.filter(w=>w.start>=selS&&w.end<=selE+0.1);
+  const sStart=selS, sEnd=selE;
+  const ww=words.filter(w=>w.start>=sStart&&w.end<=sEnd+0.1);
   aud.pause(); fecharModal('ov-transcricao'); openModal();
+  // texto e tempos do trecho entram na hora — não dependem do upload terminar
   document.getElementById('fLetra').value=ww.map(w=>w.word).join(' ');
-  document.getElementById('fAudioStart').value=fmtField(selS);
-  document.getElementById('fAudioEnd').value=fmtField(selE);
-  if(r2url){
-    const ue=document.getElementById('audioCurrentUrl');
-    ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=r2url; ue.dataset.fname=currentAudioName||(tsFile?tsFile.name:''); ue.style.display='block';
-    document.getElementById('edit-audio-player').src=r2url+'#t='+selS.toFixed(1)+','+selE.toFixed(1);
-    document.getElementById('edit-audio-preview').style.display='block';
-    document.getElementById('seg-area').style.display='block';
-    document.getElementById('seg-multi-wrap').style.display='none';
-    document.getElementById('audioFileName').textContent='✅ '+(tsFile?tsFile.name:'áudio');
-  }else toast('Upload em andamento — aguarda e tenta novamente');
+  document.getElementById('fAudioStart').value=fmtField(sStart);
+  document.getElementById('fAudioEnd').value=fmtField(sEnd);
+  document.getElementById('seg-area').style.display='block';
+  document.getElementById('seg-multi-wrap').style.display='none';
+  const ue=document.getElementById('audioCurrentUrl');
+  ue.dataset.fname=currentAudioName||(tsFile?tsFile.name:''); ue.style.display='block';
+  const player=document.getElementById('edit-audio-player');
+  const prev=document.getElementById('edit-audio-preview');
+  // resolve a URL persistente do R2 — espera o upload se ainda estiver em andamento
+  let url=r2url;
+  if(!url && r2uploadPromise){
+    ue.textContent='⏳ Preparando o áudio…';
+    document.getElementById('audioFileName').textContent='⏳ Preparando o áudio…';
+    try{ url=await r2uploadPromise; }catch{ url=''; }
+  }
+  if(url){
+    r2url=url;
+    ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=url;
+    player.src=url+'#t='+sStart.toFixed(1)+','+sEnd.toFixed(1);
+    prev.style.display='block';
+    document.getElementById('audioFileName').textContent='✅ '+(currentAudioName||(tsFile?tsFile.name:'áudio'));
+  }else{
+    ue.textContent='⚠️ Áudio ainda enviando — os tempos já entraram; re-seleciona o arquivo pra anexar o áudio';
+    ue.dataset.url='';
+    document.getElementById('audioFileName').textContent='Toque para escolher um áudio';
+    toast('Tempos do trecho puxados ✓');
+  }
 });
 
 // ── busca ──
