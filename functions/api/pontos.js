@@ -50,6 +50,7 @@ export async function onRequest(context) {
         letra:         body.letra || '',
         yt:            body.yt || '',
         audioUrl:      body.audioUrl || '',
+        audioFile:     body.audioFile || '',
         audioStart:    body.audioStart != null ? Number(body.audioStart) : null,
         audioEnd:      body.audioEnd   != null ? Number(body.audioEnd)   : null,
         dataGravacao:  body.dataGravacao || '',
