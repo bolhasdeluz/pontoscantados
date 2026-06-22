@@ -34,7 +34,7 @@ export async function onRequest(context) {
       httpMetadata: { contentType: file.type || 'audio/mpeg' },
     });
 
-    const url = `https://pub-6a5121068171403aa9e327fbd30cc8e6.r2.dev/${key}`;
+    const url = `/api/audio/${key}`;
     return new Response(JSON.stringify({ url }), { headers: CORS });
 
   } catch (e) {
