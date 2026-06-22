@@ -387,13 +387,16 @@ select option{background:#fff;color:#2a1a22}
 .ts-ts-badge:hover{border-color:var(--gold);color:var(--gold)}
 .ts-meta{display:flex;gap:1rem;margin-top:6px;flex-wrap:wrap}
 .ts-meta span{font-size:11.5px;color:var(--text-dim);font-style:italic}
-.ts-sel-panel{display:none;background:#e8f4f0;border:1px solid #b8ddd4;border-radius:10px;padding:12px 14px;margin-top:10px}
+.ts-sel-panel{display:none;background:#eef6f3;border:1px solid #cfe6df;border-radius:9px;padding:10px 12px;margin-top:11px;animation:tsSelIn .16s ease}
 .ts-sel-panel.open{display:block}
-.ts-sel-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a7a60;margin-bottom:7px}
-.ts-sel-text{font-family:'Crimson Pro',serif;font-size:14.5px;line-height:1.65;color:var(--text);background:#fff;border:1px solid #b8ddd4;border-radius:7px;padding:10px 13px;margin-bottom:8px;white-space:pre-wrap;max-height:100px;overflow-y:auto}
+@keyframes tsSelIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.ts-sel-head{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin-bottom:8px}
+.ts-sel-head .ts-time-row{margin:0;flex-wrap:nowrap}
+.ts-sel-lbl{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2a7a60}
+.ts-sel-text{font-family:'Crimson Pro',serif;font-size:14.5px;line-height:1.6;color:var(--text);background:#fff;border:1px solid #cfe6df;border-radius:7px;padding:9px 12px;margin-bottom:8px;white-space:pre-wrap;max-height:84px;overflow-y:auto}
 .ts-sel-meta{font-size:11.5px;color:#2a7a60;margin-bottom:8px;font-style:italic}
-.ts-sel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.ts-btn-usar{display:block;width:100%;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:11px 16px;border-radius:7px;cursor:pointer;border:none;background:var(--gold);color:#fff;transition:opacity .12s;box-shadow:0 2px 8px rgba(196,57,107,.2)}
+.ts-sel-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.ts-btn-usar{display:block;width:100%;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:10px 16px;border-radius:7px;cursor:pointer;border:none;background:var(--gold);color:#fff;transition:opacity .12s;box-shadow:0 2px 8px rgba(196,57,107,.2)}
 .ts-btn-usar:hover{opacity:.85}
 .ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid #b8ddd4;background:transparent;color:#2a7a60;transition:all .12s}
 .ts-btn-ok-ol:hover{background:#2a7a60;color:#fff}
@@ -759,6 +762,35 @@ select option{background:#fff;color:#2a1a22}
         </div>
         <div class="ts-wf-loading" id="ts-wf-loading">Analisando forma de onda…</div>
         <div class="ts-wf-sel-info" id="ts-wf-sel-info"></div>
+
+        <div class="ts-sel-panel" id="ts-sel-panel">
+          <div class="ts-sel-head">
+            <span class="ts-sel-lbl">Trecho selecionado</span>
+            <div class="ts-time-row" style="margin:0">
+              <input type="text" class="ts-time-input" id="ts-sel-start-input" placeholder="0:00">
+              <span class="ts-time-arrow">→</span>
+              <input type="text" class="ts-time-input" id="ts-sel-end-input" placeholder="0:00">
+              <button class="ts-btn-sm" id="ts-btn-sel-apply">Aplicar</button>
+              <span class="ts-time-dur" id="ts-sel-dur"></span>
+            </div>
+          </div>
+          <div class="ts-sel-text" id="ts-sel-text"></div>
+          <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como Ponto</button>
+          <div class="ts-sel-actions">
+            <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
+            <button class="ts-btn-ok-ol" id="ts-btn-dl-clip">⬇ Baixar áudio</button>
+            <button class="ts-btn-ok-ol" id="ts-btn-copy-trecho">Copiar legenda</button>
+            <button class="ts-btn-ok-ol" id="ts-btn-clear-sel">Limpar</button>
+          </div>
+          <div class="ts-search-google">
+            <label class="ts-search-google-label">Não reconheceu o que cantaram? Escreve o que você entende e busca a letra completa:</label>
+            <div class="ts-time-row" style="margin:0">
+              <input type="text" id="ts-sel-search-input" placeholder="ex: vovó cabocla das matas vem">
+              <button class="ts-btn-sm" id="ts-btn-search-google">🔍 Buscar letra completa</button>
+            </div>
+          </div>
+          <div class="ts-clip-status" id="ts-clip-status"></div>
+        </div>
       </div>
 
       <div id="ts-sections-panel" style="display:none;margin-bottom:14px">
@@ -808,33 +840,6 @@ select option{background:#fff;color:#2a1a22}
       <div id="ts-markers-section" style="display:none;margin-bottom:14px">
         <div class="ts-sec-lbl">Marcações</div>
         <div class="ts-markers-list" id="ts-markers-list"></div>
-      </div>
-
-      <div class="ts-sel-panel" id="ts-sel-panel">
-        <div class="ts-sel-lbl">Trecho selecionado</div>
-        <div class="ts-sel-text" id="ts-sel-text"></div>
-        <div class="ts-time-row">
-          <input type="text" class="ts-time-input" id="ts-sel-start-input" placeholder="0:00">
-          <span class="ts-time-arrow">→</span>
-          <input type="text" class="ts-time-input" id="ts-sel-end-input" placeholder="0:00">
-          <button class="ts-btn-sm" id="ts-btn-sel-apply">Aplicar</button>
-          <span class="ts-time-dur" id="ts-sel-dur"></span>
-        </div>
-        <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como Ponto</button>
-        <div class="ts-sel-actions">
-          <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
-          <button class="ts-btn-ok-ol" id="ts-btn-dl-clip">⬇ Baixar áudio</button>
-          <button class="ts-btn-ok-ol" id="ts-btn-copy-trecho">Copiar legenda</button>
-          <button class="ts-btn-ok-ol" id="ts-btn-clear-sel">Limpar</button>
-        </div>
-        <div class="ts-search-google">
-          <label class="ts-search-google-label">Não reconheceu o que cantaram? Escreve o que você entende e busca a letra completa:</label>
-          <div class="ts-time-row" style="margin:0">
-            <input type="text" id="ts-sel-search-input" placeholder="ex: vovó cabocla das matas vem">
-            <button class="ts-btn-sm" id="ts-btn-search-google">🔍 Buscar letra completa</button>
-          </div>
-        </div>
-        <div class="ts-clip-status" id="ts-clip-status"></div>
       </div>
 
       <div class="ts-hdr">
