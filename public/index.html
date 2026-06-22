@@ -2080,7 +2080,7 @@ let lastBlobUrl='';
 const MOBILE_LAZY_LIMIT_MB = 35; // acima disso em mobile, NADA toca o arquivo até o usuário pedir
 
 function applyFile(f){
-  tsFile=f; currentAudioName=f.name||''; wfDur=0; peaks=[];
+  tsFile=f; currentAudioName=f.name||''; wfDur=0; peaks=[]; audCloud=false;
   g('ts-drop').classList.remove('ts-needs-audio');
   g('ts-drop').classList.add('ts-has-file');
   const sizeMB=f.size/1024/1024;
@@ -2172,6 +2172,7 @@ function ctxP(){ const c=g('ts-ctx').value.trim(); return c?'Sessão Umbanda/Qui
 const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 let liveCtx=null, liveAnalyser=null, liveSource=null, liveData=null;
+let audCloud=false; // áudio vindo da nuvem (R2) — não roteia pelo Web Audio pra não mutar (cross-origin)
 function ensureAnalyser(){
   if(liveAnalyser) return true;
   try{
@@ -2189,7 +2190,7 @@ function ensureAnalyser(){
   }
 }
 aud.addEventListener('play',()=>{
-  ensureAnalyser();
+  if(!audCloud) ensureAnalyser();
   if(liveCtx && liveCtx.state==='suspended') liveCtx.resume();
 });
 
@@ -3041,10 +3042,13 @@ function loadSess(i){
   // mostrar botão de reload
   const drop=g('ts-drop');
   drop.classList.add('ts-needs-audio');
+  // player direto da nuvem (R2) — ouvir e criar pontos sem reanexar o arquivo
+  let cloudLoaded=false;
+  if(r2url && !liveSource){ try{ audCloud=true; aud.src=r2url; aud.load(); cloudLoaded=true; }catch(e){ cloudLoaded=false; } }
   if(s.driveFileId){
     driveFileId=s.driveFileId; driveFileName=s.driveFileName; driveResourceKey=s.driveResourceKey||'';
     g('ts-drop-name').innerHTML=
-      '<div class="ts-needs-badge">📂 <strong>'+s.driveFileName+'</strong><br><small>salvo do Drive — clica para recarregar</small></div>'+
+      '<div class="ts-needs-badge">📂 <strong>'+s.driveFileName+'</strong><br><small>'+(cloudLoaded?'tocando da nuvem ✓ — recarrega do Drive só pra desenhar a forma de onda':'salvo do Drive — clica para recarregar')+'</small></div>'+
       '<button class="ts-reload-btn" id="ts-reload-btn" style="margin-top:8px">'+
       '<svg width="13" height="13" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#fff"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#fff"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#fff"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#fff"/></svg>'+
       ' Recarregar do Drive</button>';
@@ -3052,6 +3056,9 @@ function loadSess(i){
       const btn=document.getElementById('ts-reload-btn');
       if(btn)btn.addEventListener('click',reloadDrive);
     },50);
+  }else if(cloudLoaded){
+    drop.classList.remove('ts-needs-audio');
+    g('ts-drop-name').innerHTML='<div class="ts-needs-badge" style="border-color:#cfe6df;background:#eef6f3;color:#2a7a60">🎵 <strong>'+(s.filename||'áudio')+'</strong><br><small>tocando da nuvem — ouça e crie pontos sem reanexar. Arraste o arquivo só se quiser a forma de onda desenhada.</small></div>';
   }else{
     g('ts-drop-name').innerHTML='<div class="ts-needs-badge">📂 <strong>'+(s.filename||'áudio')+'</strong><br><small>Arrasta o arquivo aqui novamente para sincronizar o player</small></div>';
   }
