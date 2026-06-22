@@ -443,6 +443,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <button class="hfbtn" id="filterNoGuia" onclick="setFilter('noguia')">Sem guias</button>
     <button class="hfbtn" id="filterNossos" onclick="setFilter('nossos')">🎙️ Nossos Pontos</button>
     <button class="hfbtn" id="filterAprender" onclick="setFilter('aprender')">📚 Aprender</button>
+    <button class="hfbtn" id="filterMudos" onclick="setFilter('mudos')" style="display:none">🔇 Sem áudio</button>
   </div>
 </header>
 
@@ -540,6 +541,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
       </div>
       <span id="audioCurrentUrl" style="font-size:.72rem;color:var(--text-dim);margin-top:4px;display:none"></span>
+      <button type="button" id="btn-attach-sess" onclick="attachSessAudio()" style="display:none;margin-top:6px;font-family:'DM Sans',sans-serif;font-size:.74rem;font-weight:600;color:#fff;background:var(--gold);border:none;border-radius:8px;padding:8px 14px;cursor:pointer">🎵 Anexar áudio desta gravação</button>
       <div id="edit-audio-preview" style="display:none;margin-top:8px">
         <audio id="edit-audio-player" controls preload="metadata" style="width:100%;border-radius:8px;accent-color:#c4396b"></audio>
         <p style="font-size:.72rem;color:var(--text-dim);margin-top:4px">🎵 Ouça e use 📍 para marcar os tempos de cada trecho</p>
@@ -1162,7 +1164,7 @@ function setLayout(l) {
 window.setFilter = f => {
   currentFilter = f;
   document.querySelectorAll('.hfbtn').forEach(b => b.classList.remove('active'));
-  const map = { all:'filterAll', sessao:'filterSessao', guia:'filterGuia', noguia:'filterNoGuia', nossos:'filterNossos', aprender:'filterAprender' };
+  const map = { all:'filterAll', sessao:'filterSessao', guia:'filterGuia', noguia:'filterNoGuia', nossos:'filterNossos', aprender:'filterAprender', mudos:'filterMudos' };
   if (map[f]) document.getElementById(map[f]).classList.add('active');
   renderCards();
 };
@@ -1544,6 +1546,21 @@ window.renderCards = () => {
   const linhaFilter = document.getElementById('filterLinha').value;
   const sortBy = document.getElementById('sortBy').value;
 
+  // pontos-trecho que ficaram sem áudio (mudos) — botão de recuperação
+  const muteCount = pontos.filter(p => (p.audioStart != null || p.audioEnd != null) && !p.audioUrl).length;
+  const mbtn = document.getElementById('filterMudos');
+  if (mbtn) {
+    if (muteCount > 0) { mbtn.style.display = ''; mbtn.textContent = '🔇 Sem áudio (' + muteCount + ')'; }
+    else {
+      mbtn.style.display = 'none';
+      if (currentFilter === 'mudos') {
+        currentFilter = 'all';
+        document.querySelectorAll('.hfbtn').forEach(b => b.classList.remove('active'));
+        document.getElementById('filterAll').classList.add('active');
+      }
+    }
+  }
+
   let filtered = pontos.filter(p => {
     const match = !search
       || (p.nome || '').toLowerCase().includes(search)
@@ -1557,6 +1574,7 @@ window.renderCards = () => {
     if (currentFilter === 'noguia') return !p.isGuia;
     if (currentFilter === 'nossos') return !!p.audioUrl;
     if (currentFilter === 'aprender') return !!p.aprender;
+    if (currentFilter === 'mudos') return (p.audioStart != null || p.audioEnd != null) && !p.audioUrl;
     return true;
   });
 
@@ -1711,6 +1729,7 @@ window.openModal = () => {
   document.getElementById('audioCurrentUrl').textContent = '';
   document.getElementById('audioCurrentUrl').dataset.url = '';
   document.getElementById('audioCurrentUrl').dataset.fname = '';
+  document.getElementById('btn-attach-sess').style.display = 'none';
   document.getElementById('audioCurrentUrl').style.display = 'none';
   segmentos = [];
   document.getElementById('seg-area').style.display = 'none';
@@ -1772,6 +1791,11 @@ window.openEdit = id => {
     document.getElementById('seg-multi-wrap').style.display = 'block';
   }
 
+  // recuperação de mudo: ponto-trecho sem áudio + gravação atual carregada e batendo → anexar num clique
+  const ehMudo = !p.audioUrl && (p.audioStart != null || p.audioEnd != null);
+  const bateNome = !p.audioFile || !currentAudioName || p.audioFile === currentAudioName;
+  document.getElementById('btn-attach-sess').style.display = (ehMudo && r2url && bateNome) ? 'inline-block' : 'none';
+
   segmentos = [];
   document.getElementById('fMultiSeg').checked = false;
   document.getElementById('seg-list').style.display = 'none';
@@ -1788,14 +1812,44 @@ window.toggleGuiaField = () => {
   document.getElementById('guiaField').style.display = document.getElementById('fIsGuia').checked ? 'block' : 'none';
 };
 
+window.attachSessAudio = () => {
+  if (!r2url) { toast('Carrega/transcreve a gravação no estúdio primeiro'); return; }
+  const ue = document.getElementById('audioCurrentUrl');
+  ue.dataset.url = r2url;
+  ue.dataset.fname = currentAudioName || ue.dataset.fname || '';
+  ue.textContent = '🎵 ' + (currentAudioName || r2url.split('/').pop());
+  ue.style.display = 'block';
+  const s = parseTime(document.getElementById('fAudioStart').value);
+  const e = parseTime(document.getElementById('fAudioEnd').value);
+  let src = r2url; if (s != null) { src += '#t=' + s.toFixed(1); if (e != null) src += ',' + e.toFixed(1); }
+  const player = document.getElementById('edit-audio-player');
+  player.src = src;
+  document.getElementById('edit-audio-preview').style.display = 'block';
+  document.getElementById('btn-attach-sess').style.display = 'none';
+  toast('Áudio anexado ✓ — agora é só salvar');
+};
+
 window.savePonto = async () => {
   const nome = document.getElementById('fNome').value.trim();
   if (!nome) { alert('Informe o nome do ponto.'); return; }
   const editId = document.getElementById('editId').value;
-  const audioUrl = document.getElementById('audioCurrentUrl').dataset.url || '';
+  let audioUrl = document.getElementById('audioCurrentUrl').dataset.url || '';
   const audioFile = document.getElementById('audioCurrentUrl').dataset.fname || '';
   const audioStart = parseTime(document.getElementById('fAudioStart').value);
   const audioEnd = parseTime(document.getElementById('fAudioEnd').value);
+  const multiSeg = document.getElementById('fMultiSeg').checked;
+  // trava: ponto-trecho sem áudio anexado não salva mudo — espera o upload terminar
+  const ehTrecho = (audioStart != null || audioEnd != null) || (multiSeg && segmentos.length > 0);
+  if (ehTrecho && !audioUrl) {
+    if (typeof r2uploadPromise !== 'undefined' && r2uploadPromise) {
+      toast('Aguardando o áudio terminar de enviar…');
+      try { const u = await r2uploadPromise; if (u) { audioUrl = u; document.getElementById('audioCurrentUrl').dataset.url = u; } } catch {}
+    }
+    if (!audioUrl) {
+      const segue = confirm('O áudio deste trecho ainda não terminou de enviar.\nSe salvar agora, o ponto fica SEM som.\n\nMelhor: espera o "Enviando…" terminar e usa "Usar como Ponto" de novo.\n\nSalvar mesmo assim, sem áudio?');
+      if (!segue) return;
+    }
+  }
   const data = {
     nome,
     linha: document.getElementById('fLinha').value,
@@ -1812,7 +1866,6 @@ window.savePonto = async () => {
     dataGravacao: document.getElementById('fDataGravacao').value || '',
     destaque: editId ? (pontos.find(x => x.id === editId) || {}).destaque || false : false
   };
-  const multiSeg = document.getElementById('fMultiSeg').checked;
   try {
     if (editId) {
       const res = await fetch(API, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id:editId, ...data }) });
