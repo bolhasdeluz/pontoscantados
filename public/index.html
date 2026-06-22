@@ -327,14 +327,14 @@ select option{background:#fff;color:#2a1a22}
 .ts-secchip-meta{font-size:10.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}
 .ts-secchip-del{font-size:11px;color:var(--text-dim);padding:2px 5px;border-radius:4px;margin-left:2px}
 .ts-secchip-del:hover{background:var(--red-dim);color:var(--red)}
-.ts-secfilter-bar{display:flex;flex-direction:column;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:8px 12px;margin-top:8px}
-.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.ts-secfilter-bar{display:flex;flex-direction:column;gap:7px;background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:8px;padding:9px 12px;margin-top:8px}
+.ts-focus-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:0}
 .ts-focus-eyebrow{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);opacity:.75}
 .ts-focus-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--text)}
 .ts-btn-exit-focus{background:#fff;border-color:rgba(196,57,107,.3)}
 .ts-btn-exit-focus:hover{background:var(--gold-dim)}
 .ts-time-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.ts-time-input{width:78px;background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;text-align:center;padding:6px 4px;outline:none;transition:border-color .15s;font-variant-numeric:tabular-nums}
+input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;text-align:center;padding:6px 4px;outline:none;transition:border-color .15s;font-variant-numeric:tabular-nums}
 .ts-time-input:focus{border-color:var(--gold)}
 .ts-time-input.ts-time-invalid{border-color:var(--red);background:var(--red-dim)}
 .ts-time-arrow{color:var(--text-dim);font-size:13px}
@@ -754,7 +754,7 @@ select option{background:#fff;color:#2a1a22}
             <button class="ts-zoom-btn" data-zoom="16">16×</button>
             <button class="ts-zoom-btn" data-zoom="32">32×</button>
           </div>
-          <span class="ts-wf-hint">Arrastar=trecho · 2×clique=marcação</span>
+          <span class="ts-wf-hint">Arrastar=trecho · 2×clique=marcação · <span style="color:#2a7a60">faixa verde = já virou ponto</span></span>
         </div>
         <div class="ts-wf-scroll" id="ts-wf-scroll">
           <canvas id="ts-ruler-canvas" height="24"></canvas>
@@ -1501,6 +1501,7 @@ async function previewAudio(input) {
     document.getElementById('audioFileName').textContent = '✅ ' + file.name;
     urlEl.textContent = '🎵 Áudio pronto para salvar';
     urlEl.dataset.url = uploaded;
+    urlEl.dataset.fname = file.name;
     urlEl.style.display = 'block';
     document.getElementById('seg-area').style.display = 'block';
     // Multi-seg só aparece para novos pontos
@@ -1709,6 +1710,7 @@ window.openModal = () => {
   document.getElementById('guiaField').style.display = 'none';
   document.getElementById('audioCurrentUrl').textContent = '';
   document.getElementById('audioCurrentUrl').dataset.url = '';
+  document.getElementById('audioCurrentUrl').dataset.fname = '';
   document.getElementById('audioCurrentUrl').style.display = 'none';
   segmentos = [];
   document.getElementById('seg-area').style.display = 'none';
@@ -1751,6 +1753,7 @@ window.openEdit = id => {
   document.getElementById('fAudioEnd').value = p.audioEnd != null ? formatTimeField(p.audioEnd) : '';
 
   const urlEl = document.getElementById('audioCurrentUrl');
+  urlEl.dataset.fname = p.audioFile || '';
   if (p.audioUrl) {
     urlEl.textContent = '🎵 ' + p.audioUrl.split('/').pop();
     urlEl.dataset.url = p.audioUrl;
@@ -1790,6 +1793,7 @@ window.savePonto = async () => {
   if (!nome) { alert('Informe o nome do ponto.'); return; }
   const editId = document.getElementById('editId').value;
   const audioUrl = document.getElementById('audioCurrentUrl').dataset.url || '';
+  const audioFile = document.getElementById('audioCurrentUrl').dataset.fname || '';
   const audioStart = parseTime(document.getElementById('fAudioStart').value);
   const audioEnd = parseTime(document.getElementById('fAudioEnd').value);
   const data = {
@@ -1799,6 +1803,7 @@ window.savePonto = async () => {
     letra: document.getElementById('fLetra').value.trim(),
     yt: document.getElementById('fYt').value.trim(),
     audioUrl,
+    audioFile,
     audioStart,
     audioEnd,
     isGuia: document.getElementById('fIsGuia').checked,
@@ -1923,7 +1928,7 @@ const MCOLS=['#c4396b','#2a7a60','#8c5a00','#6030a0','#b84040','#c88c00'];
 const WF_H=140, RUL_H=24, PEAKS=5000;
 
 // ── state ──
-let prov='deepgram', tsFile=null, words=[], r2url='';
+let prov='deepgram', tsFile=null, words=[], r2url='', currentAudioName='';
 let selS=null, selE=null, selMode=false, wordSelStart=null;
 let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
 let peaksRangeStart=null, peaksRangeEnd=null; // intervalo absoluto [start,end) que `peaks` representa
@@ -1950,6 +1955,8 @@ window.tsAbrir=()=>{
     if (!cid) { body.classList.add('open'); if (arrow) arrow.textContent = '▴'; }
     else       { body.classList.remove('open'); if (arrow) arrow.textContent = '▾'; }
   }
+  // redesenha a régua pra mostrar as faixas dos pontos salvos desde a última vez
+  try{ if(g('ts-result') && g('ts-result').style.display!=='none') drawAll(); }catch(e){}
 };
 g('ts-x').addEventListener('click',()=>{ aud.pause(); fecharModal('ov-transcricao'); });
 g('ov-transcricao').addEventListener('click',e=>{ if(e.target===g('ov-transcricao')){ aud.pause(); fecharModal('ov-transcricao'); }});
@@ -1987,7 +1994,7 @@ let lastBlobUrl='';
 const MOBILE_LAZY_LIMIT_MB = 35; // acima disso em mobile, NADA toca o arquivo até o usuário pedir
 
 function applyFile(f){
-  tsFile=f; wfDur=0; peaks=[];
+  tsFile=f; currentAudioName=f.name||''; wfDur=0; peaks=[];
   g('ts-drop').classList.remove('ts-needs-audio');
   g('ts-drop').classList.add('ts-has-file');
   const sizeMB=f.size/1024/1024;
@@ -2233,6 +2240,31 @@ function drawWf(){
       ctx.beginPath(); ctx.moveTo(x2,0); ctx.lineTo(x2,WF_H); ctx.stroke();
       ctx.fillStyle=s.color; ctx.font='bold 10px Cinzel,serif'; ctx.textAlign='left';
       if(x2-x1>40) ctx.fillText(s.name.toUpperCase(),x1+5,13);
+    });
+  }
+  // pontos já salvos DESTE áudio — faixa verde pra não repetir trecho
+  if(pontos && pontos.length && (r2url||currentAudioName)){
+    pontos.forEach(p=>{
+      const sameUrl  = p.audioUrl && r2url && p.audioUrl===r2url;
+      const sameName = p.audioFile && currentAudioName && p.audioFile===currentAudioName;
+      if(!sameUrl && !sameName) return;              // só os deste áudio (URL ou nome do arquivo)
+      const a=(p.audioStart!=null)?Number(p.audioStart):null;
+      const b=(p.audioEnd!=null)?Number(p.audioEnd):null;
+      if(a==null||b==null||!isFinite(a)||!isFinite(b)||b<=a) return;
+      const x1=sToX(a), x2=sToX(b);
+      if(x2<0||x1>w) return;                          // fora da vista atual
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(42,122,96,.13)'; ctx.fillRect(x1,0,x2-x1,WF_H);
+      ctx.strokeStyle='rgba(42,122,96,.55)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x1,0); ctx.lineTo(x1,WF_H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x2,0); ctx.lineTo(x2,WF_H); ctx.stroke();
+      ctx.fillStyle='#2a7a60'; ctx.fillRect(x1,WF_H-4,x2-x1,4);
+      if(x2-x1>50){
+        ctx.save(); ctx.beginPath(); ctx.rect(x1,0,x2-x1-3,WF_H); ctx.clip();
+        ctx.font='bold 9px Cinzel,serif'; ctx.fillStyle='#2a7a60'; ctx.textAlign='left';
+        ctx.fillText('✓ '+(p.nome||'ponto').toUpperCase(), x1+5, WF_H-9);
+        ctx.restore();
+      }
     });
   }
   // markers
@@ -2816,7 +2848,7 @@ g('ts-btn-usar').addEventListener('click',()=>{
   document.getElementById('fAudioEnd').value=fmtField(selE);
   if(r2url){
     const ue=document.getElementById('audioCurrentUrl');
-    ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=r2url; ue.style.display='block';
+    ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=r2url; ue.dataset.fname=currentAudioName||(tsFile?tsFile.name:''); ue.style.display='block';
     document.getElementById('edit-audio-player').src=r2url+'#t='+selS.toFixed(1)+','+selE.toFixed(1);
     document.getElementById('edit-audio-preview').style.display='block';
     document.getElementById('seg-area').style.display='block';
@@ -2889,6 +2921,7 @@ g('ts-sess-name').addEventListener('keydown',e=>{if(e.key==='Enter')g('ts-btn-sa
 function loadSess(i){
   const s=getSess()[i]; if(!s)return;
   words=s.data;
+  currentAudioName=s.filename||s.driveFileName||'';
   sections=s.sections||[]; markers=s.markersData||[]; activeSecIdx=-1;
   g('ts-meta-dur').textContent='cache';
   g('ts-meta-words').textContent='~'+words.length+' palavras';
