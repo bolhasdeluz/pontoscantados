@@ -2925,10 +2925,11 @@ function showSaveRow(){
   if(!g('ts-sess-name').value) g('ts-sess-name').value='Sessão '+new Date().toLocaleDateString('pt-BR');
 }
 
-g('ts-btn-save-sess').addEventListener('click',()=>{
+g('ts-btn-save-sess').addEventListener('click',async ()=>{
   const name=g('ts-sess-name').value.trim(); if(!name||!words.length)return;
+  if(!r2url && r2uploadPromise){ try{ const u=await r2uploadPromise; if(u)r2url=u; }catch{} }
   const list=getSess();
-  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',driveResourceKey:driveResourceKey||'',sections:sections||[],markersData:markers||[],data:words};
+  const entry={name,prov:TS_PROVS[prov]?.label||prov,words:words.length,date:new Date().toLocaleDateString('pt-BR'),filename:tsFile?tsFile.name:'',r2url:r2url||'',driveFileId:driveFileId||'',driveFileName:driveFileName||'',driveResourceKey:driveResourceKey||'',sections:sections||[],markersData:markers||[],data:words};
   const i=list.findIndex(s=>s.name===name);
   if(i>=0)list[i]=entry; else list.unshift(entry);
   try{putSess(list);renderSess();g('ts-sess-name').value='';toast('Sessão "'+name+'" salva ✓');}
@@ -2940,6 +2941,7 @@ function loadSess(i){
   const s=getSess()[i]; if(!s)return;
   words=s.data;
   currentAudioName=s.filename||s.driveFileName||'';
+  r2url=s.r2url||'';
   sections=s.sections||[]; markers=s.markersData||[]; activeSecIdx=-1;
   g('ts-meta-dur').textContent='cache';
   g('ts-meta-words').textContent='~'+words.length+' palavras';
