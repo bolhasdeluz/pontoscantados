@@ -289,6 +289,10 @@ select option{background:#fff;color:#2a1a22}
 .ts-wf-scroll canvas{display:block}
 #ts-ruler-canvas{background:#fdf0f3;border-bottom:1px solid rgba(196,57,107,.12)}
 #ts-wf-canvas{background:#fff}
+.ts-wf-sb{position:relative;height:20px;margin-top:7px;background:rgba(196,57,107,.08);border-radius:99px;cursor:pointer;touch-action:none;user-select:none}
+.ts-wf-sb-thumb{position:absolute;top:3px;height:14px;min-width:40px;width:30%;left:0;background:var(--gold);border-radius:99px;cursor:grab;box-shadow:0 1px 3px rgba(196,57,107,.3);transition:background .12s}
+.ts-wf-sb-thumb:hover{background:#b02d5a}
+.ts-wf-sb-thumb:active{cursor:grabbing}
 .ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:6px 0;font-style:italic;display:none}
 .ts-wf-sel-info{font-size:11.5px;color:var(--gold);margin-top:6px;font-style:italic;min-height:16px}
 .ts-drive-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
@@ -765,6 +769,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
           <canvas id="ts-ruler-canvas" height="24"></canvas>
           <canvas id="ts-wf-canvas" height="140"></canvas>
         </div>
+        <div class="ts-wf-sb" id="ts-wf-sb" style="display:none"><div class="ts-wf-sb-thumb" id="ts-wf-sb-thumb"></div></div>
         <div class="ts-wf-loading" id="ts-wf-loading">Analisando forma de onda…</div>
         <div class="ts-wf-sel-info" id="ts-wf-sel-info"></div>
 
@@ -1292,7 +1297,11 @@ function cpReady(pid, start) {
   const a = document.getElementById(pid);
   if (!a) return;
   const dur = a.duration;
-  if (dur && !isNaN(dur)) document.getElementById(pid + '-dur').textContent = formatTime(dur);
+  const end = a.dataset.end ? Number(a.dataset.end) : null;
+  const lo = start != null ? start : 0;
+  const hi = end != null ? end : (dur || 0);
+  const span = (hi > lo) ? (hi - lo) : (dur || 0);
+  if (span && !isNaN(span)) document.getElementById(pid + '-dur').textContent = formatTime(span);
   if (start != null) a.currentTime = start;
 }
 
@@ -1335,15 +1344,18 @@ function cpUpdate(pid, start, end) {
       document.getElementById(pid + '-playbtn').textContent = '▶';
     }
   }
-  if (dur > 0) {
-    const pct = (t / dur * 100).toFixed(2);
+  const lo = start != null ? start : 0;
+  const hi = end != null ? end : dur;
+  const span = (hi > lo) ? (hi - lo) : dur;
+  if (span > 0) {
+    const pct = Math.max(0, Math.min(100, ((t - lo) / span) * 100)).toFixed(2);
     const fill = document.getElementById(pid + '-fill');
     const thumb = document.getElementById(pid + '-thumb');
     if (fill) fill.style.width = pct + '%';
     if (thumb) thumb.style.left = pct + '%';
   }
   const el = document.getElementById(pid + '-cur');
-  if (el) el.textContent = formatTime(t);
+  if (el) el.textContent = formatTime(Math.max(0, t - lo));
   if (!a.paused) {
     const btn = document.getElementById(pid + '-playbtn');
     if (btn) btn.textContent = '⏸';
@@ -1354,11 +1366,15 @@ function cpSeekStart(e, pid) {
   e.preventDefault();
   const a = document.getElementById(pid);
   if (!a || !a.duration) return;
+  const lo = a.dataset.start ? Number(a.dataset.start) : 0;
+  const hiRaw = a.dataset.end ? Number(a.dataset.end) : a.duration;
+  const hi = (hiRaw > lo) ? hiRaw : a.duration;
+  const span = hi - lo;
   const bar = document.getElementById(pid + '-bar');
   const seek = (clientX) => {
     const rect = bar.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    a.currentTime = pct * a.duration;
+    a.currentTime = lo + pct * span;
   };
   const getX = ev => ev.touches ? ev.touches[0].clientX : ev.clientX;
   seek(getX(e));
@@ -1434,7 +1450,7 @@ function buildAudioPlayer(p) {
     ? `▶ ${formatTime(start)}${end != null ? ' — ' + formatTime(end) : ''}`
     : '';
   return `<div class="cplayer" id="${pid}-wrap">
-    <audio id="${pid}" preload="metadata" src="${src}" data-end="${end != null ? end : ''}"
+    <audio id="${pid}" preload="metadata" src="${src}" data-start="${start != null ? start : ''}" data-end="${end != null ? end : ''}"
       ontimeupdate="cpUpdate('${pid}',${start || 'null'},${end || 'null'})"
       onloadedmetadata="cpReady('${pid}',${start || 'null'})">
     </audio>
@@ -2294,7 +2310,7 @@ function curViewStart(){ const r=activeSecRange(); return r?r.start:0; }
 function curViewDuration(){ const r=activeSecRange(); const d=r?(r.end-r.start):wfDur; return (d&&isFinite(d)&&d>0)?d:(wfDur||0); }
 function sToX(s){ const d=curViewDuration(); return d>0?((s-curViewStart())/d)*canvW():0; }
 function xToS(x){ const w=canvW(); const d=curViewDuration(); return w>0?curViewStart()+(x/w)*d:0; }
-function drawAll(){ drawRuler(); drawWf(); }
+function drawAll(){ drawRuler(); drawWf(); syncWfScrollbar(); }
 function drawRuler(){
   const cv=g('ts-ruler-canvas'); if(!cv)return;
   const w=canvW(); cv.width=w; cv.height=RUL_H;
@@ -2427,6 +2443,41 @@ function drawWf(){
 
 // wf interaction
 const scrl=g('ts-wf-scroll');
+
+// ── barra de rolagem própria (grossa, fácil de pegar) pra navegar nas ondas ──
+function syncWfScrollbar(){
+  const sb=g('ts-wf-sb'), th=g('ts-wf-sb-thumb'); if(!scrl||!sb||!th) return;
+  const sw=scrl.scrollWidth, cw_=scrl.clientWidth;
+  if(sw<=cw_+1){ sb.style.display='none'; return; }
+  sb.style.display='block';
+  const trackW=sb.clientWidth;
+  const thumbW=Math.min(trackW, Math.max(40, trackW*(cw_/sw)));
+  const maxThumb=trackW-thumbW, maxScroll=sw-cw_;
+  th.style.width=thumbW+'px';
+  th.style.left=(maxScroll>0?(scrl.scrollLeft/maxScroll)*maxThumb:0)+'px';
+}
+scrl.addEventListener('scroll', syncWfScrollbar);
+window.addEventListener('resize', syncWfScrollbar);
+(function(){
+  const sb=g('ts-wf-sb'), th=g('ts-wf-sb-thumb'); if(!sb||!th) return;
+  function drag(e){
+    e.preventDefault();
+    const trackW=sb.clientWidth, thumbW=th.offsetWidth, maxThumb=trackW-thumbW, maxScroll=scrl.scrollWidth-scrl.clientWidth;
+    const x0=e.touches?e.touches[0].clientX:e.clientX, left0=parseFloat(th.style.left)||0;
+    const move=ev=>{ const x=ev.touches?ev.touches[0].clientX:ev.clientX; const nl=Math.max(0,Math.min(maxThumb,left0+(x-x0))); th.style.left=nl+'px'; scrl.scrollLeft=maxThumb>0?(nl/maxThumb)*maxScroll:0; };
+    const up=()=>{ ['mousemove','touchmove'].forEach(t=>window.removeEventListener(t,move)); ['mouseup','touchend'].forEach(t=>window.removeEventListener(t,up)); };
+    window.addEventListener('mousemove',move,{passive:false}); window.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('mouseup',up); window.addEventListener('touchend',up);
+  }
+  th.addEventListener('mousedown',drag); th.addEventListener('touchstart',drag,{passive:false});
+  // clicar na trilha pula pra posição
+  sb.addEventListener('mousedown',e=>{
+    if(e.target===th) return;
+    const rect=sb.getBoundingClientRect(), thumbW=th.offsetWidth, maxThumb=sb.clientWidth-thumbW, maxScroll=scrl.scrollWidth-scrl.clientWidth;
+    const nl=Math.max(0,Math.min(maxThumb,(e.clientX-rect.left)-thumbW/2));
+    scrl.scrollLeft=maxThumb>0?(nl/maxThumb)*maxScroll:0; syncWfScrollbar();
+  });
+})();
 function getX(e){ const r=g('ts-wf-canvas').getBoundingClientRect(); return (e.touches?e.touches[0].clientX:e.clientX)-r.left+scrl.scrollLeft; }
 let lastClick=0, lastX=0;
 g('ts-wf-canvas').addEventListener('mousedown',e=>{
