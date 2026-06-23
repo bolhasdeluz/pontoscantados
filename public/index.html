@@ -2101,6 +2101,37 @@ function updateElevenLabsAvailability(sizeMB){
 let lastBlobUrl='';
 const MOBILE_LAZY_LIMIT_MB = 35; // acima disso em mobile, NADA toca o arquivo até o usuário pedir
 
+let loadedSessIdx=-1;   // índice da sessão salva carregada (pra colar a URL do áudio nela)
+let needRelink=false;   // sessão carregada está sem áudio vinculado → oferece "vincular"
+
+// Sobe o arquivo arrastado e cola a URL na sessão salva atual — preserva todas as marcações
+window.relinkAudio = async () => {
+  if(!tsFile){ toast('Arraste o arquivo de áudio primeiro'); return; }
+  const btns = Array.from(document.querySelectorAll('button[data-relink="1"]'));
+  const setTxt = t => btns.forEach(b=>b.textContent=t);
+  btns.forEach(b=>b.disabled=true); setTxt('📤 Subindo…');
+  const big = tsFile.size > CF_BODY_LIMIT_MB*1024*1024;
+  let u='';
+  try{
+    if(big) u = await uploadChunkedToR2(tsFile, p=>setTxt('📤 Subindo… '+p+'%'));
+    else    u = await uploadAudioToR2(tsFile);
+  }catch(e){}
+  if(!u){ toast('Não consegui subir o áudio — tenta de novo'); btns.forEach(b=>b.disabled=false); setTxt('📤 Vincular áudio à sessão (sobe 1×)'); return; }
+  r2url=u;
+  if(loadedSessIdx>=0){ const list=getSess(); if(list[loadedSessIdx]){ list[loadedSessIdx].r2url=u; putSess(list); } }
+  needRelink=false;
+  btns.forEach(b=>{ b.disabled=false; b.style.display='none'; });
+  toast('Áudio vinculado ✓ — agora persiste no F5 e dá pra criar pontos com som');
+  try{ drawAll(); }catch{}
+};
+
+function relinkBtnHtml(){
+  return needRelink
+    ? '<br><button class="ts-reload-btn" data-relink="1" style="background:var(--gold);margin-top:8px" onclick="relinkAudio()">📤 Vincular áudio à sessão (sobe 1×)</button>'
+      +'<br><small style="color:var(--text-dim);font-style:italic">Sobe o áudio e cola nesta sessão — sem refazer nenhuma marcação.</small>'
+    : '';
+}
+
 function applyFile(f){
   tsFile=f; currentAudioName=f.name||''; wfDur=0; peaks=[]; audCloud=false;
   g('ts-drop').classList.remove('ts-needs-audio');
@@ -2120,13 +2151,13 @@ function applyFile(f){
     // Só inicializa o player quando o usuário pedir explicitamente.
     g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+sizeMB.toFixed(0)+' MB)</span>'
       +'<br><button class="ts-reload-btn" style="background:var(--gold);margin-top:8px" onclick="window.tsInitPlayer()">▶ Carregar player de áudio</button>'
-      +'<br><small style="color:var(--text-dim);font-style:italic">Arquivo grande — o player só carrega quando você pedir, pra evitar travar o celular. A transcrição funciona normalmente sem isso.</small>';
+      +'<br><small style="color:var(--text-dim);font-style:italic">Arquivo grande — o player só carrega quando você pedir, pra evitar travar o celular. A transcrição funciona normalmente sem isso.</small>'+relinkBtnHtml();
     g('ts-player-name').textContent=f.name+' (player não carregado ainda)';
     hideErr(); updateBtn();
     return;
   }
 
-  g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+sizeMB.toFixed(1)+' MB)</span>';
+  g('ts-drop-name').innerHTML='<span style="color:#2a7a60;font-weight:500">'+f.name+' ('+sizeMB.toFixed(1)+' MB)</span>'+relinkBtnHtml();
   lastBlobUrl=URL.createObjectURL(f);
   aud.src=lastBlobUrl;
   g('ts-player-name').textContent=f.name;
@@ -2735,7 +2766,7 @@ async function uploadChunkedToR2(file, onProgress){
 g('ts-btn-transcribe').addEventListener('click',async()=>{
   if(!tsFile)return; const key='';
   hideErr(); g('ts-btn-transcribe').disabled=true;
-  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(2); r2url=''; r2uploadPromise=null;
+  g('ts-result').style.display='none'; g('ts-prog-wrap').style.display='block'; setProg(2); r2url=''; r2uploadPromise=null; loadedSessIdx=-1; needRelink=false;
   sections=[]; activeSecIdx=-1; markers=[]; mci=0;
   g('ts-markers-section').style.display='none'; g('ts-secfilter-bar').style.display='none';
   const t0=Date.now();
@@ -3051,6 +3082,7 @@ function loadSess(i){
   words=s.data;
   currentAudioName=s.filename||s.driveFileName||'';
   r2url=s.r2url||'';
+  loadedSessIdx=i; needRelink=!r2url;
   sections=s.sections||[]; markers=s.markersData||[]; activeSecIdx=-1;
   g('ts-meta-dur').textContent='cache';
   g('ts-meta-words').textContent='~'+words.length+' palavras';
