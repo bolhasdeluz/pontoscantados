@@ -2479,10 +2479,12 @@ window.addEventListener('resize', syncWfScrollbar);
   });
 })();
 function getX(e){ const r=g('ts-wf-canvas').getBoundingClientRect(); return (e.touches?e.touches[0].clientX:e.clientX)-r.left+scrl.scrollLeft; }
-let lastClick=0, lastX=0;
+function getClientX(e){ return e.touches?e.touches[0].clientX:(e.changedTouches?e.changedTouches[0].clientX:e.clientX); }
+let lastClick=0, lastX=0, downClientX=0;
 g('ts-wf-canvas').addEventListener('mousedown',e=>{
   if(e.button!==0)return;
   const x=getX(e), now=Date.now();
+  downClientX=e.clientX;
   if(now-lastClick<350&&Math.abs(x-lastX)<12){ addMarker(xToS(x)); dragging=false; return; }
   lastClick=now; lastX=x;
   dragX0=x; dragX1=x; dragging=true; e.preventDefault();
@@ -2495,8 +2497,9 @@ window.addEventListener('mousemove',e=>{
 });
 window.addEventListener('mouseup',e=>{
   if(!dragging)return;
-  const dx=Math.abs(dragX1-dragX0);
-  if(dx<8){ aud.currentTime=Math.max(0,xToS(dragX0)); if(aud.paused)aud.play(); g('ts-play-btn').textContent='⏸'; }
+  // clique vs arrasto pela distância REAL do mouse (imune ao auto-scroll da régua)
+  const moved=Math.abs((e.clientX||downClientX)-downClientX);
+  if(moved<6){ aud.currentTime=Math.max(0,xToS(dragX0)); drawWf(); }
   else{ const s1=xToS(Math.min(dragX0,dragX1)),s2=xToS(Math.max(dragX0,dragX1)); setSel(s1,s2); }
   dragging=false; dragX0=null; dragX1=null; drawWf();
 });
