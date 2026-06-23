@@ -2984,7 +2984,7 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
   const sStart=selS, sEnd=selE;
   const ww=words.filter(w=>w.start>=sStart&&w.end<=sEnd+0.1);
   aud.pause(); fecharModal('ov-transcricao'); openModal();
-  // texto e tempos do trecho entram na hora — não dependem do upload terminar
+  // texto e tempos do trecho entram na hora
   document.getElementById('fLetra').value=ww.map(w=>w.word).join(' ');
   document.getElementById('fAudioStart').value=fmtField(sStart);
   document.getElementById('fAudioEnd').value=fmtField(sEnd);
@@ -2994,11 +2994,38 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
   ue.dataset.fname=currentAudioName||(tsFile?tsFile.name:''); ue.style.display='block';
   const player=document.getElementById('edit-audio-player');
   const prev=document.getElementById('edit-audio-preview');
-  // resolve a URL persistente do R2 — espera o upload se ainda estiver em andamento
+  const fileEl=document.getElementById('audioFileName');
+  const setStat=t=>{ ue.textContent=t; if(fileEl) fileEl.textContent=t; };
+
+  // ── CAMINHO PRINCIPAL: corta só esse trecho e sobe o CLIPE (1-2MB, sobe fácil) ──
+  if(tsFile && typeof tsExtractClipBlob==='function'){
+    try{
+      setStat('✂️ Cortando o trecho…');
+      const clip=await tsExtractClipBlob(tsFile,sStart,sEnd,m=>{ if(m) setStat(m); });
+      if(clip && clip.blob && clip.blob.size>0){
+        const base=(currentAudioName||'trecho').replace(/\.[^.]+$/,'');
+        const clipFile=new File([clip.blob], base+'_'+Math.round(sStart)+'-'+Math.round(sEnd)+'.'+clip.ext, { type:clip.mime });
+        setStat('⬆️ Subindo o clipe ('+(clip.blob.size/1024/1024).toFixed(1)+'MB)…');
+        const u=await uploadAudioToR2(clipFile);
+        if(u){
+          ue.dataset.url=u; ue.textContent='🎵 Clipe deste trecho';
+          if(fileEl) fileEl.textContent='✅ '+clipFile.name;
+          // o clipe JÁ é o trecho exato → toca inteiro, sem início/fim
+          document.getElementById('fAudioStart').value='';
+          document.getElementById('fAudioEnd').value='';
+          player.src=u; prev.style.display='block';
+          toast('Clipe pronto ✓ — só salvar');
+          return;
+        }
+      }
+    }catch(e){ console.error('corte/upload do clipe falhou:',e); }
+    // se o corte/upload falhar, cai pro modo URL grande abaixo
+  }
+
+  // ── FALLBACK: usa a URL do áudio grande + início/fim (modo antigo) ──
   let url=r2url;
   if(!url && r2uploadPromise){
-    ue.textContent='⏳ Preparando o áudio…';
-    document.getElementById('audioFileName').textContent='⏳ Preparando o áudio…';
+    setStat('⏳ Preparando o áudio…');
     try{ url=await r2uploadPromise; }catch{ url=''; }
   }
   if(url){
@@ -3006,11 +3033,11 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
     ue.textContent='🎵 Áudio da transcrição'; ue.dataset.url=url;
     player.src=audioSrc(url)+'#t='+sStart.toFixed(1)+','+sEnd.toFixed(1);
     prev.style.display='block';
-    document.getElementById('audioFileName').textContent='✅ '+(currentAudioName||(tsFile?tsFile.name:'áudio'));
+    if(fileEl) fileEl.textContent='✅ '+(currentAudioName||(tsFile?tsFile.name:'áudio'));
   }else{
-    ue.textContent='⚠️ Áudio ainda enviando — os tempos já entraram; re-seleciona o arquivo pra anexar o áudio';
+    ue.textContent='⚠️ Não consegui anexar o áudio — os tempos já entraram';
     ue.dataset.url='';
-    document.getElementById('audioFileName').textContent='Toque para escolher um áudio';
+    if(fileEl) fileEl.textContent='Toque para escolher um áudio';
     toast('Tempos do trecho puxados ✓');
   }
 });
