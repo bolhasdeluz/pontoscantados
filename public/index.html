@@ -2723,7 +2723,7 @@ aud.addEventListener('loadedmetadata',()=>{
 });
 
 // ── transcrever ──
-const CF_BODY_LIMIT_MB = 80; // margem de segurança abaixo do limite real (100MB Free/Pro)
+const CF_BODY_LIMIT_MB = 12; // acima disso, sobe em pedaços de 8MB (confiável). Um request único grande trava/falha.
 const CHUNK_SIZE = 8*1024*1024; // 8MB por parte
 
 async function uploadChunkedToR2(file, onProgress){
@@ -2995,37 +2995,11 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
   const player=document.getElementById('edit-audio-player');
   const prev=document.getElementById('edit-audio-preview');
   const fileEl=document.getElementById('audioFileName');
-  const setStat=t=>{ ue.textContent=t; if(fileEl) fileEl.textContent=t; };
-
-  // ── CAMINHO PRINCIPAL: corta só esse trecho e sobe o CLIPE (1-2MB, sobe fácil) ──
-  if(tsFile && typeof tsExtractClipBlob==='function'){
-    try{
-      setStat('✂️ Cortando o trecho…');
-      const clip=await tsExtractClipBlob(tsFile,sStart,sEnd,m=>{ if(m) setStat(m); });
-      if(clip && clip.blob && clip.blob.size>0){
-        const base=(currentAudioName||'trecho').replace(/\.[^.]+$/,'');
-        const clipFile=new File([clip.blob], base+'_'+Math.round(sStart)+'-'+Math.round(sEnd)+'.'+clip.ext, { type:clip.mime });
-        setStat('⬆️ Subindo o clipe ('+(clip.blob.size/1024/1024).toFixed(1)+'MB)…');
-        const u=await uploadAudioToR2(clipFile);
-        if(u){
-          ue.dataset.url=u; ue.textContent='🎵 Clipe deste trecho';
-          if(fileEl) fileEl.textContent='✅ '+clipFile.name;
-          // o clipe JÁ é o trecho exato → toca inteiro, sem início/fim
-          document.getElementById('fAudioStart').value='';
-          document.getElementById('fAudioEnd').value='';
-          player.src=u; prev.style.display='block';
-          toast('Clipe pronto ✓ — só salvar');
-          return;
-        }
-      }
-    }catch(e){ console.error('corte/upload do clipe falhou:',e); }
-    // se o corte/upload falhar, cai pro modo URL grande abaixo
-  }
-
-  // ── FALLBACK: usa a URL do áudio grande + início/fim (modo antigo) ──
+  // resolve a URL do R2 — espera o upload (em pedaços) terminar se preciso
   let url=r2url;
   if(!url && r2uploadPromise){
-    setStat('⏳ Preparando o áudio…');
+    ue.textContent='⏳ Preparando o áudio…';
+    if(fileEl) fileEl.textContent='⏳ Preparando o áudio…';
     try{ url=await r2uploadPromise; }catch{ url=''; }
   }
   if(url){
