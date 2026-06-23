@@ -2997,10 +2997,20 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
   const fileEl=document.getElementById('audioFileName');
   // resolve a URL do R2 — espera o upload (em pedaços) terminar se preciso
   let url=r2url;
+  const setS=t=>{ ue.textContent=t; if(fileEl) fileEl.textContent=t; };
   if(!url && r2uploadPromise){
-    ue.textContent='⏳ Preparando o áudio…';
-    if(fileEl) fileEl.textContent='⏳ Preparando o áudio…';
+    setS('⏳ Preparando o áudio…');
     try{ url=await r2uploadPromise; }catch{ url=''; }
+  }
+  // não tem URL mas tem o arquivo carregado → sobe agora, em pedaços de 8MB
+  if(!url && tsFile){
+    setS('⬆️ Subindo o áudio em pedaços…');
+    try{
+      const big=tsFile.size>CF_BODY_LIMIT_MB*1024*1024;
+      if(big) url=await uploadChunkedToR2(tsFile,p=>setS('⬆️ Subindo… '+p+'%'));
+      else    url=await uploadAudioToR2(tsFile);
+    }catch(e){ url=''; }
+    if(url && loadedSessIdx>=0){ const l=getSess(); if(l[loadedSessIdx]){ l[loadedSessIdx].r2url=url; putSess(l); } }
   }
   if(url){
     r2url=url;
@@ -3009,10 +3019,10 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
     prev.style.display='block';
     if(fileEl) fileEl.textContent='✅ '+(currentAudioName||(tsFile?tsFile.name:'áudio'));
   }else{
-    ue.textContent='⚠️ Não consegui anexar o áudio — os tempos já entraram';
+    ue.textContent='⚠️ Sem áudio carregado — arraste o arquivo no topo do estúdio e clique de novo';
     ue.dataset.url='';
     if(fileEl) fileEl.textContent='Toque para escolher um áudio';
-    toast('Tempos do trecho puxados ✓');
+    toast('Arraste o arquivo de áudio no estúdio pra anexar o som');
   }
 });
 
