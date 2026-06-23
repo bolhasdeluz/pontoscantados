@@ -1418,12 +1418,8 @@ function renderSegmentos() {
   });
 }
 
-// normaliza qualquer URL antiga do r2.dev pra rota da mesma origem (que serve do R2 pelo binding)
-function audioSrc(u) {
-  if (!u) return u;
-  const m = /r2\.dev\/(.+)$/.exec(u);
-  return m ? '/api/audio/' + m[1] : u;
-}
+// mantém a URL salva como está (R2 r2.dev) — tocar cross-origin funciona normalmente
+function audioSrc(u) { return u; }
 
 function buildAudioPlayer(p) {
   const pid = 'cp' + String(p.id).replace(/[^a-z0-9]/gi, '').slice(-8);
@@ -3070,7 +3066,7 @@ function loadSess(i){
   drop.classList.add('ts-needs-audio');
   // player direto da nuvem (R2) — ouvir e criar pontos sem reanexar o arquivo
   let cloudLoaded=false;
-  if(r2url){ try{ audCloud=false; aud.src=audioSrc(r2url); aud.load(); cloudLoaded=true; }catch(e){ cloudLoaded=false; } }
+  if(r2url && !liveSource){ try{ audCloud=true; aud.src=audioSrc(r2url); aud.load(); cloudLoaded=true; }catch(e){ cloudLoaded=false; } }
   if(s.driveFileId){
     driveFileId=s.driveFileId; driveFileName=s.driveFileName; driveResourceKey=s.driveResourceKey||'';
     g('ts-drop-name').innerHTML=
@@ -3084,7 +3080,7 @@ function loadSess(i){
     },50);
   }else if(cloudLoaded){
     drop.classList.remove('ts-needs-audio');
-    g('ts-drop-name').innerHTML='<div class="ts-needs-badge" style="border-color:#cfe6df;background:#eef6f3;color:#2a7a60">🎵 <strong>'+(s.filename||'áudio')+'</strong><br><small>tocando da nuvem ✓ — a forma de onda vai aparecendo conforme você escuta. Não precisa reanexar o arquivo.</small></div>';
+    g('ts-drop-name').innerHTML='<div class="ts-needs-badge" style="border-color:#cfe6df;background:#eef6f3;color:#2a7a60">🎵 <strong>'+(s.filename||'áudio')+'</strong><br><small>tocando da nuvem ✓ — ouça e crie pontos sem reanexar. Arraste o arquivo só se quiser a forma de onda desenhada.</small></div>';
   }else{
     g('ts-drop-name').innerHTML='<div class="ts-needs-badge">📂 <strong>'+(s.filename||'áudio')+'</strong><br><small>Arrasta o arquivo aqui novamente para sincronizar o player</small></div>';
   }

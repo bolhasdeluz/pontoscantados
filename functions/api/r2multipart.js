@@ -58,7 +58,7 @@ export async function onRequest(context) {
       const upload = env.AUDIO_BUCKET.resumeMultipartUpload(key, uploadId);
       await upload.complete(parts);
 
-      const publicUrl = `/api/audio/${key}`;
+      const publicUrl = `https://pub-6a5121068171403aa9e327fbd30cc8e6.r2.dev/${key}`;
       return json({ url: publicUrl, key });
     }
 
