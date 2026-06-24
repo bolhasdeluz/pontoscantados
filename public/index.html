@@ -293,6 +293,17 @@ select option{background:#fff;color:#2a1a22}
 .ts-wf-sb-thumb{position:absolute;top:3px;height:14px;min-width:40px;width:30%;left:0;background:var(--gold);border-radius:99px;cursor:grab;box-shadow:0 1px 3px rgba(196,57,107,.3);transition:background .12s}
 .ts-wf-sb-thumb:hover{background:#b02d5a}
 .ts-wf-sb-thumb:active{cursor:grabbing}
+#pl-bar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:none;align-items:center;gap:10px;padding:9px 16px;background:#fff;border-top:1px solid rgba(196,57,107,.18);box-shadow:0 -3px 16px rgba(196,57,107,.12)}
+#pl-bar.open{display:flex}
+.pl-btn{background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:var(--gold);padding:5px 7px;border-radius:8px;flex-shrink:0}
+.pl-btn:hover{background:rgba(196,57,107,.08)}
+.pl-main{font-size:22px}
+.pl-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.pl-title{font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-bar-track{height:6px;background:rgba(196,57,107,.12);border-radius:99px;cursor:pointer;position:relative}
+.pl-bar-fill{height:100%;width:0;background:var(--gold);border-radius:99px;pointer-events:none}
+.pl-count{font-size:.75rem;color:var(--text-dim);flex-shrink:0;font-variant-numeric:tabular-nums}
+.pl-playing{box-shadow:0 0 0 2px var(--gold)!important;border-radius:14px}
 .ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:6px 0;font-style:italic;display:none}
 .ts-wf-sel-info{font-size:11.5px;color:var(--gold);margin-top:6px;font-style:italic;min-height:16px}
 .ts-drive-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
@@ -466,6 +477,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <option value="za">Z → A</option>
         <option value="linha">Por linha</option>
       </select>
+      <button class="filter-select" id="btn-tocar-fila" onclick="playlistStart()" title="Tocar em sequência os pontos com áudio que estão filtrados" style="cursor:pointer;white-space:nowrap">▶ Tocar fila</button>
     </div>
     <div class="layout-btns">
       <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards">
@@ -484,6 +496,20 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 <div class="main" id="mainGrid"><div class="loading"><div class="spinner"></div>Carregando pontos...</div></div>
 <div class="count-info" id="countInfo"></div>
 <div class="bottom-space"></div>
+
+<!-- PLAYER DE FILA -->
+<div id="pl-bar">
+  <button class="pl-btn" id="pl-prev" title="Anterior">⏮</button>
+  <button class="pl-btn pl-main" id="pl-toggle" title="Tocar/Pausar">⏸</button>
+  <button class="pl-btn" id="pl-next" title="Próximo">⏭</button>
+  <div class="pl-mid">
+    <div class="pl-title" id="pl-title">—</div>
+    <div class="pl-bar-track" id="pl-track"><div class="pl-bar-fill" id="pl-fill"></div></div>
+  </div>
+  <div class="pl-count" id="pl-count"></div>
+  <button class="pl-btn" id="pl-close" title="Fechar fila">✕</button>
+</div>
+<audio id="pl-audio" preload="metadata"></audio>
 
 <div id="admin-bar">
   <span style="color:rgba(255,255,255,.7);font-size:.78rem">Modo Admin ativo</span>
@@ -588,9 +614,9 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     </div>
 
     <div class="form-row"><label>Data da gravação (opcional)</label><input type="date" id="fDataGravacao"></div>
-    <div class="form-row"><label>É de um Guia Nosso?</label><label class="check-row"><input type="checkbox" id="fIsGuia" onchange="toggleGuiaField()"><span class="check-label">Sim, pertence a um guia do terreiro</span></label></div>
-    <div class="form-row" id="guiaField" style="display:none"><label>Qual Guia</label><input type="text" id="fGuia" placeholder="Nome do guia..."></div>
-    <div class="form-row"><label>Postado por</label><input type="text" id="fPostadoPor" placeholder="Seu nome..."></div>
+    <input type="hidden" id="fIsGuia">
+    <div class="form-row" id="guiaField"><label>Guia <button type="button" onclick="abrirGerenciarGuias()" style="background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;text-decoration:underline;padding:0 0 0 6px">＋ gerenciar</button></label><select id="fGuia"><option value="">— Nenhum —</option></select></div>
+    <div class="form-row"><label>Postado por <button type="button" onclick="abrirGerenciarPostadores()" style="background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;text-decoration:underline;padding:0 0 0 6px">＋ gerenciar</button></label><select id="fPostadoPor"><option value="Anna">Anna</option><option value="Diego">Diego</option></select></div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="savePonto()">Salvar Ponto</button></div>
   </div>
 </div>
@@ -612,6 +638,34 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <div class="linhas-add-row">
       <input type="text" id="nova-linha-input" placeholder="Nome da linha...">
       <button class="btn-save" onclick="adicionarLinha()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- GERENCIAR GUIAS -->
+<div class="overlay" id="ov-guias">
+  <div class="modal" style="max-width:400px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-guias')">✕</button>
+    <h2>Guias</h2>
+    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Oxóssi, Xangô, Tranca Ruas, Pai João… ficam disponíveis no campo "Guia" do ponto.</p>
+    <div id="guias-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-height:40px"></div>
+    <div class="linhas-add-row">
+      <input type="text" id="nova-guia-input" placeholder="Nome do guia...">
+      <button class="btn-save" onclick="adicionarGuia()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- GERENCIAR POSTADORES -->
+<div class="overlay" id="ov-postadores">
+  <div class="modal" style="max-width:400px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-postadores')">✕</button>
+    <h2>Quem posta</h2>
+    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Nomes disponíveis no campo "Postado por".</p>
+    <div id="postadores-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-height:40px"></div>
+    <div class="linhas-add-row">
+      <input type="text" id="novo-postador-input" placeholder="Nome...">
+      <button class="btn-save" onclick="adicionarPostador()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
     </div>
   </div>
 </div>
@@ -764,6 +818,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
             <button class="ts-zoom-btn" data-zoom="32">32×</button>
           </div>
           <span class="ts-wf-hint">Arrastar=trecho · 2×clique=marcação · <span style="color:#2a7a60">faixa verde = já virou ponto</span></span>
+          <button class="ts-zoom-btn" id="ts-toggle-green" style="margin-left:auto" title="Mostrar/ocultar as faixas verdes dos trechos que já viraram ponto">🟢 Ocultar verdes</button>
         </div>
         <div class="ts-wf-scroll" id="ts-wf-scroll">
           <canvas id="ts-ruler-canvas" height="24"></canvas>
@@ -783,6 +838,10 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
               <button class="ts-btn-sm" id="ts-btn-sel-apply">Aplicar</button>
               <span class="ts-time-dur" id="ts-sel-dur"></span>
             </div>
+          </div>
+          <div class="ts-time-row" style="margin:0 0 8px 0">
+            <button class="ts-btn-sm" id="ts-btn-selset-start" title="Marca o início do trecho no tempo que está tocando">⏺ Início aqui</button>
+            <button class="ts-btn-sm" id="ts-btn-selset-end" title="Marca o fim do trecho no tempo que está tocando">⏹ Fim aqui</button>
           </div>
           <div class="ts-sel-text" id="ts-sel-text"></div>
           <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como Ponto</button>
@@ -1103,6 +1162,101 @@ document.getElementById('nova-linha-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') adicionarLinha();
 });
 
+// ── GUIAS ──
+let guias = [];
+function loadGuias() {
+  try { guias = JSON.parse(localStorage.getItem('pontos_guias') || 'null'); }
+  catch { guias = null; }
+  if (!Array.isArray(guias)) guias = ['Oxóssi','Xangô','Ogum','Iansã','Oxum','Iemanjá','Nanã','Oxalá'];
+  refreshGuiaSelect();
+}
+function saveGuias() {
+  localStorage.setItem('pontos_guias', JSON.stringify(guias));
+  refreshGuiaSelect();
+}
+function refreshGuiaSelect() {
+  const sel = document.getElementById('fGuia');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Nenhum —</option>' + guias.map(gg => `<option value="${esc(gg)}">${esc(gg)}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+function syncGuiasFromData() {
+  const ex = new Set(guias.map(x => x.toLowerCase()));
+  pontos.forEach(p => {
+    if (p.guia && !ex.has(p.guia.toLowerCase())) { guias.push(p.guia); ex.add(p.guia.toLowerCase()); }
+  });
+}
+function abrirGerenciarGuias() { renderGuiasModal(); abrirModal('ov-guias'); }
+function renderGuiasModal() {
+  const el = document.getElementById('guias-list');
+  if (!guias.length) { el.innerHTML = '<p class="linhas-empty">Nenhum guia cadastrado ainda.</p>'; return; }
+  el.innerHTML = guias.map((gg, i) => `
+    <div class="linha-item">
+      <span class="linha-item-name">${esc(gg)}</span>
+      <button class="btn-rm-linha" onclick="removerGuia(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
+function adicionarGuia() {
+  const input = document.getElementById('nova-guia-input');
+  const nome = input.value.trim();
+  if (!nome) return;
+  if (guias.some(gg => gg.toLowerCase() === nome.toLowerCase())) { toast('Guia já existe!'); return; }
+  guias.push(nome); saveGuias(); input.value = ''; renderGuiasModal(); toast('Guia adicionado!');
+}
+function removerGuia(i) {
+  if (!confirm(`Remover o guia "${guias[i]}"? Os pontos vinculados a ele não serão afetados.`)) return;
+  guias.splice(i, 1); saveGuias(); renderGuiasModal(); toast('Guia removido!');
+}
+document.getElementById('nova-guia-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adicionarGuia();
+});
+
+// ── POSTADORES (quem posta) ──
+let postadores = [];
+function loadPostadores() {
+  try { postadores = JSON.parse(localStorage.getItem('pontos_postadores') || 'null'); }
+  catch { postadores = null; }
+  if (!Array.isArray(postadores) || !postadores.length) postadores = ['Anna','Diego'];
+  refreshPostadorSelect();
+}
+function savePostadores() {
+  localStorage.setItem('pontos_postadores', JSON.stringify(postadores));
+  refreshPostadorSelect();
+}
+function refreshPostadorSelect() {
+  const sel = document.getElementById('fPostadoPor');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = postadores.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  if (cur && postadores.includes(cur)) sel.value = cur;
+}
+function abrirGerenciarPostadores() { renderPostadoresModal(); abrirModal('ov-postadores'); }
+function renderPostadoresModal() {
+  const el = document.getElementById('postadores-list');
+  if (!postadores.length) { el.innerHTML = '<p class="linhas-empty">Ninguém cadastrado ainda.</p>'; return; }
+  el.innerHTML = postadores.map((n, i) => `
+    <div class="linha-item">
+      <span class="linha-item-name">${esc(n)}</span>
+      <button class="btn-rm-linha" onclick="removerPostador(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
+function adicionarPostador() {
+  const input = document.getElementById('novo-postador-input');
+  const nome = input.value.trim();
+  if (!nome) return;
+  if (postadores.some(n => n.toLowerCase() === nome.toLowerCase())) { toast('Já existe!'); return; }
+  postadores.push(nome); savePostadores(); input.value = ''; renderPostadoresModal(); toast('Adicionado!');
+}
+function removerPostador(i) {
+  if (postadores.length <= 1) { toast('Deixe ao menos um nome.'); return; }
+  if (!confirm(`Remover "${postadores[i]}"? Os pontos já postados por ele não mudam.`)) return;
+  postadores.splice(i, 1); savePostadores(); renderPostadoresModal(); toast('Removido!');
+}
+document.getElementById('novo-postador-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adicionarPostador();
+});
+
 // ── ADMIN (toggle simples, sem senha) ──
 document.getElementById('admin-toggle-input').addEventListener('change', e => {
   if (e.target.checked) ativarAdmin(); else sairAdmin();
@@ -1282,6 +1436,7 @@ async function load() {
     if (!Array.isArray(data)) throw new Error('Resposta inválida: ' + JSON.stringify(data).slice(0, 100));
     pontos = data;
     syncLinhasFromData();
+    syncGuiasFromData(); saveGuias();
     renderCards();
   } catch (e) {
     clearTimeout(timeout);
@@ -1782,9 +1937,11 @@ window.openModal = () => {
     document.getElementById(id).value = '';
   });
   refreshLinhaSelects();
+  refreshGuiaSelect();
+  refreshPostadorSelect();
   document.getElementById('fLinha').value = '';
-  document.getElementById('fIsGuia').checked = false;
-  document.getElementById('guiaField').style.display = 'none';
+  document.getElementById('fGuia').value = '';
+  document.getElementById('fPostadoPor').value = postadores[0] || 'Anna';
   document.getElementById('audioCurrentUrl').textContent = '';
   document.getElementById('audioCurrentUrl').dataset.url = '';
   document.getElementById('audioCurrentUrl').dataset.fname = '';
@@ -1810,12 +1967,14 @@ window.openEdit = id => {
   document.getElementById('fNome').value = p.nome || '';
   document.getElementById('fLetra').value = p.letra || '';
   document.getElementById('fYt').value = p.yt || '';
-  document.getElementById('fIsGuia').checked = !!p.isGuia;
+  if (p.guia && !guias.some(gg => gg.toLowerCase() === p.guia.toLowerCase())) { guias.push(p.guia); saveGuias(); }
+  else { refreshGuiaSelect(); }
   document.getElementById('fGuia').value = p.guia || '';
-  document.getElementById('fPostadoPor').value = p.postadoPor || '';
+  if (p.postadoPor && !postadores.some(n => n.toLowerCase() === p.postadoPor.toLowerCase())) { postadores.push(p.postadoPor); savePostadores(); }
+  else { refreshPostadorSelect(); }
+  document.getElementById('fPostadoPor').value = p.postadoPor || postadores[0] || 'Anna';
   document.getElementById('fTipo').value = p.tipo || '';
   document.getElementById('fDataGravacao').value = p.dataGravacao || '';
-  document.getElementById('guiaField').style.display = p.isGuia ? 'block' : 'none';
 
   // Garantir que a linha do ponto existe nas opções
   if (p.linha && !linhas.some(l => l.toLowerCase() === p.linha.toLowerCase())) {
@@ -1899,7 +2058,7 @@ window.savePonto = async () => {
   const multiSeg = document.getElementById('fMultiSeg').checked;
   // trava: ponto-trecho sem áudio — em vez de salvar mudo, espera/sobe o áudio mostrando o %
   const ehTrecho = (audioStart != null || audioEnd != null) || (multiSeg && segmentos.length > 0);
-  if (ehTrecho && !audioUrl) {
+  if (!editId && ehTrecho && !audioUrl) {
     const btn = document.querySelector('.modal-footer .btn-save');
     const oldLabel = btn ? btn.textContent : 'Salvar Ponto';
     const setLbl = t => { if (btn) btn.textContent = t; };
@@ -1931,8 +2090,8 @@ window.savePonto = async () => {
     audioFile,
     audioStart,
     audioEnd,
-    isGuia: document.getElementById('fIsGuia').checked,
-    guia: document.getElementById('fIsGuia').checked ? document.getElementById('fGuia').value.trim() : '',
+    isGuia: !!document.getElementById('fGuia').value,
+    guia: document.getElementById('fGuia').value.trim(),
     postadoPor: document.getElementById('fPostadoPor').value.trim(),
     dataGravacao: document.getElementById('fDataGravacao').value || '',
     destaque: editId ? (pontos.find(x => x.id === editId) || {}).destaque || false : false
@@ -2054,7 +2213,7 @@ const WF_H=140, RUL_H=24, PEAKS=5000;
 // ── state ──
 let prov='deepgram', tsFile=null, words=[], r2url='', currentAudioName='', r2uploadPromise=null;
 let selS=null, selE=null, selMode=false, wordSelStart=null;
-let peaks=[], wfDur=0, zoom=1, markers=[], mci=0;
+let peaks=[], wfDur=0, zoom=1, markers=[], mci=0, showGreenBands=true;
 let peaksRangeStart=null, peaksRangeEnd=null; // intervalo absoluto [start,end) que `peaks` representa
 let sections=[], activeSecIdx=-1;
 const SEC_COLORS=['#2a7a60','#6030a0','#c4396b','#8c5a00','#1a73e8','#b84040','#3a9a78'];
@@ -2399,7 +2558,7 @@ function drawWf(){
     });
   }
   // pontos já salvos DESTE áudio — faixa verde pra não repetir trecho
-  if(pontos && pontos.length && (r2url||currentAudioName)){
+  if(showGreenBands && pontos && pontos.length && (r2url||currentAudioName)){
     pontos.forEach(p=>{
       const sameUrl  = p.audioUrl && r2url && p.audioUrl===r2url;
       const sameName = p.audioFile && currentAudioName && p.audioFile===currentAudioName;
@@ -2519,6 +2678,15 @@ document.querySelectorAll('#ts-zoom-btns .ts-zoom-btn').forEach(btn=>{
     const px=sToX(aud.currentTime||0); scrl.scrollLeft=Math.max(0,px-cw()/2);
   });
 });
+// ocultar/mostrar faixas verdes
+(function(){ const b=g('ts-toggle-green'); if(!b) return;
+  b.addEventListener('click',()=>{
+    showGreenBands=!showGreenBands;
+    b.textContent = showGreenBands ? '🟢 Ocultar verdes' : '⚪ Mostrar verdes';
+    b.classList.toggle('active', !showGreenBands);
+    drawWf();
+  });
+})();
 
 // velocidade de reprodução
 g('ts-speed-select').addEventListener('change',e=>{
@@ -2978,6 +3146,18 @@ function applySelTimeInputs(){
   setSel(s1,s2);
 }
 g('ts-btn-sel-apply').addEventListener('click',applySelTimeInputs);
+g('ts-btn-selset-start').addEventListener('click',()=>{
+  const t=aud.currentTime||0;
+  let s=t, e=(selE!=null&&selE>t)?selE:t;
+  setSel(Math.min(s,e),Math.max(s,e));
+  toast('Início do trecho: '+fmt(t));
+});
+g('ts-btn-selset-end').addEventListener('click',()=>{
+  const t=aud.currentTime||0;
+  let s=(selS!=null&&selS<t)?selS:t, e=t;
+  setSel(Math.min(s,e),Math.max(s,e));
+  toast('Fim do trecho: '+fmt(t));
+});
 g('ts-sel-start-input').addEventListener('keydown',e=>{if(e.key==='Enter')applySelTimeInputs();});
 g('ts-sel-end-input').addEventListener('keydown',e=>{if(e.key==='Enter')applySelTimeInputs();});
 
@@ -3323,7 +3503,86 @@ async function reloadDrive(){
 // ══ /MÓDULO TRANSCRIÇÃO ══
 
 // ── INIT ──
-loadLinhas();
+// ── PLAYER DE FILA (playlist) ──
+let plList=[], plIdx=-1, plCurUrl='';
+function plBuildList(){
+  const search=(document.getElementById('searchInput').value||'').toLowerCase();
+  const linhaFilter=document.getElementById('filterLinha').value;
+  const sortBy=document.getElementById('sortBy').value;
+  let filtered=pontos.filter(p=>{
+    const match=!search||(p.nome||'').toLowerCase().includes(search)||(p.guia||'').toLowerCase().includes(search)||(p.letra||'').toLowerCase().includes(search)||(p.postadoPor||'').toLowerCase().includes(search);
+    if(!match)return false;
+    if(linhaFilter&&(p.linha||'')!==linhaFilter)return false;
+    if(currentFilter==='sessao')return p.destaque;
+    if(currentFilter==='guia')return p.isGuia;
+    if(currentFilter==='noguia')return !p.isGuia;
+    if(currentFilter==='nossos')return !!p.audioUrl;
+    if(currentFilter==='aprender')return !!p.aprender;
+    if(currentFilter==='mudos')return (p.audioStart!=null||p.audioEnd!=null)&&!p.audioUrl;
+    return true;
+  });
+  if(sortBy==='az')filtered.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt'));
+  else if(sortBy==='za')filtered.sort((a,b)=>(b.nome||'').localeCompare(a.nome||'','pt'));
+  else if(sortBy==='linha')filtered.sort((a,b)=>(a.linha||'').localeCompare(b.linha||'','pt')||(a.nome||'').localeCompare(b.nome||'','pt'));
+  const dest=filtered.filter(p=>p.destaque),outros=filtered.filter(p=>!p.destaque);
+  return [...dest,...outros].filter(p=>p.audioUrl);
+}
+window.playlistStart=(fromId)=>{
+  plList=plBuildList();
+  if(!plList.length){ toast('Nenhum ponto com áudio no filtro atual'); return; }
+  let i=0; if(fromId){ const k=plList.findIndex(p=>p.id===fromId||String(p.id)===String(fromId)); if(k>=0)i=k; }
+  document.getElementById('pl-bar').classList.add('open');
+  plLoad(i);
+};
+function plLoad(i){
+  if(i<0||i>=plList.length){ plClose(); return; }
+  plIdx=i; const p=plList[i]; const a=document.getElementById('pl-audio');
+  document.getElementById('pl-title').textContent=(p.nome||'(sem nome)')+(p.guia?(' · '+p.guia):'');
+  document.getElementById('pl-count').textContent=(i+1)+'/'+plList.length;
+  document.getElementById('pl-fill').style.width='0%';
+  document.getElementById('pl-toggle').textContent='⏸';
+  const start=p.audioStart!=null?p.audioStart:0;
+  a.dataset.start=start; a.dataset.end=(p.audioEnd!=null?p.audioEnd:'');
+  highlightPlaying(p.id);
+  const go=()=>{ if(start>0){ try{a.currentTime=start;}catch(e){} } a.play().catch(()=>{}); };
+  if(plCurUrl===p.audioUrl && a.readyState>=1){ go(); }
+  else { plCurUrl=p.audioUrl; a.onloadedmetadata=go; a.src=audioSrc(p.audioUrl); a.load(); }
+}
+function plNext(){ plLoad(plIdx+1); }
+function plPrev(){ const a=document.getElementById('pl-audio'); const st=Number(a.dataset.start)||0; if(a.currentTime-st>3) plLoad(plIdx); else plLoad(plIdx>0?plIdx-1:0); }
+function plToggle(){ const a=document.getElementById('pl-audio'); if(a.paused){ a.play().catch(()=>{}); document.getElementById('pl-toggle').textContent='⏸'; } else { a.pause(); document.getElementById('pl-toggle').textContent='▶'; } }
+function plClose(){ const a=document.getElementById('pl-audio'); a.pause(); a.removeAttribute('src'); a.load(); plCurUrl=''; plIdx=-1; document.getElementById('pl-bar').classList.remove('open'); highlightPlaying(null); }
+function highlightPlaying(id){
+  document.querySelectorAll('.pl-playing').forEach(el=>el.classList.remove('pl-playing'));
+  if(id!=null){ const el=document.querySelector('[data-id="'+id+'"]'); if(el) el.classList.add('pl-playing'); }
+}
+(function(){
+  const a=document.getElementById('pl-audio'); if(!a) return;
+  a.addEventListener('timeupdate',()=>{
+    if(plIdx<0) return;
+    const start=Number(a.dataset.start)||0;
+    const hasEnd=a.dataset.end!=='';
+    const end=hasEnd?Number(a.dataset.end):(a.duration||0);
+    const span=(end>start)?(end-start):(a.duration||0);
+    if(span>0){ const pct=Math.max(0,Math.min(100,((a.currentTime-start)/span)*100)); document.getElementById('pl-fill').style.width=pct+'%'; }
+    if(hasEnd && a.currentTime>=Number(a.dataset.end)-0.05) plNext();
+  });
+  a.addEventListener('ended',()=>{ if(plIdx>=0) plNext(); });
+  document.getElementById('pl-toggle').addEventListener('click',plToggle);
+  document.getElementById('pl-next').addEventListener('click',plNext);
+  document.getElementById('pl-prev').addEventListener('click',plPrev);
+  document.getElementById('pl-close').addEventListener('click',plClose);
+  document.getElementById('pl-track').addEventListener('click',e=>{
+    const start=Number(a.dataset.start)||0;
+    const end=a.dataset.end!==''?Number(a.dataset.end):(a.duration||0);
+    const span=(end>start)?(end-start):(a.duration||0);
+    const rect=e.currentTarget.getBoundingClientRect();
+    const pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+    try{ a.currentTime=start+pct*span; }catch(err){}
+  });
+})();
+
+loadLinhas(); loadGuias(); loadPostadores();
 const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
 setLayout(savedLayout);
 load();
