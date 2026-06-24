@@ -56,6 +56,7 @@ export async function onRequest(context) {
         dataGravacao:  body.dataGravacao || '',
         isGuia:        !!body.isGuia,
         guia:          body.guia || '',
+        falange:       body.falange || '',
         postadoPor:    body.postadoPor || '',
         destaque:      !!body.destaque,
         criadoEm:      Date.now(),
