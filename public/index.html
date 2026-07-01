@@ -439,6 +439,24 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 .ts-sec-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
 
+/* ── DASHBOARD ── */
+.dashboard{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:16px 12px;position:sticky;top:90px;z-index:399}
+.dashboard-inner{max-width:1200px;margin:0 auto}
+.dashboard-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.dashboard-title::before{content:'';width:4px;height:4px;background:var(--gold);border-radius:50%}
+.dashboard-section{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.dashboard-section:last-child{margin-bottom:0}
+.dashboard-label{font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
+.dashboard-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dashboard-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid rgba(196,57,107,.2);border-radius:20px;background:#fdf5f7;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.78rem;cursor:pointer;transition:all .18s;position:relative;user-select:none}
+.dashboard-chip:hover{border-color:rgba(196,57,107,.4);background:var(--gold-dim)}
+.dashboard-chip.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.dashboard-chip-label{font-weight:500;flex:1}
+.dashboard-chip-count{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:rgba(0,0,0,.08);border-radius:50%;font-size:.7rem;font-weight:700;flex-shrink:0}
+.dashboard-chip.active .dashboard-chip-count{background:rgba(255,255,255,.25)}
+.dashboard-clear{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid rgba(196,57,107,.25);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .12s;white-space:nowrap}
+.dashboard-clear:hover{background:var(--red-dim);color:var(--red);border-color:var(--red)}
+
 </style>
 </head>
 <body>
@@ -497,6 +515,24 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <button onclick="openModal()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;padding:6px 11px;flex-shrink:0;display:flex;align-items:center;gap:4px">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo
     </button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard" style="display:none">
+  <div class="dashboard-inner">
+    <div class="dashboard-title">Filtrar por Playlist</div>
+    <div class="dashboard-section">
+      <div class="dashboard-label">📂 Linhas</div>
+      <div class="dashboard-chips" id="dashboard-linhas"></div>
+    </div>
+    <div class="dashboard-section">
+      <div class="dashboard-label">👥 Guias</div>
+      <div class="dashboard-chips" id="dashboard-guias"></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="dashboard-clear" onclick="clearDashboardFilter()" id="clear-dashboard-btn" style="display:none">✕ Limpar filtros</button>
+    </div>
   </div>
 </div>
 
@@ -1509,6 +1545,7 @@ async function load() {
     syncGuiasFromData(); saveGuias();
     syncFilhasFromData(); saveFilhas();
     renderCards();
+    renderDashboard();
   } catch (e) {
     clearTimeout(timeout);
     document.getElementById('mainGrid').innerHTML =
@@ -1827,6 +1864,10 @@ function uploadAudioToR2(file) {
 
 // ── RENDER ──
 window.renderCards = () => {
+  // Resetar filtros do dashboard se existirem
+  dashboardFilterLinha = null;
+  dashboardFilterGuia = null;
+
   if (typeof refreshPlaylistSelect === 'function') refreshPlaylistSelect();
   const search = document.getElementById('searchInput').value.toLowerCase();
   const linhaFilter = document.getElementById('filterLinha').value;
@@ -1881,13 +1922,14 @@ window.renderCards = () => {
   const dest = filtered.filter(p => p.destaque);
   const outros = filtered.filter(p => !p.destaque);
 
-  if (currentLayout === 'list') { renderList(dest, outros, grid); return; }
+  if (currentLayout === 'list') { renderList(dest, outros, grid); renderDashboard(); return; }
 
   let html = '';
   if (dest.length && currentFilter !== 'sessao')
     html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length > 1 ? 's' : ''}</div>`;
   [...dest, ...outros].forEach(p => { html += cardHtml(p); });
   grid.innerHTML = html;
+  renderDashboard();
 };
 
 function cardHtml(p) {
@@ -1946,6 +1988,7 @@ function renderList(dest, outros, grid) {
   }
   outros.forEach((p, i) => wrap.appendChild(makeListItem(p, dest.length + i)));
   grid.appendChild(wrap);
+  renderDashboard();
 }
 
 function makeListItem(p, i) {
@@ -1971,6 +2014,119 @@ function makeListItem(p, i) {
   div.addEventListener('click', () => abrirDetalhe(p.id));
   return div;
 }
+
+// ── DASHBOARD ──
+let dashboardFilterLinha = null;
+let dashboardFilterGuia = null;
+
+window.renderDashboard = () => {
+  const dash = document.getElementById('dashboard');
+  if (!pontos.some(p => p.audioUrl)) {
+    dash.style.display = 'none';
+    return;
+  }
+  dash.style.display = '';
+  
+  // Contar pontos com áudio por linha e guia
+  const linhasWithAudio = {};
+  const guiasWithAudio = {};
+  
+  pontos.forEach(p => {
+    if (p.audioUrl) {
+      if (p.linha) linhasWithAudio[p.linha] = (linhasWithAudio[p.linha] || 0) + 1;
+      if (p.isGuia && p.guia) guiasWithAudio[p.guia] = (guiasWithAudio[p.guia] || 0) + 1;
+    }
+  });
+  
+  // Renderizar chips de linhas
+  const linhasEl = document.getElementById('dashboard-linhas');
+  const sortedLinhas = Object.entries(linhasWithAudio).sort((a, b) => a[0].localeCompare(b[0], 'pt'));
+  linhasEl.innerHTML = sortedLinhas.map(([linha, count]) => `
+    <div class="dashboard-chip ${dashboardFilterLinha === linha ? 'active' : ''}" onclick="filterByPlaylist('linha', '${esc(linha)}')">
+      <span class="dashboard-chip-label">${esc(linha)}</span>
+      <span class="dashboard-chip-count">${count}</span>
+    </div>
+  `).join('');
+  
+  // Renderizar chips de guias
+  const guiasEl = document.getElementById('dashboard-guias');
+  const sortedGuias = Object.entries(guiasWithAudio).sort((a, b) => a[0].localeCompare(b[0], 'pt'));
+  guiasEl.innerHTML = sortedGuias.map(([guia, count]) => `
+    <div class="dashboard-chip ${dashboardFilterGuia === guia ? 'active' : ''}" onclick="filterByPlaylist('guia', '${esc(guia)}')">
+      <span class="dashboard-chip-label">${esc(guia)}</span>
+      <span class="dashboard-chip-count">${count}</span>
+    </div>
+  `).join('');
+  
+  // Mostrar botão de limpar se houver filtro ativo
+  const clearBtn = document.getElementById('clear-dashboard-btn');
+  if (dashboardFilterLinha || dashboardFilterGuia) {
+    clearBtn.style.display = '';
+  } else {
+    clearBtn.style.display = 'none';
+  }
+};
+
+window.filterByPlaylist = (type, value) => {
+  if (type === 'linha') {
+    dashboardFilterLinha = dashboardFilterLinha === value ? null : value;
+    dashboardFilterGuia = null;
+  } else if (type === 'guia') {
+    dashboardFilterGuia = dashboardFilterGuia === value ? null : value;
+    dashboardFilterLinha = null;
+  }
+  renderDashboard();
+  renderFilteredByDashboard();
+};
+
+window.clearDashboardFilter = () => {
+  dashboardFilterLinha = null;
+  dashboardFilterGuia = null;
+  renderDashboard();
+  renderFilteredByDashboard();
+};
+
+window.renderFilteredByDashboard = () => {
+  if (!dashboardFilterLinha && !dashboardFilterGuia) {
+    // Se não há filtro, renderiza normalmente
+    renderCards();
+    return;
+  }
+  
+  // Filtrar pontos com áudio pela linha/guia selecionada
+  let filtered = pontos.filter(p => p.audioUrl);
+  
+  if (dashboardFilterLinha) {
+    filtered = filtered.filter(p => p.linha === dashboardFilterLinha);
+  }
+  if (dashboardFilterGuia) {
+    filtered = filtered.filter(p => p.isGuia && p.guia === dashboardFilterGuia);
+  }
+  
+  document.getElementById('countInfo').textContent = filtered.length === 0 ? '' :
+    filtered.length === 1 ? '1 ponto encontrado' : `${filtered.length} pontos encontrados`;
+
+  const grid = document.getElementById('mainGrid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">🎙️</div><p>Nenhum ponto com áudio encontrado nesta linha/guia.</p></div>';
+    return;
+  }
+
+  const dest = filtered.filter(p => p.destaque);
+  const outros = filtered.filter(p => !p.destaque);
+
+  if (currentLayout === 'list') { 
+    renderList(dest, outros, grid); 
+    return; 
+  }
+
+  let html = '';
+  if (dest.length)
+    html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length > 1 ? 's' : ''}</div>`;
+  [...dest, ...outros].forEach(p => { html += cardHtml(p); });
+  grid.innerHTML = html;
+  renderDashboard();
+};
 
 function abrirDetalhe(id) {
   const p = pontos.find(x => x.id === id);
