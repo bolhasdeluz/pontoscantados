@@ -1555,6 +1555,11 @@ async function saveFirebaseConfig() {
   }
 }
 
+function isMobileAuthDevice() {
+  const ua = navigator.userAgent || '';
+  return /iPhone|iPad|iPod|Android|Mobile|Opera Mini|IEMobile/i.test(ua);
+}
+
 async function initFirebaseAuth() {
   const btn = document.getElementById('profile-login-btn');
   let cfg = getStoredFirebaseConfig();
@@ -1606,6 +1611,20 @@ async function initFirebaseAuth() {
           localStorage.setItem('pontoscantados_firebase_token', authToken);
           await fetchAuthUser();
         }
+      }
+      try {
+        const redirectResult = await firebaseAuth.getRedirectResult();
+        if (redirectResult?.user) {
+          applyFirebaseUserToState(redirectResult.user);
+          const token = await redirectResult.user.getIdToken().catch(() => '');
+          if (token) {
+            authToken = token;
+            localStorage.setItem('pontoscantados_firebase_token', authToken);
+            await fetchAuthUser();
+          }
+        }
+      } catch (e) {
+        console.warn('Falha ao processar redirect result do Firebase', e);
       }
     };
     applyPersistence();
@@ -1769,6 +1788,11 @@ async function loginWithGoogle() {
     const provider = new window.firebase.auth.GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
+    if (isMobileAuthDevice()) {
+      await firebaseAuth.signInWithRedirect(provider);
+      toast('Abrindo login do Google no navegador…');
+      return;
+    }
     const result = await firebaseAuth.signInWithPopup(provider);
     const firebaseUser = result.user;
     applyFirebaseUserToState(firebaseUser);
