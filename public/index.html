@@ -352,7 +352,17 @@ select option{background:#fff;color:#2a1a22}
 .profile-user-meta{display:flex;flex-direction:column;gap:3px}
 .profile-name{font-weight:700;color:var(--text)}
 .profile-email{font-size:.82rem;color:var(--text-dim)}
+.header-user-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(8px);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.16);min-width:220px}
+.header-user-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.22)}
+.header-user-name{font-weight:700;font-size:.85rem;line-height:1.1}
+.header-user-meta{display:block;font-size:.72rem;opacity:.8;line-height:1.1}
+.header-logout-btn{margin-left:auto;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.header-logout-btn:hover{background:rgba(255,255,255,.24)}
 .profile-form{display:grid;gap:8px}
+.playlist-filter-bar{display:grid;grid-template-columns:1.2fr .8fr;gap:8px;margin-bottom:8px}
+.playlist-filter-bar input,.playlist-filter-bar select{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s}
+.playlist-filter-bar input:focus,.playlist-filter-bar select:focus{border-color:var(--gold)}
+@media(max-width:700px){.playlist-filter-bar{grid-template-columns:1fr}}
 .profile-form input,.profile-form textarea,.profile-client-id input,.playlist-form input,.playlist-form textarea,.playlist-form select{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s}
 .profile-form input:focus,.profile-form textarea:focus,.profile-client-id input:focus,.playlist-form input:focus,.playlist-form textarea:focus,.playlist-form select:focus{border-color:var(--gold)}
 .profile-form textarea{min-height:72px;resize:vertical}
@@ -503,6 +513,14 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <p id="subtitle">Bolhas de Luz</p>
     </div>
     <div class="hr">
+      <div class="header-user-pill" id="header-user-pill">
+        <img class="header-user-avatar" id="header-user-avatar" src="https://placehold.co/40x40?text=U" alt="avatar">
+        <div>
+          <div class="header-user-name" id="header-user-name">Conecte sua conta</div>
+          <small class="header-user-meta" id="header-user-meta">Google • configure o Firebase</small>
+        </div>
+        <button class="header-logout-btn" id="header-logout-btn" type="button" onclick="logout()" style="display:none">Sair</button>
+      </div>
       <div class="sw">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCards()">
@@ -537,7 +555,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <div class="profile-content" id="profile-content">
       <div class="profile-empty">Faça login para criar seu perfil e playlists.</div>
     </div>
-    <div class="profile-client-id">
+    <div class="profile-client-id" style="display:none">
       <textarea id="firebaseConfigInput" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
       <button class="profile-btn secondary" onclick="saveFirebaseConfig()">Salvar config</button>
     </div>
@@ -685,6 +703,12 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       </div>
       <div class="form-row">
         <label>Pontos na playlist</label>
+        <div class="playlist-filter-bar">
+          <input type="text" id="playlist-point-search" placeholder="Filtrar por nome, guia, linha..." oninput="renderPlaylistPoints()">
+          <select id="playlist-point-line-filter" onchange="renderPlaylistPoints()">
+            <option value="">Todas as linhas</option>
+          </select>
+        </div>
         <div id="playlist-points" class="playlist-points"></div>
       </div>
     </div>
@@ -1493,15 +1517,25 @@ function sairAdmin() {
 }
 
 // ── FIREBASE / PERFIL / PLAYLISTS ──
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDZ_vFMHZ7t7nyJWJPRfD280VZzagqY5Ws',
+  authDomain: 'terreiro-bolhas-de-luz.firebaseapp.com',
+  projectId: 'terreiro-bolhas-de-luz',
+  appId: '1:179602931861:web:5cf336e9077334cee05b9c'
+};
+
 function getStoredFirebaseConfig() {
-  try { return JSON.parse(localStorage.getItem('pontoscantados_firebase_config') || '{}'); }
-  catch { return {}; }
+  try {
+    const stored = JSON.parse(localStorage.getItem('pontoscantados_firebase_config') || '{}');
+    return stored && Object.keys(stored).length ? stored : DEFAULT_FIREBASE_CONFIG;
+  } catch { return DEFAULT_FIREBASE_CONFIG; }
 }
 
 function setFirebaseConfig(cfg) {
-  localStorage.setItem('pontoscantados_firebase_config', JSON.stringify(cfg));
+  const merged = { ...DEFAULT_FIREBASE_CONFIG, ...(cfg || {}) };
+  localStorage.setItem('pontoscantados_firebase_config', JSON.stringify(merged));
   const input = document.getElementById('firebaseConfigInput');
-  if (input) input.value = JSON.stringify(cfg, null, 2);
+  if (input) input.value = JSON.stringify(merged, null, 2);
 }
 
 function saveFirebaseConfig() {
@@ -1528,19 +1562,37 @@ function initFirebaseAuth() {
   }
   if (!firebaseAuthReady) {
     firebaseAuthReady = true;
-    firebaseAuth.onAuthStateChanged(async user => {
-      if (user) {
-        const token = await user.getIdToken().catch(() => '');
+    const applyPersistence = async () => {
+      try {
+        await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
+      } catch (e) {
+        console.warn('Falha ao definir persistência do Firebase', e);
+      }
+      firebaseAuth.onAuthStateChanged(async user => {
+        if (user) {
+          const token = await user.getIdToken().catch(() => '');
+          if (token) {
+            authToken = token;
+            localStorage.setItem('pontoscantados_firebase_token', authToken);
+            await fetchAuthUser();
+          }
+        } else {
+          authToken = '';
+          localStorage.removeItem('pontoscantados_firebase_token');
+          authUser = null;
+          renderProfileState();
+        }
+      });
+      if (firebaseAuth.currentUser) {
+        const token = await firebaseAuth.currentUser.getIdToken().catch(() => '');
         if (token) {
           authToken = token;
           localStorage.setItem('pontoscantados_firebase_token', authToken);
           await fetchAuthUser();
         }
-      } else if (!authToken) {
-        authUser = null;
-        renderProfileState();
       }
-    });
+    };
+    applyPersistence();
   }
   if (btn) btn.textContent = authUser ? 'Trocar conta' : 'Entrar com Google';
 }
@@ -1577,11 +1629,34 @@ async function fetchAuthUser() {
   }
 }
 
+function renderHeaderUserBadge() {
+  const pill = document.getElementById('header-user-pill');
+  const name = document.getElementById('header-user-name');
+  const meta = document.getElementById('header-user-meta');
+  const avatar = document.getElementById('header-user-avatar');
+  const logoutBtn = document.getElementById('header-logout-btn');
+  if (!pill || !name || !meta || !avatar) return;
+  const cfg = getStoredFirebaseConfig();
+  const hasCfg = !!(cfg.apiKey && cfg.authDomain && cfg.projectId);
+  if (!authUser) {
+    name.textContent = 'Conecte sua conta';
+    meta.textContent = hasCfg ? 'Google • pronto para entrar' : 'Google • configure o Firebase';
+    avatar.src = 'https://placehold.co/40x40?text=U';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    return;
+  }
+  name.textContent = authUser.name || authUser.email || 'Usuário';
+  meta.textContent = authUser.isAdmin ? 'Administrador' : 'Usuário logado';
+  avatar.src = authUser.picture || 'https://placehold.co/40x40?text=U';
+  if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+}
+
 function renderProfileState() {
   const content = document.getElementById('profile-content');
   const title = document.getElementById('profile-title');
   const btn = document.getElementById('profile-login-btn');
   const input = document.getElementById('firebaseConfigInput');
+  renderHeaderUserBadge();
   if (input) input.value = JSON.stringify(getStoredFirebaseConfig(), null, 2);
   if (!authUser) {
     if (title) title.textContent = 'Conecte sua conta Google';
@@ -1650,6 +1725,7 @@ async function loginWithGoogle() {
     firebaseAuth = window.firebase.auth();
   }
   try {
+    await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
     const provider = new window.firebase.auth.GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
@@ -1663,6 +1739,23 @@ async function loginWithGoogle() {
   } catch (e) {
     console.error(e);
     toast(e.message || 'Erro ao entrar com o Google');
+  }
+}
+
+async function logout() {
+  try {
+    if (firebaseAuth) {
+      await firebaseAuth.signOut();
+    }
+    authToken = '';
+    authUser = null;
+    localStorage.removeItem('pontoscantados_firebase_token');
+    renderProfileState();
+    renderPlaylists();
+    toast('Você saiu da conta');
+  } catch (e) {
+    console.error(e);
+    toast('Não foi possível sair da conta');
   }
 }
 
@@ -1710,6 +1803,33 @@ function renderPlaylists() {
   `).join('');
 }
 
+function populatePlaylistPointFilters() {
+  const select = document.getElementById('playlist-point-line-filter');
+  if (!select) return;
+  const linhas = [...new Set(pontos.map(p => p.linha).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+  select.innerHTML = '<option value="">Todas as linhas</option>' + linhas.map(linha => `<option value="${esc(linha)}">${esc(linha)}</option>`).join('');
+}
+
+function renderPlaylistPoints() {
+  const points = document.getElementById('playlist-points');
+  if (!points) return;
+  const search = (document.getElementById('playlist-point-search')?.value || '').toLowerCase();
+  const lineFilter = document.getElementById('playlist-point-line-filter')?.value || '';
+  const filtered = pontos.filter(p => {
+    const haystack = `${p.nome || ''} ${p.guia || ''} ${p.linha || ''} ${p.tipo || ''} ${p.letra || ''}`.toLowerCase();
+    const matchSearch = !search || haystack.includes(search);
+    const matchLine = !lineFilter || (p.linha || '') === lineFilter;
+    return matchSearch && matchLine;
+  });
+  const items = filtered.map(p => `
+    <label class="playlist-point-row">
+      <input type="checkbox" ${playlistDraftIds.includes(p.id) ? 'checked' : ''} onchange="togglePlaylistDraft('${p.id}', this.checked)">
+      <span>${esc(p.nome || p.id)}</span>
+    </label>
+  `).join('');
+  points.innerHTML = items || '<div class="profile-empty">Nenhum ponto encontrado com estes filtros.</div>';
+}
+
 function openPlaylistModal(id) {
   const modal = document.getElementById('ov-playlist');
   const title = document.getElementById('playlist-modal-title');
@@ -1726,13 +1846,10 @@ function openPlaylistModal(id) {
   visibility.value = current?.visibility || 'private';
   hidden.value = current?.id || '';
   playlistDraftIds = Array.isArray(current?.items) ? current.items.slice() : [];
-  const items = pontos.map(p => `
-    <label class="playlist-point-row">
-      <input type="checkbox" ${playlistDraftIds.includes(p.id) ? 'checked' : ''} onchange="togglePlaylistDraft('${p.id}', this.checked)">
-      <span>${esc(p.nome || p.id)}</span>
-    </label>
-  `).join('');
-  points.innerHTML = items || '<div class="profile-empty">Nenhum ponto disponível ainda.</div>';
+  document.getElementById('playlist-point-search').value = '';
+  document.getElementById('playlist-point-line-filter').value = '';
+  populatePlaylistPointFilters();
+  renderPlaylistPoints();
   abrirModal('ov-playlist');
 }
 
