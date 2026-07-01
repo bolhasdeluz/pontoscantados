@@ -484,7 +484,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <option value="linha">Por linha</option>
       </select>
       <button class="filter-select" id="btn-tocar-fila" onclick="playlistStart()" title="Tocar em sequência os pontos com áudio que estão filtrados" style="cursor:pointer;white-space:nowrap">▶ Tocar fila</button>
-      <select class="filter-select" id="pl-select" onchange="playlistByCategory(this.value)" title="Tocar uma playlist por linha, guia ou falange" style="cursor:pointer"><option value="">♫ Playlists…</option></select>
+      <select class="filter-select" id="pl-select" onchange="playlistByCategory(this.value)" title="Tocar uma playlist por linha, guia ou filha" style="cursor:pointer"><option value="">♫ Playlists…</option></select>
     </div>
     <div class="layout-btns">
       <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards">
@@ -623,7 +623,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <div class="form-row"><label>Data da gravação (opcional)</label><input type="date" id="fDataGravacao"></div>
     <input type="hidden" id="fIsGuia">
     <div class="form-row" id="guiaField"><label>Guia <button type="button" onclick="abrirGerenciarGuias()" style="background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;text-decoration:underline;padding:0 0 0 6px">＋ gerenciar</button></label><select id="fGuia"><option value="">— Nenhum —</option></select></div>
-    <div class="form-row" id="falangeField"><label>Falange <button type="button" onclick="abrirGerenciarFalanges()" style="background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;text-decoration:underline;padding:0 0 0 6px">＋ gerenciar</button></label><select id="fFalange"><option value="">— Nenhuma —</option></select></div>
+    <div class="form-row" id="FilhaField"><label>Filha <button type="button" onclick="abrirGerenciarFilhas()" style="background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;text-decoration:underline;padding:0 0 0 6px">＋ gerenciar</button></label><select id="fFilha"><option value="">— Nenhuma —</option></select></div>
     <div class="form-row"><label>Postado por <button type="button" onclick="abrirGerenciarPostadores()" style="background:none;border:none;color:var(--gold);font-size:.75rem;cursor:pointer;text-decoration:underline;padding:0 0 0 6px">＋ gerenciar</button></label><select id="fPostadoPor"><option value="Anna">Anna</option><option value="Diego">Diego</option></select></div>
     <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="savePonto()">Salvar Ponto</button></div>
   </div>
@@ -678,16 +678,16 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
   </div>
 </div>
 
-<!-- GERENCIAR FALANGES -->
-<div class="overlay" id="ov-falanges">
+<!-- GERENCIAR FILHAS -->
+<div class="overlay" id="ov-filhas">
   <div class="modal" style="max-width:400px">
-    <button class="btn-close-modal" onclick="fecharModal('ov-falanges')">✕</button>
-    <h2>Falanges</h2>
-    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Grupos/legiões de guias. Disponíveis no campo "Falange" do ponto.</p>
-    <div id="falanges-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-height:40px"></div>
+    <button class="btn-close-modal" onclick="fecharModal('ov-filhas')">✕</button>
+    <h2>Filhass</h2>
+    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Grupos/legiões de guias. Disponíveis no campo "Filhas" do ponto.</p>
+    <div id="filhas-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-height:40px"></div>
     <div class="linhas-add-row">
-      <input type="text" id="nova-falange-input" placeholder="Nome da falange...">
-      <button class="btn-save" onclick="adicionarFalange()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
+      <input type="text" id="nova-filhas-input" placeholder="Nome da filha...">
+      <button class="btn-save" onclick="adicionarFilhas()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
     </div>
   </div>
 </div>
@@ -1279,52 +1279,52 @@ document.getElementById('novo-postador-input').addEventListener('keydown', e => 
   if (e.key === 'Enter') adicionarPostador();
 });
 
-// ── FALANGES ──
-let falanges = [];
-function loadFalanges() {
-  try { falanges = JSON.parse(localStorage.getItem('pontos_falanges') || '[]'); }
-  catch { falanges = []; }
-  if (!Array.isArray(falanges)) falanges = [];
-  refreshFalangeSelect();
+// ── FILHAS ──
+let filhas = [];
+function loadFilhas() {
+  try { filhas = JSON.parse(localStorage.getItem('pontos_filhas') || '[]'); }
+  catch { filhas = []; }
+  if (!Array.isArray(filhas)) filhas = [];
+  refreshFilhasSelect();
 }
-function saveFalanges() {
-  localStorage.setItem('pontos_falanges', JSON.stringify(falanges));
-  refreshFalangeSelect();
+function saveFilhas() {
+  localStorage.setItem('pontos_filhas', JSON.stringify(filhas));
+  refreshFilhaSelect();
 }
-function refreshFalangeSelect() {
-  const sel = document.getElementById('fFalange');
+function refreshfilhaSelect() {
+  const sel = document.getElementById('ffilha');
   if (!sel) return;
   const cur = sel.value;
-  sel.innerHTML = '<option value="">— Nenhuma —</option>' + falanges.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+  sel.innerHTML = '<option value="">— Nenhuma —</option>' + filhas.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
   if (cur) sel.value = cur;
 }
-function syncFalangesFromData() {
-  const ex = new Set(falanges.map(x => x.toLowerCase()));
-  pontos.forEach(p => { if (p.falange && !ex.has(p.falange.toLowerCase())) { falanges.push(p.falange); ex.add(p.falange.toLowerCase()); } });
+function syncfilhasFromData() {
+  const ex = new Set(filhas.map(x => x.toLowerCase()));
+  pontos.forEach(p => { if (p.filha && !ex.has(p.filha.toLowerCase())) { filhas.push(p.filha); ex.add(p.filha.toLowerCase()); } });
 }
-function abrirGerenciarFalanges() { renderFalangesModal(); abrirModal('ov-falanges'); }
-function renderFalangesModal() {
-  const el = document.getElementById('falanges-list');
-  if (!falanges.length) { el.innerHTML = '<p class="linhas-empty">Nenhuma falange cadastrada ainda.</p>'; return; }
-  el.innerHTML = falanges.map((f, i) => `
+function abrirGerenciarfilhas() { renderfilhasModal(); abrirModal('ov-filhas'); }
+function renderfilhasModal() {
+  const el = document.getElementById('filhas-list');
+  if (!filhas.length) { el.innerHTML = '<p class="linhas-empty">Nenhuma filha cadastrada ainda.</p>'; return; }
+  el.innerHTML = filhas.map((f, i) => `
     <div class="linha-item">
       <span class="linha-item-name">${esc(f)}</span>
-      <button class="btn-rm-linha" onclick="removerFalange(${i})" title="Remover">✕</button>
+      <button class="btn-rm-linha" onclick="removerfilha(${i})" title="Remover">✕</button>
     </div>`).join('');
 }
-function adicionarFalange() {
-  const input = document.getElementById('nova-falange-input');
+function adicionarfilha() {
+  const input = document.getElementById('nova-filha-input');
   const nome = input.value.trim();
   if (!nome) return;
-  if (falanges.some(f => f.toLowerCase() === nome.toLowerCase())) { toast('Falange já existe!'); return; }
-  falanges.push(nome); saveFalanges(); input.value = ''; renderFalangesModal(); toast('Falange adicionada!');
+  if (filhas.some(f => f.toLowerCase() === nome.toLowerCase())) { toast('filha já existe!'); return; }
+  filhas.push(nome); savefilhas(); input.value = ''; renderfilhasModal(); toast('filha adicionada!');
 }
-function removerFalange(i) {
-  if (!confirm(`Remover a falange "${falanges[i]}"? Os pontos vinculados não mudam.`)) return;
-  falanges.splice(i, 1); saveFalanges(); renderFalangesModal(); toast('Falange removida!');
+function removerfilha(i) {
+  if (!confirm(`Remover a filha "${filhas[i]}"? Os pontos vinculados não mudam.`)) return;
+  filhas.splice(i, 1); savefilhas(); renderfilhasModal(); toast('filha removida!');
 }
-document.getElementById('nova-falange-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') adicionarFalange();
+document.getElementById('nova-filha-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adicionarfilha();
 });
 
 // ── ADMIN (toggle simples, sem senha) ──
@@ -1507,7 +1507,7 @@ async function load() {
     pontos = data;
     syncLinhasFromData();
     syncGuiasFromData(); saveGuias();
-    syncFalangesFromData(); saveFalanges();
+    syncfilhasFromData(); savefilhas();
     renderCards();
   } catch (e) {
     clearTimeout(timeout);
@@ -2010,11 +2010,11 @@ window.openModal = () => {
   });
   refreshLinhaSelects();
   refreshGuiaSelect();
-  refreshFalangeSelect();
+  refreshfilhaSelect();
   refreshPostadorSelect();
   document.getElementById('fLinha').value = '';
   document.getElementById('fGuia').value = '';
-  document.getElementById('fFalange').value = '';
+  document.getElementById('ffilha').value = '';
   document.getElementById('fPostadoPor').value = postadores[0] || 'Anna';
   document.getElementById('audioCurrentUrl').textContent = '';
   document.getElementById('audioCurrentUrl').dataset.url = '';
@@ -2045,9 +2045,9 @@ window.openEdit = id => {
   if (p.guia && !guias.some(gg => gg.toLowerCase() === p.guia.toLowerCase())) { guias.push(p.guia); saveGuias(); }
   else { refreshGuiaSelect(); }
   document.getElementById('fGuia').value = p.guia || '';
-  if (p.falange && !falanges.some(f => f.toLowerCase() === p.falange.toLowerCase())) { falanges.push(p.falange); saveFalanges(); }
-  else { refreshFalangeSelect(); }
-  document.getElementById('fFalange').value = p.falange || '';
+  if (p.filha && !filhas.some(f => f.toLowerCase() === p.filha.toLowerCase())) { filhas.push(p.filha); savefilhas(); }
+  else { refreshfilhaSelect(); }
+  document.getElementById('ffilha').value = p.filha || '';
   if (p.postadoPor && !postadores.some(n => n.toLowerCase() === p.postadoPor.toLowerCase())) { postadores.push(p.postadoPor); savePostadores(); }
   else { refreshPostadorSelect(); }
   document.getElementById('fPostadoPor').value = p.postadoPor || postadores[0] || 'Anna';
@@ -2170,7 +2170,7 @@ window.savePonto = async () => {
     audioEnd,
     isGuia: !!document.getElementById('fGuia').value,
     guia: document.getElementById('fGuia').value.trim(),
-    falange: document.getElementById('fFalange').value.trim(),
+    filha: document.getElementById('ffilha').value.trim(),
     postadoPor: document.getElementById('fPostadoPor').value.trim(),
     dataGravacao: document.getElementById('fDataGravacao').value || '',
     destaque: editId ? (pontos.find(x => x.id === editId) || {}).destaque || false : false
@@ -3609,13 +3609,13 @@ function plBuildList(){
 function refreshPlaylistSelect(){
   const sel=document.getElementById('pl-select'); if(!sel) return;
   const cur=sel.value;
-  const setBy=(type)=>{ const s=new Set(); pontos.forEach(p=>{ if(p.audioUrl){ const v=type==='linha'?p.linha:type==='guia'?p.guia:p.falange; if(v) s.add(v); } }); return [...s].sort((a,b)=>a.localeCompare(b,'pt')); };
+  const setBy=(type)=>{ const s=new Set(); pontos.forEach(p=>{ if(p.audioUrl){ const v=type==='linha'?p.linha:type==='guia'?p.guia:p.filha; if(v) s.add(v); } }); return [...s].sort((a,b)=>a.localeCompare(b,'pt')); };
   const mk=(arr,type)=>arr.map(x=>`<option value="${type}:${esc(x)}">${esc(x)}</option>`).join('');
-  const L=setBy('linha'), G=setBy('guia'), F=setBy('falange');
+  const L=setBy('linha'), G=setBy('guia'), F=setBy('filha');
   let html='<option value="">♫ Playlists…</option>';
   if(L.length) html+='<optgroup label="Linhas">'+mk(L,'linha')+'</optgroup>';
   if(G.length) html+='<optgroup label="Guias">'+mk(G,'guia')+'</optgroup>';
-  if(F.length) html+='<optgroup label="Falanges">'+mk(F,'falange')+'</optgroup>';
+  if(F.length) html+='<optgroup label="filhas">'+mk(F,'filha')+'</optgroup>';
   sel.innerHTML=html;
   if(cur) sel.value=cur;
 }
@@ -3626,7 +3626,7 @@ window.playlistByCategory=(val)=>{
   let list=pontos.filter(p=>p.audioUrl && (
     type==='linha' ? (p.linha||'')===key :
     type==='guia'  ? (p.guia||'')===key :
-    type==='falange' ? (p.falange||'')===key : false));
+    type==='filha' ? (p.filha||'')===key : false));
   list.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt'));
   if(sel) sel.value='';
   if(!list.length){ toast('Nenhum ponto com áudio em "'+key+'"'); return; }
@@ -3688,7 +3688,7 @@ function highlightPlaying(id){
   });
 })();
 
-loadLinhas(); loadGuias(); loadPostadores(); loadFalanges();
+loadLinhas(); loadGuias(); loadPostadores(); loadfilhas();
 const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
 setLayout(savedLayout);
 load();
