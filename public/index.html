@@ -1584,6 +1584,7 @@ async function initFirebaseAuth() {
       }
       firebaseAuth.onAuthStateChanged(async user => {
         if (user) {
+          applyFirebaseUserToState(user);
           const token = await user.getIdToken().catch(() => '');
           if (token) {
             authToken = token;
@@ -1598,6 +1599,7 @@ async function initFirebaseAuth() {
         }
       });
       if (firebaseAuth.currentUser) {
+        applyFirebaseUserToState(firebaseAuth.currentUser);
         const token = await firebaseAuth.currentUser.getIdToken().catch(() => '');
         if (token) {
           authToken = token;
@@ -1609,6 +1611,24 @@ async function initFirebaseAuth() {
     applyPersistence();
   }
   if (btn) btn.textContent = authUser ? 'Trocar conta' : 'Entrar com Google';
+}
+
+function applyFirebaseUserToState(user) {
+  if (!user) {
+    authUser = null;
+    renderProfileState();
+    return;
+  }
+  authUser = {
+    id: user.uid || user.providerData?.[0]?.uid || '',
+    email: user.email || '',
+    name: user.displayName || user.providerData?.[0]?.displayName || '',
+    picture: user.photoURL || user.providerData?.[0]?.photoURL || '',
+    bio: '',
+    city: '',
+    isAdmin: false,
+  };
+  renderProfileState();
 }
 
 async function fetchAuthUser() {
@@ -1627,9 +1647,11 @@ async function fetchAuthUser() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.user) {
-      authUser = null;
-      authToken = '';
-      localStorage.removeItem('pontoscantados_firebase_token');
+      if (!authUser) {
+        authUser = null;
+        authToken = '';
+        localStorage.removeItem('pontoscantados_firebase_token');
+      }
       renderProfileState();
       return;
     }
@@ -1638,7 +1660,11 @@ async function fetchAuthUser() {
     await loadPlaylists();
   } catch (e) {
     console.error(e);
-    authUser = null;
+    if (!authUser) {
+      authUser = null;
+      authToken = '';
+      localStorage.removeItem('pontoscantados_firebase_token');
+    }
     renderProfileState();
   }
 }
@@ -1744,7 +1770,9 @@ async function loginWithGoogle() {
     provider.addScope('profile');
     provider.addScope('email');
     const result = await firebaseAuth.signInWithPopup(provider);
-    const token = await result.user?.getIdToken?.();
+    const firebaseUser = result.user;
+    applyFirebaseUserToState(firebaseUser);
+    const token = await firebaseUser?.getIdToken?.();
     if (!token) throw new Error('Não foi possível obter o token do Firebase');
     authToken = token;
     localStorage.setItem('pontoscantados_firebase_token', authToken);
