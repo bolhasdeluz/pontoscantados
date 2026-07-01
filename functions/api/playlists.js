@@ -45,6 +45,7 @@ export async function onRequest(context) {
       items: Array.isArray(body.items) ? body.items : [],
       ownerId: activeProfile.id,
       ownerEmail: activeProfile.email || user.email || '',
+      ownerName: activeProfile.name || activeProfile.email || user.name || user.email || '',
       visibility: body.visibility || 'private',
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -60,7 +61,15 @@ export async function onRequest(context) {
     const existing = await KV.get(id, { type: 'json' }).catch(() => null);
     if (!existing) return json({ error: 'Playlist não encontrada' }, 404);
     if (!isAdminUser && existing.ownerId !== activeProfile.id) return json({ error: 'Sem permissão' }, 403);
-    const updated = { ...existing, ...body, id, updatedAt: Date.now() };
+    const updated = {
+      ...existing,
+      ...body,
+      id,
+      ownerId: existing.ownerId || activeProfile.id,
+      ownerEmail: existing.ownerEmail || (activeProfile.email || user.email || ''),
+      ownerName: body.ownerName || existing.ownerName || activeProfile.name || activeProfile.email || user.name || user.email || '',
+      updatedAt: Date.now(),
+    };
     await KV.put(id, JSON.stringify(updated));
     return json(updated);
   }

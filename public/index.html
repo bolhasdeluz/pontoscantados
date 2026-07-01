@@ -1518,10 +1518,10 @@ function sairAdmin() {
 
 // ── FIREBASE / PERFIL / PLAYLISTS ──
 const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyDZ_vFMHZ7t7nyJWJPRfD280VZzagqY5Ws',
-  authDomain: 'terreiro-bolhas-de-luz.firebaseapp.com',
-  projectId: 'terreiro-bolhas-de-luz',
-  appId: '1:179602931861:web:5cf336e9077334cee05b9c'
+  apiKey: '',
+  authDomain: '',
+  projectId: '',
+  appId: ''
 };
 
 function getStoredFirebaseConfig() {
@@ -1538,20 +1538,34 @@ function setFirebaseConfig(cfg) {
   if (input) input.value = JSON.stringify(merged, null, 2);
 }
 
-function saveFirebaseConfig() {
-  const raw = document.getElementById('firebaseConfigInput').value.trim();
-  if (!raw) { toast('Cole a configuração do Firebase em JSON'); return; }
-  let cfg = {};
-  try { cfg = JSON.parse(raw); } catch { toast('JSON inválido'); return; }
-  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) { toast('Faltam apiKey, authDomain ou projectId'); return; }
-  setFirebaseConfig(cfg);
-  initFirebaseAuth();
-  toast('Configuração do Firebase salva');
+async function saveFirebaseConfig() {
+  try {
+    const res = await fetch('/api/firebase-config');
+    const data = await res.json().catch(() => ({}));
+    const cfg = data?.config || {};
+    if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
+      toast('A configuração do Firebase não está disponível no Cloudflare');
+      return;
+    }
+    setFirebaseConfig(cfg);
+    initFirebaseAuth();
+    toast('Configuração do Firebase carregada');
+  } catch (e) {
+    toast('Não foi possível carregar a configuração do Firebase');
+  }
 }
 
-function initFirebaseAuth() {
+async function initFirebaseAuth() {
   const btn = document.getElementById('profile-login-btn');
-  const cfg = getStoredFirebaseConfig();
+  let cfg = getStoredFirebaseConfig();
+  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
+    try {
+      const res = await fetch('/api/firebase-config');
+      const data = await res.json().catch(() => ({}));
+      cfg = data?.config || {};
+      if (cfg.apiKey && cfg.authDomain && cfg.projectId) setFirebaseConfig(cfg);
+    } catch {}
+  }
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !window.firebase?.app) {
     if (btn) btn.textContent = 'Configurar Firebase';
     return;
@@ -1793,7 +1807,7 @@ function renderPlaylists() {
     <div class="playlist-item">
       <div class="playlist-item-info">
         <div class="playlist-item-name">${esc(p.name || 'Sem nome')}</div>
-        <div class="playlist-item-meta">${esc((p.items || []).length)} ponto(s) • ${p.visibility === 'public' ? 'Pública' : 'Privada'} • ${p.ownerEmail ? esc(p.ownerEmail) : ''}</div>
+        <div class="playlist-item-meta">${esc((p.items || []).length)} ponto(s) • ${p.visibility === 'public' ? 'Pública' : 'Privada'} • ${p.ownerName ? esc(p.ownerName) : (p.ownerEmail ? esc(p.ownerEmail) : 'Usuário')}</div>
       </div>
       <div class="playlist-item-actions">
         <button onclick="openPlaylistModal('${p.id}')">Editar</button>
