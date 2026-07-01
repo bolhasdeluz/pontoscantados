@@ -335,7 +335,43 @@ select option{background:#fff;color:#2a1a22}
 .ts-reload-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 16px;border-radius:6px;cursor:pointer;border:none;background:#1a73e8;color:#fff;transition:opacity .15s;box-shadow:0 2px 8px rgba(26,115,232,.25);margin-top:8px}
 .ts-reload-btn:hover{opacity:.85}
 .ts-needs-badge{display:inline-block;background:#fffbe8;border:1px solid #e8d060;border-radius:6px;color:#8c5a00;font-size:12px;padding:6px 12px;margin-top:4px;line-height:1.4}
-/* ══ SEÇÕES / CAPÍTULOS ══ */
+/* ══ PERFIL / GOOGLE / PLAYLISTS ══ */
+.profile-shell{display:grid;gap:14px;max-width:1200px;margin:16px auto 0;padding:0 16px}
+.profile-card,.playlists-card{background:#fff;border:1px solid rgba(196,57,107,.12);border-radius:14px;box-shadow:0 4px 20px rgba(180,60,90,.06);padding:16px}
+.profile-card-header,.playlists-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.profile-eyebrow{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+.profile-card h3,.playlists-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);margin-top:2px}
+.profile-btn{background:var(--gold);border:none;border-radius:8px;color:#fff;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s}
+.profile-btn:hover{background:var(--gold-light)}
+.profile-btn.secondary{background:#fdf0f3;color:var(--gold);border:1px solid rgba(196,57,107,.2)}
+.profile-btn.secondary:hover{background:#fde8ef}
+.profile-content{display:flex;flex-direction:column;gap:10px}
+.profile-empty{padding:12px;border-radius:10px;background:#fdf5f7;color:var(--text-dim);font-size:.9rem}
+.profile-user{display:flex;gap:12px;align-items:center}
+.profile-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(196,57,107,.2)}
+.profile-user-meta{display:flex;flex-direction:column;gap:3px}
+.profile-name{font-weight:700;color:var(--text)}
+.profile-email{font-size:.82rem;color:var(--text-dim)}
+.profile-form{display:grid;gap:8px}
+.profile-form input,.profile-form textarea,.profile-client-id input,.playlist-form input,.playlist-form textarea,.playlist-form select{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s}
+.profile-form input:focus,.profile-form textarea:focus,.profile-client-id input:focus,.playlist-form input:focus,.playlist-form textarea:focus,.playlist-form select:focus{border-color:var(--gold)}
+.profile-form textarea{min-height:72px;resize:vertical}
+.profile-client-id{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.playlists-list{display:flex;flex-direction:column;gap:8px}
+.playlist-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(196,57,107,.12);border-radius:10px;background:#fcf7f9}
+.playlist-item-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.playlist-item-name{font-weight:600;color:var(--text)}
+.playlist-item-meta{font-size:.78rem;color:var(--text-dim)}
+.playlist-item-actions{display:flex;gap:6px;flex-shrink:0}
+.playlist-item-actions button{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text-dim);cursor:pointer}
+.playlist-item-actions button:hover{border-color:var(--gold);color:var(--gold)}
+.playlist-form{display:grid;gap:10px}
+.playlist-points{display:grid;gap:8px;max-height:220px;overflow:auto;padding-right:4px}
+.playlist-point-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(196,57,107,.12);border-radius:8px;background:#fcf8fa}
+.playlist-point-row input{width:16px;height:16px;accent-color:var(--gold)}
+.playlist-point-row span{font-size:.84rem;color:var(--text)}
+@media(min-width:860px){.profile-shell{grid-template-columns:1.1fr .9fr;align-items:start}}
+
 .ts-secquick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .ts-secquick-btn{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.05em;padding:6px 12px;border-radius:20px;border:1px dashed rgba(196,57,107,.35);background:transparent;color:var(--gold);cursor:pointer;transition:all .12s;text-transform:uppercase}
 .ts-secquick-btn:hover{background:var(--gold-dim);border-style:solid}
@@ -489,6 +525,36 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
   </div>
 </header>
 
+<div class="profile-shell">
+  <div class="profile-card">
+    <div class="profile-card-header">
+      <div>
+        <div class="profile-eyebrow">Conta & perfil</div>
+        <h3 id="profile-title">Conecte sua conta Google</h3>
+      </div>
+      <button class="profile-btn" id="profile-login-btn" onclick="loginWithGoogle()">Entrar com Google</button>
+    </div>
+    <div class="profile-content" id="profile-content">
+      <div class="profile-empty">Faça login para criar seu perfil e playlists.</div>
+    </div>
+    <div class="profile-client-id">
+      <textarea id="firebaseConfigInput" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
+      <button class="profile-btn secondary" onclick="saveFirebaseConfig()">Salvar config</button>
+    </div>
+  </div>
+
+  <div class="playlists-card">
+    <div class="playlists-header">
+      <div>
+        <div class="profile-eyebrow">Playlists</div>
+        <h3>Minhas playlists</h3>
+      </div>
+      <button class="profile-btn" onclick="openPlaylistModal()">+ Nova playlist</button>
+    </div>
+    <div id="playlists-list" class="playlists-list"></div>
+  </div>
+</div>
+
 <div class="cb">
   <div class="ci">
     <div class="ci-filters">
@@ -591,6 +657,40 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     </div>
     <div style="display:flex;justify-content:flex-end;margin-top:16px">
       <button class="btn-save" onclick="verificarSenha()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYLIST -->
+<div class="overlay" id="ov-playlist">
+  <div class="modal">
+    <button class="btn-close-modal" onclick="fecharModal('ov-playlist')">✕</button>
+    <h2 id="playlist-modal-title">Nova playlist</h2>
+    <input type="hidden" id="playlist-edit-id">
+    <div class="playlist-form">
+      <div class="form-row">
+        <label>Nome</label>
+        <input type="text" id="playlist-name" placeholder="Nome da playlist">
+      </div>
+      <div class="form-row">
+        <label>Descrição</label>
+        <textarea id="playlist-description" placeholder="O que essa playlist representa?"></textarea>
+      </div>
+      <div class="form-row">
+        <label>Visibilidade</label>
+        <select id="playlist-visibility">
+          <option value="private">Privada</option>
+          <option value="public">Pública</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Pontos na playlist</label>
+        <div id="playlist-points" class="playlist-points"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal('ov-playlist')">Cancelar</button>
+      <button class="btn-save" onclick="savePlaylist()">Salvar</button>
     </div>
   </div>
 </div>
@@ -1136,6 +1236,13 @@ let currentFilter = 'all';
 let selectedIds = new Set();
 let segmentos = [];
 let linhas = [];
+let authUser = null;
+let authToken = localStorage.getItem('pontoscantados_firebase_token') || '';
+let playlists = [];
+let playlistDraftIds = [];
+let firebaseApp = null;
+let firebaseAuth = null;
+let firebaseAuthReady = false;
 
 // ── LINHAS ──
 function loadLinhas() {
@@ -1385,6 +1492,291 @@ function sairAdmin() {
   limparSelecao();
 }
 
+// ── FIREBASE / PERFIL / PLAYLISTS ──
+function getStoredFirebaseConfig() {
+  try { return JSON.parse(localStorage.getItem('pontoscantados_firebase_config') || '{}'); }
+  catch { return {}; }
+}
+
+function setFirebaseConfig(cfg) {
+  localStorage.setItem('pontoscantados_firebase_config', JSON.stringify(cfg));
+  const input = document.getElementById('firebaseConfigInput');
+  if (input) input.value = JSON.stringify(cfg, null, 2);
+}
+
+function saveFirebaseConfig() {
+  const raw = document.getElementById('firebaseConfigInput').value.trim();
+  if (!raw) { toast('Cole a configuração do Firebase em JSON'); return; }
+  let cfg = {};
+  try { cfg = JSON.parse(raw); } catch { toast('JSON inválido'); return; }
+  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) { toast('Faltam apiKey, authDomain ou projectId'); return; }
+  setFirebaseConfig(cfg);
+  initFirebaseAuth();
+  toast('Configuração do Firebase salva');
+}
+
+function initFirebaseAuth() {
+  const btn = document.getElementById('profile-login-btn');
+  const cfg = getStoredFirebaseConfig();
+  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !window.firebase?.app) {
+    if (btn) btn.textContent = 'Configurar Firebase';
+    return;
+  }
+  if (!firebaseApp) {
+    firebaseApp = window.firebase.initializeApp(cfg);
+    firebaseAuth = window.firebase.auth();
+  }
+  if (!firebaseAuthReady) {
+    firebaseAuthReady = true;
+    firebaseAuth.onAuthStateChanged(async user => {
+      if (user) {
+        const token = await user.getIdToken().catch(() => '');
+        if (token) {
+          authToken = token;
+          localStorage.setItem('pontoscantados_firebase_token', authToken);
+          await fetchAuthUser();
+        }
+      } else if (!authToken) {
+        authUser = null;
+        renderProfileState();
+      }
+    });
+  }
+  if (btn) btn.textContent = authUser ? 'Trocar conta' : 'Entrar com Google';
+}
+
+async function fetchAuthUser() {
+  const cfg = getStoredFirebaseConfig();
+  if (!authToken) {
+    authUser = null;
+    renderProfileState();
+    return;
+  }
+  try {
+    const res = await fetch('/api/auth', {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'X-Firebase-Api-Key': cfg.apiKey || '',
+      },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.user) {
+      authUser = null;
+      authToken = '';
+      localStorage.removeItem('pontoscantados_firebase_token');
+      renderProfileState();
+      return;
+    }
+    authUser = data.user;
+    renderProfileState();
+    await loadPlaylists();
+  } catch (e) {
+    console.error(e);
+    authUser = null;
+    renderProfileState();
+  }
+}
+
+function renderProfileState() {
+  const content = document.getElementById('profile-content');
+  const title = document.getElementById('profile-title');
+  const btn = document.getElementById('profile-login-btn');
+  const input = document.getElementById('firebaseConfigInput');
+  if (input) input.value = JSON.stringify(getStoredFirebaseConfig(), null, 2);
+  if (!authUser) {
+    if (title) title.textContent = 'Conecte sua conta Google';
+    if (btn) btn.textContent = 'Entrar com Google';
+    if (content) {
+      content.innerHTML = `
+        <div class="profile-empty">Faça login para criar seu perfil e playlists.</div>
+      `;
+    }
+    return;
+  }
+  if (title) title.textContent = `Olá, ${authUser.name || authUser.email || 'usuário'}`;
+  if (btn) btn.textContent = 'Trocar conta';
+  if (content) {
+    content.innerHTML = `
+      <div class="profile-user">
+        <img class="profile-avatar" src="${esc(authUser.picture || 'https://placehold.co/96x96?text=U')}" alt="avatar">
+        <div class="profile-user-meta">
+          <div class="profile-name">${esc(authUser.name || authUser.email || 'Usuário')}</div>
+          <div class="profile-email">${esc(authUser.email || 'Sem e-mail')}</div>
+          <div class="profile-email">${esc(authUser.isAdmin ? 'Administrador' : 'Perfil simples')}</div>
+        </div>
+      </div>
+      <div class="profile-form">
+        <input id="profile-name-input" type="text" value="${esc(authUser.name || '')}" placeholder="Nome exibido">
+        <textarea id="profile-bio-input" placeholder="Uma bio curta">${esc(authUser.bio || '')}</textarea>
+        <input id="profile-city-input" type="text" value="${esc(authUser.city || '')}" placeholder="Cidade ou local">
+        <button class="profile-btn" onclick="saveProfile()">Salvar perfil</button>
+      </div>
+    `;
+  }
+}
+
+async function saveProfile() {
+  if (!authUser) { toast('Entre com Google primeiro'); return; }
+  const payload = {
+    name: document.getElementById('profile-name-input')?.value.trim() || authUser.name || '',
+    bio: document.getElementById('profile-bio-input')?.value.trim() || '',
+    city: document.getElementById('profile-city-input')?.value.trim() || '',
+  };
+  try {
+    const res = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${authToken}`}, body:JSON.stringify(payload) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Falha ao salvar perfil');
+    authUser = data.user;
+    renderProfileState();
+    toast('Perfil salvo');
+  } catch (e) {
+    toast(e.message || 'Erro ao salvar perfil');
+  }
+}
+
+async function loginWithGoogle() {
+  const cfg = getStoredFirebaseConfig();
+  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
+    toast('Salve a configuração do Firebase antes de entrar');
+    document.getElementById('firebaseConfigInput')?.focus();
+    return;
+  }
+  if (!window.firebase?.auth) {
+    toast('Firebase ainda não carregou');
+    return;
+  }
+  if (!firebaseApp) {
+    firebaseApp = window.firebase.initializeApp(cfg);
+    firebaseAuth = window.firebase.auth();
+  }
+  try {
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    const result = await firebaseAuth.signInWithPopup(provider);
+    const token = await result.user?.getIdToken?.();
+    if (!token) throw new Error('Não foi possível obter o token do Firebase');
+    authToken = token;
+    localStorage.setItem('pontoscantados_firebase_token', authToken);
+    await fetchAuthUser();
+    toast('Login realizado');
+  } catch (e) {
+    console.error(e);
+    toast(e.message || 'Erro ao entrar com o Google');
+  }
+}
+
+async function loadPlaylists() {
+  if (!authToken) {
+    playlists = [];
+    renderPlaylists();
+    return;
+  }
+  try {
+    const res = await fetch('/api/playlists', { headers: { Authorization: `Bearer ${authToken}` } });
+    if (!res.ok) throw new Error('Erro ao carregar playlists');
+    const data = await res.json();
+    playlists = Array.isArray(data) ? data : [];
+    renderPlaylists();
+  } catch (e) {
+    console.error(e);
+    playlists = [];
+    renderPlaylists();
+  }
+}
+
+function renderPlaylists() {
+  const el = document.getElementById('playlists-list');
+  if (!el) return;
+  if (!authUser) {
+    el.innerHTML = '<div class="profile-empty">Entre para ver e editar playlists.</div>';
+    return;
+  }
+  if (!playlists.length) {
+    el.innerHTML = '<div class="profile-empty">Nenhuma playlist ainda. Crie a primeira para organizar seus pontos.</div>';
+    return;
+  }
+  el.innerHTML = playlists.map(p => `
+    <div class="playlist-item">
+      <div class="playlist-item-info">
+        <div class="playlist-item-name">${esc(p.name || 'Sem nome')}</div>
+        <div class="playlist-item-meta">${esc((p.items || []).length)} ponto(s) • ${p.visibility === 'public' ? 'Pública' : 'Privada'} • ${p.ownerEmail ? esc(p.ownerEmail) : ''}</div>
+      </div>
+      <div class="playlist-item-actions">
+        <button onclick="openPlaylistModal('${p.id}')">Editar</button>
+        <button onclick="deletePlaylist('${p.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openPlaylistModal(id) {
+  const modal = document.getElementById('ov-playlist');
+  const title = document.getElementById('playlist-modal-title');
+  const name = document.getElementById('playlist-name');
+  const description = document.getElementById('playlist-description');
+  const visibility = document.getElementById('playlist-visibility');
+  const hidden = document.getElementById('playlist-edit-id');
+  const points = document.getElementById('playlist-points');
+  if (!modal || !name || !description || !visibility || !points) return;
+  const current = playlists.find(p => p.id === id) || null;
+  title.textContent = current ? 'Editar playlist' : 'Nova playlist';
+  name.value = current?.name || '';
+  description.value = current?.description || '';
+  visibility.value = current?.visibility || 'private';
+  hidden.value = current?.id || '';
+  playlistDraftIds = Array.isArray(current?.items) ? current.items.slice() : [];
+  const items = pontos.map(p => `
+    <label class="playlist-point-row">
+      <input type="checkbox" ${playlistDraftIds.includes(p.id) ? 'checked' : ''} onchange="togglePlaylistDraft('${p.id}', this.checked)">
+      <span>${esc(p.nome || p.id)}</span>
+    </label>
+  `).join('');
+  points.innerHTML = items || '<div class="profile-empty">Nenhum ponto disponível ainda.</div>';
+  abrirModal('ov-playlist');
+}
+
+function togglePlaylistDraft(id, checked) {
+  if (checked) {
+    if (!playlistDraftIds.includes(id)) playlistDraftIds.push(id);
+  } else {
+    playlistDraftIds = playlistDraftIds.filter(item => item !== id);
+  }
+}
+
+async function savePlaylist() {
+  if (!authUser) { toast('Entre antes de salvar uma playlist'); return; }
+  const name = document.getElementById('playlist-name').value.trim();
+  const description = document.getElementById('playlist-description').value.trim();
+  const visibility = document.getElementById('playlist-visibility').value;
+  const id = document.getElementById('playlist-edit-id').value;
+  if (!name) { toast('Dê um nome para a playlist'); return; }
+  try {
+    const payload = { name, description, visibility, items: playlistDraftIds };
+    const res = await fetch('/api/playlists', { method: id ? 'PUT' : 'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${authToken}`}, body:JSON.stringify(id ? { id, ...payload } : payload) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Falha ao salvar playlist');
+    await loadPlaylists();
+    fecharModal('ov-playlist');
+    toast('Playlist salva');
+  } catch (e) {
+    toast(e.message || 'Erro ao salvar playlist');
+  }
+}
+
+async function deletePlaylist(id) {
+  if (!confirm('Excluir esta playlist?')) return;
+  try {
+    const res = await fetch(`/api/playlists?id=${encodeURIComponent(id)}`, { method:'DELETE', headers:{ Authorization:`Bearer ${authToken}` } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Falha ao excluir playlist');
+    await loadPlaylists();
+    toast('Playlist removida');
+  } catch (e) {
+    toast(e.message || 'Erro ao excluir playlist');
+  }
+}
+
 // ── MODAIS ──
 function abrirModal(id) { document.getElementById(id).classList.add('open'); }
 
@@ -1530,6 +1922,7 @@ window.toggleAprender = async (id, cur) => {
 
 // ── LOAD ──
 async function load() {
+  await initFirebaseAuth();
   const timeout = setTimeout(() => {
     document.getElementById('mainGrid').innerHTML =
       `<div class="empty"><div class="empty-icon">⏱️</div><p>Tempo esgotado.<br><br><button onclick="load()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;padding:9px 18px;font-family:'DM Sans',sans-serif;cursor:pointer">Tentar novamente</button></p></div>`;
@@ -1546,6 +1939,7 @@ async function load() {
     syncFilhasFromData(); saveFilhas();
     renderCards();
     renderDashboard();
+    await fetchAuthUser();
   } catch (e) {
     clearTimeout(timeout);
     document.getElementById('mainGrid').innerHTML =
@@ -3849,5 +4243,7 @@ const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
 setLayout(savedLayout);
 load();
 </script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </body>
 </html>
