@@ -346,6 +346,11 @@ select option{background:#fff;color:#2a1a22}
 .profile-btn.secondary{background:#fdf0f3;color:var(--gold);border:1px solid rgba(196,57,107,.2)}
 .profile-btn.secondary:hover{background:#fde8ef}
 .profile-content{display:flex;flex-direction:column;gap:10px}
+.profile-auth-error{background:#fdeeee;border:1px solid rgba(184,64,64,.3);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.82rem;color:var(--red)}
+.profile-auth-error-head{display:flex;align-items:center;gap:6px;font-size:.82rem}
+.profile-auth-error-head strong{flex:1}
+.profile-auth-error-head button{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem;padding:2px 4px}
+.profile-auth-error-body{margin-top:6px;font-family:monospace;font-size:.74rem;line-height:1.5;color:#8a3838;word-break:break-word;white-space:pre-wrap}
 .profile-empty{display:flex;align-items:flex-start;gap:10px;padding:14px;border-radius:10px;background:#fdf5f7;color:var(--text-dim);font-size:.86rem;line-height:1.5}
 .profile-empty-icon{flex-shrink:0;font-size:1.1rem;line-height:1}
 .profile-empty strong{color:var(--gold)}
@@ -563,6 +568,14 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <h3 id="profile-title">Seu perfil na casa</h3>
       </div>
       <button class="profile-btn secondary" id="profile-login-btn" onclick="loginWithGoogle()" style="display:none">Trocar conta</button>
+    </div>
+    <div class="profile-auth-error" id="profile-auth-error" style="display:none">
+      <div class="profile-auth-error-head">
+        <span aria-hidden="true">⚠️</span>
+        <strong>Não foi possível entrar</strong>
+        <button type="button" onclick="clearAuthError()" aria-label="Fechar">✕</button>
+      </div>
+      <div class="profile-auth-error-body" id="profile-auth-error-body"></div>
     </div>
     <div class="profile-content" id="profile-content">
       <div class="profile-empty"><span class="profile-empty-icon" aria-hidden="true">🔒</span><span>Toque em <strong>Entrar</strong>, no topo da página, para fazer login com Google e criar seu perfil e playlists.</span></div>
@@ -1637,8 +1650,7 @@ async function initFirebaseAuth() {
           }
         }
       } catch (e) {
-        console.warn('Falha ao processar redirect result do Firebase', e);
-        toast(authErrorMessage(e));
+        showAuthError('processar retorno do redirect', e);
       }
     };
     applyPersistence();
@@ -1794,12 +1806,35 @@ function authErrorMessage(e) {
   const code = e?.code || '';
   if (code === 'auth/unauthorized-domain') return 'Este domínio não está autorizado no Firebase (Authentication → Settings → Authorized domains).';
   if (code === 'auth/network-request-failed') return 'Falha de rede ao tentar entrar. Verifique sua conexão e tente de novo.';
-  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'Login cancelado antes de concluir.';
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'A janela de login fechou antes de concluir o processo.';
   if (code === 'auth/popup-blocked') return 'O navegador bloqueou a janela de login. Permita pop-ups para este site e tente de novo.';
   return e?.message || 'Erro ao entrar com o Google';
 }
 
+function showAuthError(step, e) {
+  console.error('[login]', step, e);
+  const banner = document.getElementById('profile-auth-error');
+  const body = document.getElementById('profile-auth-error-body');
+  if (!banner || !body) { toast(authErrorMessage(e)); return; }
+  const code = e?.code ? `code: ${e.code}\n` : '';
+  const msg = e?.message || String(e);
+  body.textContent = `Etapa: ${step}\n${code}${msg}`;
+  banner.style.display = 'block';
+  banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  toast(authErrorMessage(e));
+}
+
+function clearAuthError() {
+  const banner = document.getElementById('profile-auth-error');
+  if (banner) banner.style.display = 'none';
+}
+
+function isInstalledPWA() {
+  return window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)')?.matches === true;
+}
+
 async function loginWithGoogle() {
+  clearAuthError();
   const cfg = getStoredFirebaseConfig();
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
     toast('Salve a configuração do Firebase antes de entrar');
@@ -1810,50 +1845,60 @@ async function loginWithGoogle() {
     toast('Firebase ainda não carregou');
     return;
   }
+  if (isInstalledPWA()) {
+    showAuthError('verificação de ambiente', new Error('O login do Google não funciona dentro do app instalado na tela de início do iOS (limitação do Safari/WebKit). Abra o site pelo Safari normalmente (não pelo ícone salvo) para entrar, ou entre uma vez pelo Safari e depois volte a usar o app instalado.'));
+    return;
+  }
   if (!firebaseApp) {
     firebaseApp = window.firebase.initializeApp(cfg);
     firebaseAuth = window.firebase.auth();
   }
-  try {
-    await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
-  } catch (e) {
-    console.warn('Falha ao definir persistência do Firebase', e);
-  }
+  // Não fazemos "await" na persistência aqui de propósito: no Safari/iOS, qualquer
+  // await antes de abrir o popup pode fazer o navegador achar que a chamada não veio
+  // mais de um toque direto do usuário, e aí o popup abre só visualmente mas perde a
+  // ligação com a página original — dá exatamente a sensação de "abriu mas não logou".
+  firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(err => console.warn('Falha ao definir persistência do Firebase', err));
+
   const provider = new window.firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
 
-  // Popup funciona bem no Safari/iOS numa aba normal e evita o bug de "login não
-  // conclui" causado pelo bloqueio de armazenamento entre domínios (ITP) que o
-  // fluxo de redirect sofre no iOS. Só cai pro redirect se o popup for
-  // realmente bloqueado ou não suportado (ex: navegador embutido do Instagram/WhatsApp).
+  let result;
   try {
-    const result = await firebaseAuth.signInWithPopup(provider);
-    const firebaseUser = result.user;
-    applyFirebaseUserToState(firebaseUser);
-    const token = await firebaseUser?.getIdToken?.();
-    if (!token) throw new Error('Não foi possível obter o token do Firebase');
-    authToken = token;
-    localStorage.setItem('pontoscantados_firebase_token', authToken);
-    await fetchAuthUser();
-    toast('Login realizado');
-    return;
+    result = await firebaseAuth.signInWithPopup(provider);
   } catch (e) {
     const code = e?.code || '';
     const fallbackToRedirect = (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') && isMobileAuthDevice();
-    if (!fallbackToRedirect) {
-      console.error(e);
-      toast(authErrorMessage(e));
-      return;
+    if (!fallbackToRedirect) { showAuthError('abrir popup do Google', e); return; }
+    try {
+      await firebaseAuth.signInWithRedirect(provider);
+      toast('Abrindo login do Google…');
+    } catch (e2) {
+      showAuthError('abrir redirect do Google', e2);
     }
+    return;
   }
 
   try {
-    await firebaseAuth.signInWithRedirect(provider);
-    toast('Abrindo login do Google…');
+    const firebaseUser = result.user;
+    applyFirebaseUserToState(firebaseUser);
+    const token = await firebaseUser.getIdToken();
+    authToken = token;
+    localStorage.setItem('pontoscantados_firebase_token', authToken);
   } catch (e) {
-    console.error(e);
-    toast(authErrorMessage(e));
+    showAuthError('obter token do Firebase', e);
+    return;
+  }
+
+  try {
+    await fetchAuthUser();
+    if (!authUser) {
+      showAuthError('sincronizar perfil no servidor', new Error('O login com o Google funcionou, mas o servidor não confirmou o usuário. Verifique se a Cloudflare Function /api/auth está com o KV e o FIREBASE_API_KEY configurados.'));
+      return;
+    }
+    toast('Login realizado');
+  } catch (e) {
+    showAuthError('sincronizar perfil no servidor', e);
   }
 }
 
