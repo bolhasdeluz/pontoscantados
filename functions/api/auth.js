@@ -1,50 +1,72 @@
-import { createProfilePayload, getUserFromRequest, isAdmin } from './_lib/auth.js';
+const ADMIN_EMAILS = ['bolhasdeluz@gmail.com', 'annagomes.bdl@gmail.com'];
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-};
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: CORS });
+export function isAdmin(email) {
+  return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
 }
 
-export async function onRequest(context) {
-  const { request, env } = context;
-  const url = new URL(request.url);
+export function createProfilePayload(user) {
+  return {
+    id: user.id,
+    email: user.email || '',
+    name: user.name || '',
+    picture: user.picture || '',
+    bio: user.bio || '',
+    city: user.city || '',
+    isAdmin: isAdmin(user.email),
+    createdAt: Date.now(),
+  };
+}
 
-  if (request.method === 'OPTIONS') return new Response('', { status: 200, headers: CORS });
+export async function getUserFromRequest(request, env) {
+  const authHeader = request.headers.get('authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7).trim();
+  if (!token) return null;
 
-  const KV = env.PONTOS_KV;
-  if (!KV) return json({ error: 'KV não configurado.' }, 500);
-
-  const user = await getUserFromRequest(request, env);
-  if (!user) return json({ error: 'Não autenticado.' }, 401);
-
-  const path = url.pathname.replace(/\/+$|^\//, '');
-  if (path === 'auth' && request.method === 'GET') {
-    const profile = createProfilePayload(user);
-    const profileKey = `profile:${profile.id}`;
-    await KV.put(profileKey, JSON.stringify(profile));
-    return json({ user: profile });
+  const apiKey = request.headers.get('x-firebase-api-key') || env.FIREBASE_API_KEY || '';
+  if (apiKey) {
+    try {
+      const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: token }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const account = data.users?.[0];
+        if (account) {
+          return {
+            id: account.localId || account.uid || '',
+            email: account.email || '',
+            name: account.displayName || '',
+            picture: account.photoUrl || '',
+          };
+        }
+      }
+    } catch {}
   }
 
-  if ((path === 'auth' || path === 'api/auth') && request.method === 'POST') {
-    const body = await request.json().catch(() => ({}));
-    const profileKey = `profile:${user.id}`;
-    const existing = await KV.get(profileKey, { type: 'json' }).catch(() => null);
-    const profile = {
-      ...(existing || createProfilePayload(user)),
-      ...body,
-      id: user.id,
-      email: user.email || existing?.email || '',
-      name: user.name || existing?.name || '',
-      picture: user.picture || existing?.picture || '',
-      isAdmin: isAdmin(user.email || existing?.email || ''),
+  const tokenInfoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
+  if (tokenInfoRes.ok) {
+    const data = await tokenInfoRes.json();
+    return {
+      id: data.sub,
+      email: data.email || '',
+      name: data.name || data.given_name || '',
+      picture: data.picture || '',
     };
-    await KV.put(profileKey, JSON.stringify(profile));
-    return json({ user: profile });
   }
 
-  return json({ error: 'Rota não encontrada.' }, 404);
+  const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) return null;
+  const data = await res.json();
+  return {
+    id: data.sub,
+    email: data.email || '',
+    name: data.name || '',
+    picture: data.picture || '',
+  };
 }
