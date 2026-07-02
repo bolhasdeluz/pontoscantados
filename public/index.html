@@ -338,26 +338,43 @@ select option{background:#fff;color:#2a1a22}
 /* ══ PERFIL / GOOGLE / PLAYLISTS ══ */
 .profile-shell{display:grid;gap:14px;max-width:1200px;margin:16px auto 0;padding:0 16px}
 .profile-card,.playlists-card{background:#fff;border:1px solid rgba(196,57,107,.12);border-radius:14px;box-shadow:0 4px 20px rgba(180,60,90,.06);padding:16px}
-.profile-card-header,.playlists-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.profile-card-header,.playlists-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .profile-eyebrow{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
 .profile-card h3,.playlists-card h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);margin-top:2px}
-.profile-btn{background:var(--gold);border:none;border-radius:8px;color:#fff;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s}
+.profile-btn{background:var(--gold);border:none;border-radius:8px;color:#fff;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap}
 .profile-btn:hover{background:var(--gold-light)}
 .profile-btn.secondary{background:#fdf0f3;color:var(--gold);border:1px solid rgba(196,57,107,.2)}
 .profile-btn.secondary:hover{background:#fde8ef}
 .profile-content{display:flex;flex-direction:column;gap:10px}
-.profile-empty{padding:12px;border-radius:10px;background:#fdf5f7;color:var(--text-dim);font-size:.9rem}
+.profile-empty{display:flex;align-items:flex-start;gap:10px;padding:14px;border-radius:10px;background:#fdf5f7;color:var(--text-dim);font-size:.86rem;line-height:1.5}
+.profile-empty-icon{flex-shrink:0;font-size:1.1rem;line-height:1}
+.profile-empty strong{color:var(--gold)}
 .profile-user{display:flex;gap:12px;align-items:center}
-.profile-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(196,57,107,.2)}
-.profile-user-meta{display:flex;flex-direction:column;gap:3px}
-.profile-name{font-weight:700;color:var(--text)}
-.profile-email{font-size:.82rem;color:var(--text-dim)}
-.header-user-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(8px);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.16);min-width:220px}
-.header-user-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.22)}
-.header-user-name{font-weight:700;font-size:.85rem;line-height:1.1}
-.header-user-meta{display:block;font-size:.72rem;opacity:.8;line-height:1.1}
-.header-logout-btn{margin-left:auto;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:6px 10px;font-size:.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
-.header-logout-btn:hover{background:rgba(255,255,255,.24)}
+.profile-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(196,57,107,.2);flex-shrink:0}
+.profile-user-meta{display:flex;flex-direction:column;gap:3px;min-width:0}
+.profile-name{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-email{font-size:.82rem;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Header login pill (single source of truth for sign-in) ── */
+.header-user-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 8px 5px 5px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(8px);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.16);max-width:210px;transition:background .18s,border-color .18s;flex-shrink:1;min-width:0}
+.header-user-pill.is-guest{cursor:pointer}
+.header-user-pill.is-guest:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.45)}
+.header-user-pill.is-guest:active{transform:scale(.97)}
+.header-user-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.22);flex-shrink:0}
+.header-user-text{display:flex;flex-direction:column;line-height:1.15;min-width:0;overflow:hidden}
+.header-user-name{font-weight:700;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-user-meta{display:block;font-size:.68rem;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.header-logout-btn{margin-left:2px;flex-shrink:0;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:5px 9px;font-size:.68rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.header-logout-btn:hover{background:rgba(255,255,255,.3)}
+@media(max-width:600px){
+  .header-user-pill{max-width:132px}
+  .header-user-meta{display:none}
+  .header-user-avatar{width:26px;height:26px}
+}
+@media(max-width:420px){
+  .header-user-pill{max-width:44px;padding:5px}
+  .header-user-text{display:none}
+}
 .profile-form{display:grid;gap:8px}
 .playlist-filter-bar{display:grid;grid-template-columns:1.2fr .8fr;gap:8px;margin-bottom:8px}
 .playlist-filter-bar input,.playlist-filter-bar select{width:100%;background:#fff;border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s}
@@ -513,13 +530,13 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <p id="subtitle">Bolhas de Luz</p>
     </div>
     <div class="hr">
-      <div class="header-user-pill" id="header-user-pill">
+      <div class="header-user-pill is-guest" id="header-user-pill" onclick="handleHeaderPillClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')handleHeaderPillClick()">
         <img class="header-user-avatar" id="header-user-avatar" src="https://placehold.co/40x40?text=U" alt="avatar">
-        <div>
-          <div class="header-user-name" id="header-user-name">Conecte sua conta</div>
-          <small class="header-user-meta" id="header-user-meta">Google • configure o Firebase</small>
-        </div>
-        <button class="header-logout-btn" id="header-logout-btn" type="button" onclick="logout()" style="display:none">Sair</button>
+        <span class="header-user-text">
+          <span class="header-user-name" id="header-user-name">Entrar</span>
+          <span class="header-user-meta" id="header-user-meta">com Google</span>
+        </span>
+        <button class="header-logout-btn" id="header-logout-btn" type="button" onclick="event.stopPropagation();logout()" style="display:none">Sair</button>
       </div>
       <div class="sw">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -544,16 +561,16 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 </header>
 
 <div class="profile-shell">
-  <div class="profile-card">
+  <div class="profile-card" id="profile-card">
     <div class="profile-card-header">
       <div>
         <div class="profile-eyebrow">Conta & perfil</div>
-        <h3 id="profile-title">Conecte sua conta Google</h3>
+        <h3 id="profile-title">Seu perfil na casa</h3>
       </div>
-      <button class="profile-btn" id="profile-login-btn" onclick="loginWithGoogle()">Entrar com Google</button>
+      <button class="profile-btn secondary" id="profile-login-btn" onclick="loginWithGoogle()" style="display:none">Trocar conta</button>
     </div>
     <div class="profile-content" id="profile-content">
-      <div class="profile-empty">Faça login para criar seu perfil e playlists.</div>
+      <div class="profile-empty"><span class="profile-empty-icon" aria-hidden="true">🔒</span><span>Toque em <strong>Entrar</strong>, no topo da página, para fazer login com Google e criar seu perfil e playlists.</span></div>
     </div>
     <div class="profile-client-id" style="display:none">
       <textarea id="firebaseConfigInput" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
@@ -1698,16 +1715,23 @@ function renderHeaderUserBadge() {
   const cfg = getStoredFirebaseConfig();
   const hasCfg = !!(cfg.apiKey && cfg.authDomain && cfg.projectId);
   if (!authUser) {
-    name.textContent = 'Conecte sua conta';
-    meta.textContent = hasCfg ? 'Google • pronto para entrar' : 'Google • configure o Firebase';
-    avatar.src = 'https://placehold.co/40x40?text=U';
+    pill.classList.add('is-guest');
+    name.textContent = 'Entrar';
+    meta.textContent = hasCfg ? 'com Google' : 'configurar Firebase';
+    avatar.src = 'https://placehold.co/40x40?text=%3F';
     if (logoutBtn) logoutBtn.style.display = 'none';
     return;
   }
+  pill.classList.remove('is-guest');
   name.textContent = authUser.name || authUser.email || 'Usuário';
   meta.textContent = authUser.isAdmin ? 'Administrador' : 'Usuário logado';
   avatar.src = authUser.picture || 'https://placehold.co/40x40?text=U';
   if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+}
+
+function handleHeaderPillClick() {
+  if (!authUser) { loginWithGoogle(); return; }
+  document.getElementById('profile-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function renderProfileState() {
@@ -1718,17 +1742,17 @@ function renderProfileState() {
   renderHeaderUserBadge();
   if (input) input.value = JSON.stringify(getStoredFirebaseConfig(), null, 2);
   if (!authUser) {
-    if (title) title.textContent = 'Conecte sua conta Google';
-    if (btn) btn.textContent = 'Entrar com Google';
+    if (title) title.textContent = 'Seu perfil na casa';
+    if (btn) btn.style.display = 'none';
     if (content) {
       content.innerHTML = `
-        <div class="profile-empty">Faça login para criar seu perfil e playlists.</div>
+        <div class="profile-empty"><span class="profile-empty-icon" aria-hidden="true">🔒</span><span>Toque em <strong>Entrar</strong>, no topo da página, para fazer login com Google e criar seu perfil e playlists.</span></div>
       `;
     }
     return;
   }
   if (title) title.textContent = `Olá, ${authUser.name || authUser.email || 'usuário'}`;
-  if (btn) btn.textContent = 'Trocar conta';
+  if (btn) { btn.style.display = 'inline-flex'; btn.textContent = 'Trocar conta'; }
   if (content) {
     content.innerHTML = `
       <div class="profile-user">
