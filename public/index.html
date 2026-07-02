@@ -542,11 +542,6 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCards()">
       </div>
-      <label class="admin-toggle" id="admin-toggle" title="Modo edição">
-        <input type="checkbox" id="admin-toggle-input">
-        <span class="admin-toggle-track"><span class="admin-toggle-knob"></span></span>
-        <span class="admin-toggle-text">Editar</span>
-      </label>
     </div>
   </div>
   <div class="header-row2">
@@ -664,7 +659,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup
   </button>
   <button class="hbtn" onclick="tsAbrir()" style="background:rgba(255,255,255,.12)">🎙️ Transcrever</button>
-  <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
+  <button class="hbtn" onclick="logout()" style="background:rgba(0,0,0,.15)">Sair</button>
 </div>
 
 <!-- BATCH BAR -->
@@ -1511,15 +1506,16 @@ document.getElementById('nova-filha-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') adicionarFilha();
 });
 
-// ── ADMIN (toggle simples, sem senha) ──
-document.getElementById('admin-toggle-input').addEventListener('change', e => {
-  if (e.target.checked) ativarAdmin(); else sairAdmin();
-});
+// ── ADMIN (ativado automaticamente para o e-mail administrador logado) ──
+function syncAdminFromAuth() {
+  const shouldBeAdmin = !!(authUser && authUser.isAdmin);
+  if (shouldBeAdmin && !adminMode) ativarAdmin();
+  else if (!shouldBeAdmin && adminMode) sairAdmin();
+}
 
 function ativarAdmin() {
   adminMode = true;
   document.body.classList.add('admin-mode');
-  document.getElementById('admin-toggle-input').checked = true;
   document.getElementById('admin-bar').style.display = 'flex';
   document.getElementById('subtitle').textContent = '✏️ Modo edição ativo';
 }
@@ -1527,7 +1523,6 @@ function ativarAdmin() {
 function sairAdmin() {
   adminMode = false;
   document.body.classList.remove('admin-mode');
-  document.getElementById('admin-toggle-input').checked = false;
   document.getElementById('admin-bar').style.display = 'none';
   document.getElementById('subtitle').textContent = 'Bolhas de Luz';
   limparSelecao();
@@ -1638,10 +1633,12 @@ async function initFirebaseAuth() {
             authToken = token;
             localStorage.setItem('pontoscantados_firebase_token', authToken);
             await fetchAuthUser();
+            toast('Login realizado');
           }
         }
       } catch (e) {
         console.warn('Falha ao processar redirect result do Firebase', e);
+        toast(authErrorMessage(e));
       }
     };
     applyPersistence();
@@ -1740,6 +1737,7 @@ function renderProfileState() {
   const btn = document.getElementById('profile-login-btn');
   const input = document.getElementById('firebaseConfigInput');
   renderHeaderUserBadge();
+  syncAdminFromAuth();
   if (input) input.value = JSON.stringify(getStoredFirebaseConfig(), null, 2);
   if (!authUser) {
     if (title) title.textContent = 'Seu perfil na casa';
@@ -1792,6 +1790,15 @@ async function saveProfile() {
   }
 }
 
+function authErrorMessage(e) {
+  const code = e?.code || '';
+  if (code === 'auth/unauthorized-domain') return 'Este domínio não está autorizado no Firebase (Authentication → Settings → Authorized domains).';
+  if (code === 'auth/network-request-failed') return 'Falha de rede ao tentar entrar. Verifique sua conexão e tente de novo.';
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'Login cancelado antes de concluir.';
+  if (code === 'auth/popup-blocked') return 'O navegador bloqueou a janela de login. Permita pop-ups para este site e tente de novo.';
+  return e?.message || 'Erro ao entrar com o Google';
+}
+
 async function loginWithGoogle() {
   const cfg = getStoredFirebaseConfig();
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
@@ -1809,14 +1816,18 @@ async function loginWithGoogle() {
   }
   try {
     await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
-    const provider = new window.firebase.auth.GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-    if (isMobileAuthDevice()) {
-      await firebaseAuth.signInWithRedirect(provider);
-      toast('Abrindo login do Google no navegador…');
-      return;
-    }
+  } catch (e) {
+    console.warn('Falha ao definir persistência do Firebase', e);
+  }
+  const provider = new window.firebase.auth.GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
+
+  // Popup funciona bem no Safari/iOS numa aba normal e evita o bug de "login não
+  // conclui" causado pelo bloqueio de armazenamento entre domínios (ITP) que o
+  // fluxo de redirect sofre no iOS. Só cai pro redirect se o popup for
+  // realmente bloqueado ou não suportado (ex: navegador embutido do Instagram/WhatsApp).
+  try {
     const result = await firebaseAuth.signInWithPopup(provider);
     const firebaseUser = result.user;
     applyFirebaseUserToState(firebaseUser);
@@ -1826,9 +1837,23 @@ async function loginWithGoogle() {
     localStorage.setItem('pontoscantados_firebase_token', authToken);
     await fetchAuthUser();
     toast('Login realizado');
+    return;
+  } catch (e) {
+    const code = e?.code || '';
+    const fallbackToRedirect = (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') && isMobileAuthDevice();
+    if (!fallbackToRedirect) {
+      console.error(e);
+      toast(authErrorMessage(e));
+      return;
+    }
+  }
+
+  try {
+    await firebaseAuth.signInWithRedirect(provider);
+    toast('Abrindo login do Google…');
   } catch (e) {
     console.error(e);
-    toast(e.message || 'Erro ao entrar com o Google');
+    toast(authErrorMessage(e));
   }
 }
 
