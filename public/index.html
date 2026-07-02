@@ -1585,6 +1585,31 @@ function isMobileAuthDevice() {
   return /iPhone|iPad|iPod|Android|Mobile|Opera Mini|IEMobile/i.test(ua);
 }
 
+// ── LOG DE LOGIN (sobrevive a recarregamentos de página) ──
+// Se o "popup" do Google na verdade navegar a página inteira (comum em alguns
+// iOS), qualquer estado em memória do JS se perde no reload. Por isso o log
+// vai pro localStorage a cada passo, e é reexibido assim que a página volta a
+// carregar — mesmo que nenhum erro tenha sido lançado.
+const AUTH_LOG_KEY = 'pontoscantados_auth_log';
+function logAuth(line) {
+  try {
+    const logs = JSON.parse(localStorage.getItem(AUTH_LOG_KEY) || '[]');
+    logs.push(`${new Date().toLocaleTimeString('pt-BR')} — ${line}`);
+    localStorage.setItem(AUTH_LOG_KEY, JSON.stringify(logs.slice(-50)));
+  } catch {}
+  renderAuthLog();
+}
+function renderAuthLog() {
+  const banner = document.getElementById('profile-auth-error');
+  const body = document.getElementById('profile-auth-error-body');
+  if (!banner || !body) return;
+  let logs = [];
+  try { logs = JSON.parse(localStorage.getItem(AUTH_LOG_KEY) || '[]'); } catch {}
+  if (!logs.length) { banner.style.display = 'none'; return; }
+  body.textContent = logs.join('\n');
+  banner.style.display = 'block';
+}
+
 async function initFirebaseAuth() {
   const btn = document.getElementById('profile-login-btn');
   let cfg = getStoredFirebaseConfig();
@@ -1606,20 +1631,23 @@ async function initFirebaseAuth() {
   }
   if (!firebaseAuthReady) {
     firebaseAuthReady = true;
+    logAuth(`Iniciando Firebase Auth (mobile: ${isMobileAuthDevice()}, PWA instalado: ${isInstalledPWA()})`);
     const applyPersistence = async () => {
       try {
         await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
       } catch (e) {
-        console.warn('Falha ao definir persistência do Firebase', e);
+        logAuth(`Aviso: falha ao definir persistência — ${e?.message || e}`);
       }
       firebaseAuth.onAuthStateChanged(async user => {
+        logAuth(`onAuthStateChanged disparou — usuário: ${user ? (user.email || user.uid) : 'nenhum'}`);
         if (user) {
           applyFirebaseUserToState(user);
-          const token = await user.getIdToken().catch(() => '');
+          const token = await user.getIdToken().catch(e => { logAuth(`Falha ao pegar token no onAuthStateChanged: ${e?.message || e}`); return ''; });
           if (token) {
             authToken = token;
             localStorage.setItem('pontoscantados_firebase_token', authToken);
             await fetchAuthUser();
+            logAuth(`Perfil sincronizado com o servidor: ${authUser ? 'sim' : 'não'}`);
           }
         } else {
           authToken = '';
@@ -1628,6 +1656,7 @@ async function initFirebaseAuth() {
           renderProfileState();
         }
       });
+      logAuth(`currentUser ao carregar a página: ${firebaseAuth.currentUser ? (firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid) : 'nenhum'}`);
       if (firebaseAuth.currentUser) {
         applyFirebaseUserToState(firebaseAuth.currentUser);
         const token = await firebaseAuth.currentUser.getIdToken().catch(() => '');
@@ -1639,6 +1668,7 @@ async function initFirebaseAuth() {
       }
       try {
         const redirectResult = await firebaseAuth.getRedirectResult();
+        logAuth(`getRedirectResult() retornou usuário: ${redirectResult?.user ? (redirectResult.user.email || redirectResult.user.uid) : 'nenhum'}`);
         if (redirectResult?.user) {
           applyFirebaseUserToState(redirectResult.user);
           const token = await redirectResult.user.getIdToken().catch(() => '');
@@ -1647,6 +1677,7 @@ async function initFirebaseAuth() {
             localStorage.setItem('pontoscantados_firebase_token', authToken);
             await fetchAuthUser();
             toast('Login realizado');
+            logAuth('Login concluído via redirect.');
           }
         }
       } catch (e) {
@@ -1813,18 +1844,14 @@ function authErrorMessage(e) {
 
 function showAuthError(step, e) {
   console.error('[login]', step, e);
-  const banner = document.getElementById('profile-auth-error');
-  const body = document.getElementById('profile-auth-error-body');
-  if (!banner || !body) { toast(authErrorMessage(e)); return; }
-  const code = e?.code ? `code: ${e.code}\n` : '';
+  const code = e?.code ? ` (code: ${e.code})` : '';
   const msg = e?.message || String(e);
-  body.textContent = `Etapa: ${step}\n${code}${msg}`;
-  banner.style.display = 'block';
-  banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  logAuth(`ERRO em "${step}"${code}: ${msg}`);
   toast(authErrorMessage(e));
 }
 
 function clearAuthError() {
+  localStorage.removeItem(AUTH_LOG_KEY);
   const banner = document.getElementById('profile-auth-error');
   if (banner) banner.style.display = 'none';
 }
@@ -1835,70 +1862,72 @@ function isInstalledPWA() {
 
 async function loginWithGoogle() {
   clearAuthError();
+  logAuth(`loginWithGoogle() chamado (mobile: ${isMobileAuthDevice()}, PWA instalado: ${isInstalledPWA()}, UA: ${navigator.userAgent})`);
   const cfg = getStoredFirebaseConfig();
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
+    logAuth('Config do Firebase incompleta — abortando.');
     toast('Salve a configuração do Firebase antes de entrar');
     document.getElementById('firebaseConfigInput')?.focus();
     return;
   }
   if (!window.firebase?.auth) {
+    logAuth('window.firebase.auth ainda não carregou — abortando.');
     toast('Firebase ainda não carregou');
     return;
   }
   if (isInstalledPWA()) {
-    showAuthError('verificação de ambiente', new Error('O login do Google não funciona dentro do app instalado na tela de início do iOS (limitação do Safari/WebKit). Abra o site pelo Safari normalmente (não pelo ícone salvo) para entrar, ou entre uma vez pelo Safari e depois volte a usar o app instalado.'));
+    showAuthError('verificação de ambiente', new Error('O login do Google não funciona dentro do app instalado na tela de início do iOS (limitação do Safari/WebKit). Abra o site pelo Safari normalmente (não pelo ícone salvo) para entrar.'));
     return;
   }
   if (!firebaseApp) {
     firebaseApp = window.firebase.initializeApp(cfg);
     firebaseAuth = window.firebase.auth();
   }
-  // Não fazemos "await" na persistência aqui de propósito: no Safari/iOS, qualquer
-  // await antes de abrir o popup pode fazer o navegador achar que a chamada não veio
-  // mais de um toque direto do usuário, e aí o popup abre só visualmente mas perde a
-  // ligação com a página original — dá exatamente a sensação de "abriu mas não logou".
-  firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(err => console.warn('Falha ao definir persistência do Firebase', err));
+  try {
+    await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
+  } catch (e) {
+    logAuth(`Aviso: falha ao definir persistência — ${e?.message || e}`);
+  }
 
   const provider = new window.firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
 
-  let result;
-  try {
-    result = await firebaseAuth.signInWithPopup(provider);
-  } catch (e) {
-    const code = e?.code || '';
-    const fallbackToRedirect = (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') && isMobileAuthDevice();
-    if (!fallbackToRedirect) { showAuthError('abrir popup do Google', e); return; }
+  // No iOS, o "popup" do Google costuma virar uma navegação de página inteira
+  // (o Safari não sustenta uma janela separada), o que orfaniza a Promise do
+  // signInWithPopup sem lançar nenhum erro — dá a sensação de "não aconteceu
+  // nada". Por isso, em celular, vamos direto de redirect (fluxo desenhado
+  // pelo próprio Firebase pra esse cenário); no desktop usamos popup.
+  if (isMobileAuthDevice()) {
     try {
+      logAuth('Chamando signInWithRedirect()…');
       await firebaseAuth.signInWithRedirect(provider);
+      logAuth('signInWithRedirect() retornou sem erro (a página deve navegar agora).');
       toast('Abrindo login do Google…');
-    } catch (e2) {
-      showAuthError('abrir redirect do Google', e2);
+    } catch (e) {
+      showAuthError('abrir redirect do Google', e);
     }
     return;
   }
 
   try {
+    logAuth('Chamando signInWithPopup()…');
+    const result = await firebaseAuth.signInWithPopup(provider);
+    logAuth(`signInWithPopup() concluiu — usuário: ${result?.user?.email || result?.user?.uid || 'nenhum'}`);
     const firebaseUser = result.user;
     applyFirebaseUserToState(firebaseUser);
     const token = await firebaseUser.getIdToken();
     authToken = token;
     localStorage.setItem('pontoscantados_firebase_token', authToken);
-  } catch (e) {
-    showAuthError('obter token do Firebase', e);
-    return;
-  }
-
-  try {
     await fetchAuthUser();
     if (!authUser) {
       showAuthError('sincronizar perfil no servidor', new Error('O login com o Google funcionou, mas o servidor não confirmou o usuário. Verifique se a Cloudflare Function /api/auth está com o KV e o FIREBASE_API_KEY configurados.'));
       return;
     }
     toast('Login realizado');
+    logAuth('Login concluído via popup.');
   } catch (e) {
-    showAuthError('sincronizar perfil no servidor', e);
+    showAuthError('login via popup', e);
   }
 }
 
@@ -4518,6 +4547,7 @@ function highlightPlaying(id){
 loadLinhas(); loadGuias(); loadPostadores(); loadFilhas();
 const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
 setLayout(savedLayout);
+renderAuthLog();
 load();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
