@@ -4548,6 +4548,28 @@ loadLinhas(); loadGuias(); loadPostadores(); loadFilhas();
 const savedLayout = localStorage.getItem('pontos_layout') || 'cards';
 setLayout(savedLayout);
 renderAuthLog();
+window.addEventListener('pageshow', e => {
+  logAuth(`pageshow disparado (restaurado do cache do navegador: ${e.persisted})`);
+  if (e.persisted && firebaseAuth) {
+    // No iOS, às vezes o Safari restaura a página do cache ao voltar do login em vez
+    // de recarregar de verdade — o que faz o app nunca checar o resultado do redirect.
+    // Aqui forçamos essa checagem de novo, manualmente.
+    firebaseAuth.getRedirectResult()
+      .then(r => {
+        logAuth(`Nova checagem de getRedirectResult() após pageshow: ${r?.user ? (r.user.email || r.user.uid) : 'nenhum usuário'}`);
+        if (r?.user) {
+          applyFirebaseUserToState(r.user);
+          r.user.getIdToken().then(async token => {
+            authToken = token;
+            localStorage.setItem('pontoscantados_firebase_token', authToken);
+            await fetchAuthUser();
+            toast('Login realizado');
+          });
+        }
+      })
+      .catch(err => showAuthError('checar redirect após pageshow', err));
+  }
+});
 load();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
