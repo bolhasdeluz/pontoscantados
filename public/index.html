@@ -1730,9 +1730,16 @@ async function fetchAuthUser() {
         'X-Firebase-Api-Key': cfg.apiKey || '',
       },
     });
-    const data = await res.json().catch(() => ({}));
+    const rawText = await res.text();
+    let data = {};
+    let parseError = null;
+    try { data = JSON.parse(rawText); } catch (e) { parseError = e; }
     if (!res.ok || !data.user) {
-      logAuth(`/api/auth respondeu status ${res.status}${data?.error ? ' — ' + data.error : ''} (perfil NÃO sincronizado — os dados na tela são só locais do Google, sem confirmação do servidor).`);
+      const preview = rawText.slice(0, 140).replace(/\s+/g, ' ');
+      const diag = parseError
+        ? `resposta não é JSON (provavelmente a Cloudflare Function /api/auth não está publicada e o Pages devolveu a própria página em vez da API) — início da resposta: "${preview}"`
+        : (data?.error ? `erro retornado: ${data.error}` : 'resposta JSON sem o campo "user"');
+      logAuth(`/api/auth respondeu status ${res.status} — ${diag}`);
       if (!authUser) {
         authUser = null;
         authToken = '';
