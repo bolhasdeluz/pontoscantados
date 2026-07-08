@@ -1286,6 +1286,7 @@ let selectedIds = new Set();
 let segmentos = [];
 let linhas = [];
 let authUser = null;
+let authUserSynced = false;
 let authToken = localStorage.getItem('pontoscantados_firebase_token') || '';
 let playlists = [];
 let playlistDraftIds = [];
@@ -1647,7 +1648,8 @@ async function initFirebaseAuth() {
             authToken = token;
             localStorage.setItem('pontoscantados_firebase_token', authToken);
             await fetchAuthUser();
-            logAuth(`Perfil sincronizado com o servidor: ${authUser ? 'sim' : 'não'}`);
+            logAuth(`Perfil sincronizado com o servidor: ${authUserSynced ? 'sim (isAdmin: ' + authUser?.isAdmin + ')' : 'não'}`);
+            if (authUserSynced) clearAuthError();
           }
         } else {
           authToken = '';
@@ -1676,8 +1678,13 @@ async function initFirebaseAuth() {
             authToken = token;
             localStorage.setItem('pontoscantados_firebase_token', authToken);
             await fetchAuthUser();
-            toast('Login realizado');
-            logAuth('Login concluído via redirect.');
+            if (authUserSynced) {
+              toast('Login realizado');
+              logAuth('Login concluído via redirect.');
+              clearAuthError();
+            } else {
+              showAuthError('sincronizar perfil no servidor', new Error('O login com o Google funcionou, mas o servidor não confirmou o usuário — veja o log acima.'));
+            }
           }
         }
       } catch (e) {
@@ -1709,12 +1716,14 @@ function applyFirebaseUserToState(user) {
 
 async function fetchAuthUser() {
   const cfg = getStoredFirebaseConfig();
+  authUserSynced = false;
   if (!authToken) {
     authUser = null;
     renderProfileState();
     return;
   }
   try {
+    logAuth('Chamando /api/auth para sincronizar o perfil…');
     const res = await fetch('/api/auth', {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -1723,6 +1732,7 @@ async function fetchAuthUser() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.user) {
+      logAuth(`/api/auth respondeu status ${res.status}${data?.error ? ' — ' + data.error : ''} (perfil NÃO sincronizado — os dados na tela são só locais do Google, sem confirmação do servidor).`);
       if (!authUser) {
         authUser = null;
         authToken = '';
@@ -1732,9 +1742,12 @@ async function fetchAuthUser() {
       return;
     }
     authUser = data.user;
+    authUserSynced = true;
+    logAuth(`/api/auth confirmou o perfil — email: ${authUser.email}, isAdmin: ${authUser.isAdmin}`);
     renderProfileState();
     await loadPlaylists();
   } catch (e) {
+    logAuth(`Falha de rede ao chamar /api/auth: ${e?.message || e}`);
     console.error(e);
     if (!authUser) {
       authUser = null;
@@ -1920,12 +1933,13 @@ async function loginWithGoogle() {
     authToken = token;
     localStorage.setItem('pontoscantados_firebase_token', authToken);
     await fetchAuthUser();
-    if (!authUser) {
-      showAuthError('sincronizar perfil no servidor', new Error('O login com o Google funcionou, mas o servidor não confirmou o usuário. Verifique se a Cloudflare Function /api/auth está com o KV e o FIREBASE_API_KEY configurados.'));
+    if (!authUserSynced) {
+      showAuthError('sincronizar perfil no servidor', new Error('O login com o Google funcionou, mas o servidor não confirmou o usuário — veja o log acima da linha "/api/auth respondeu...". Verifique se a Cloudflare Function /api/auth está com o KV e o FIREBASE_API_KEY configurados.'));
       return;
     }
     toast('Login realizado');
     logAuth('Login concluído via popup.');
+    clearAuthError();
   } catch (e) {
     showAuthError('login via popup', e);
   }
@@ -4563,7 +4577,8 @@ window.addEventListener('pageshow', e => {
             authToken = token;
             localStorage.setItem('pontoscantados_firebase_token', authToken);
             await fetchAuthUser();
-            toast('Login realizado');
+            if (authUserSynced) { toast('Login realizado'); clearAuthError(); }
+            else showAuthError('sincronizar perfil no servidor', new Error('O login com o Google funcionou, mas o servidor não confirmou o usuário — veja o log acima.'));
           });
         }
       })
