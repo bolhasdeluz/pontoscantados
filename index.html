@@ -547,6 +547,11 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCards()">
       </div>
+      <label class="admin-toggle" id="admin-toggle" title="Modo edição">
+        <input type="checkbox" id="admin-toggle-input">
+        <span class="admin-toggle-track"><span class="admin-toggle-knob"></span></span>
+        <span class="admin-toggle-text">Editar</span>
+      </label>
     </div>
   </div>
   <div class="header-row2">
@@ -672,7 +677,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup
   </button>
   <button class="hbtn" onclick="tsAbrir()" style="background:rgba(255,255,255,.12)">🎙️ Transcrever</button>
-  <button class="hbtn" onclick="logout()" style="background:rgba(0,0,0,.15)">Sair</button>
+  <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
 </div>
 
 <!-- BATCH BAR -->
@@ -1520,9 +1525,15 @@ document.getElementById('nova-filha-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') adicionarFilha();
 });
 
-// ── ADMIN (ativado automaticamente para o e-mail administrador logado) ──
+// ── ADMIN: toggle manual OU e-mail administrador logado (o que vier primeiro) ──
+let manualAdminOverride = false;
+document.getElementById('admin-toggle-input').addEventListener('change', e => {
+  manualAdminOverride = e.target.checked;
+  syncAdminFromAuth();
+});
+
 function syncAdminFromAuth() {
-  const shouldBeAdmin = !!(authUser && authUser.isAdmin);
+  const shouldBeAdmin = manualAdminOverride || !!(authUser && authUser.isAdmin);
   if (shouldBeAdmin && !adminMode) ativarAdmin();
   else if (!shouldBeAdmin && adminMode) sairAdmin();
 }
@@ -1530,6 +1541,7 @@ function syncAdminFromAuth() {
 function ativarAdmin() {
   adminMode = true;
   document.body.classList.add('admin-mode');
+  document.getElementById('admin-toggle-input').checked = true;
   document.getElementById('admin-bar').style.display = 'flex';
   document.getElementById('subtitle').textContent = '✏️ Modo edição ativo';
 }
@@ -1537,6 +1549,8 @@ function ativarAdmin() {
 function sairAdmin() {
   adminMode = false;
   document.body.classList.remove('admin-mode');
+  manualAdminOverride = false;
+  document.getElementById('admin-toggle-input').checked = false;
   document.getElementById('admin-bar').style.display = 'none';
   document.getElementById('subtitle').textContent = 'Bolhas de Luz';
   limparSelecao();
@@ -1593,23 +1607,17 @@ function isMobileAuthDevice() {
 // carregar — mesmo que nenhum erro tenha sido lançado.
 const AUTH_LOG_KEY = 'pontoscantados_auth_log';
 function logAuth(line) {
+  console.debug('[auth]', line);
   try {
     const logs = JSON.parse(localStorage.getItem(AUTH_LOG_KEY) || '[]');
     logs.push(`${new Date().toLocaleTimeString('pt-BR')} — ${line}`);
     localStorage.setItem(AUTH_LOG_KEY, JSON.stringify(logs.slice(-50)));
   } catch {}
-  renderAuthLog();
 }
-function renderAuthLog() {
-  const banner = document.getElementById('profile-auth-error');
-  const body = document.getElementById('profile-auth-error-body');
-  if (!banner || !body) return;
-  let logs = [];
-  try { logs = JSON.parse(localStorage.getItem(AUTH_LOG_KEY) || '[]'); } catch {}
-  if (!logs.length) { banner.style.display = 'none'; return; }
-  body.textContent = logs.join('\n');
-  banner.style.display = 'block';
-}
+// O painel de erro visível foi desativado a pedido — o histórico continua sendo
+// gravado no console e no localStorage (chave "pontoscantados_auth_log") caso
+// seja preciso investigar de novo no futuro.
+function renderAuthLog() {}
 
 async function initFirebaseAuth() {
   const btn = document.getElementById('profile-login-btn');
