@@ -79,7 +79,7 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .layout-btn.active{background:#fff;color:var(--gold);box-shadow:0 1px 4px rgba(180,60,90,.12)}
 .main{max-width:900px;margin:20px auto 0;padding:0 16px;display:grid;gap:14px}
 @media(min-width:860px){
-  .hi,.ci{max-width:1200px}
+  .hi,.ci,.dash-filtros{max-width:1200px}
   .main{max-width:1200px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));align-items:start}
   .main.layout-list{display:flex}
   .main .sessao-banner{grid-column:1/-1}
@@ -540,9 +540,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 .ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* ── DASHBOARD ── */
-.dashboard{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:10px 12px;position:sticky;top:90px;z-index:399}
-.dashboard-inner{max-width:1200px;margin:0 auto}
-.dash-filtros{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dash-filtros{display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:900px;margin:0 auto;padding:0 0 10px}
 .dash-dd{position:relative}
 .dash-dd-btn{display:flex;align-items:center;gap:7px;background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 12px;transition:border-color .18s}
 .dash-dd-btn:hover{border-color:var(--gold)}
@@ -678,14 +676,6 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <select id="filterLinha" onchange="renderCards()" style="display:none">
         <option value="">Todas as linhas</option>
       </select>
-      <div class="dash-dd" id="dd-linhas">
-        <button class="dash-dd-btn" type="button" onclick="toggleDashDD('linhas')">
-          <span>📂 Linhas</span>
-          <span class="dash-dd-active" id="dash-dd-linhas-active"></span>
-          <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
-        <div class="dash-dd-panel" id="dashboard-linhas"></div>
-      </div>
       <select class="filter-select" id="sortBy" onchange="renderCards()">
         <option value="default">Mais recentes</option>
         <option value="az">A → Z</option>
@@ -707,23 +697,24 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo
     </button>
   </div>
-</div>
-
-<!-- DASHBOARD: fila de áudio por guia (só aparece quando há pontos com áudio) -->
-<div class="dashboard" id="dashboard" style="display:none">
-  <div class="dashboard-inner">
-    <div class="dash-filtros">
-      <span style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)">Fila de áudio:</span>
-      <div class="dash-dd" id="dd-guias">
-        <button class="dash-dd-btn" type="button" onclick="toggleDashDD('guias')">
-          <span>👥 Guias</span>
-          <span class="dash-dd-active" id="dash-dd-guias-active"></span>
-          <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </button>
-        <div class="dash-dd-panel" id="dashboard-guias"></div>
-      </div>
-      <button class="dashboard-clear" onclick="clearDashboardFilter()" id="clear-dashboard-btn" style="display:none">✕ Limpar filtro</button>
+  <div class="dash-filtros">
+    <div class="dash-dd" id="dd-linhas">
+      <button class="dash-dd-btn" type="button" onclick="toggleDashDD('linhas')">
+        <span>📂 Linhas</span>
+        <span class="dash-dd-active" id="dash-dd-linhas-active"></span>
+        <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dash-dd-panel" id="dashboard-linhas"></div>
     </div>
+    <div class="dash-dd" id="dd-guias">
+      <button class="dash-dd-btn" type="button" onclick="toggleDashDD('guias')">
+        <span>👥 Guias</span>
+        <span class="dash-dd-active" id="dash-dd-guias-active"></span>
+        <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="dash-dd-panel" id="dashboard-guias"></div>
+    </div>
+    <button class="dashboard-clear" onclick="clearFiltrosLinhaGuia()" id="clear-dashboard-btn" style="display:none">✕ Limpar filtros</button>
   </div>
 </div>
 
@@ -1488,10 +1479,12 @@ function saveGuias() {
 }
 function refreshGuiaSelect() {
   const sel = document.getElementById('fGuia');
-  if (!sel) return;
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— Nenhum —</option>' + guias.map(gg => `<option value="${esc(gg)}">${esc(gg)}</option>`).join('');
-  if (cur) sel.value = cur;
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Nenhum —</option>' + guias.map(gg => `<option value="${esc(gg)}">${esc(gg)}</option>`).join('');
+    if (cur) sel.value = cur;
+  }
+  if (typeof renderGuiaDropdown === 'function') renderGuiaDropdown();
 }
 function syncGuiasFromData() {
   const ex = new Set(guias.map(x => x.toLowerCase()));
@@ -2367,7 +2360,6 @@ async function load() {
     syncGuiasFromData(); saveGuias();
     syncFilhasFromData(); saveFilhas();
     renderCards();
-    renderDashboard();
     await fetchAuthUser();
   } catch (e) {
     clearTimeout(timeout);
@@ -2687,9 +2679,8 @@ function uploadAudioToR2(file) {
 
 // ── RENDER ──
 window.renderCards = () => {
-  // Resetar filtro de guia do dashboard, se existir
-  dashboardFilterGuia = null;
   renderLinhaDropdown();
+  renderGuiaDropdown();
 
   if (typeof refreshPlaylistSelect === 'function') refreshPlaylistSelect();
   const search = document.getElementById('searchInput').value.toLowerCase();
@@ -2719,6 +2710,7 @@ window.renderCards = () => {
       || (p.postadoPor || '').toLowerCase().includes(search);
     if (!match) return false;
     if (linhaFilter && (p.linha || '') !== linhaFilter) return false;
+    if (guiaFiltroAtual && (p.guia || '') !== guiaFiltroAtual) return false;
     if (currentFilter === 'sessao') return p.destaque;
     if (currentFilter === 'guia') return p.isGuia;
     if (currentFilter === 'noguia') return !p.isGuia;
@@ -2745,14 +2737,13 @@ window.renderCards = () => {
   const dest = filtered.filter(p => p.destaque);
   const outros = filtered.filter(p => !p.destaque);
 
-  if (currentLayout === 'list') { renderList(dest, outros, grid); renderDashboard(); return; }
+  if (currentLayout === 'list') { renderList(dest, outros, grid); return; }
 
   let html = '';
   if (dest.length && currentFilter !== 'sessao')
     html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length > 1 ? 's' : ''}</div>`;
   [...dest, ...outros].forEach(p => { html += cardHtml(p); });
   grid.innerHTML = html;
-  renderDashboard();
 };
 
 function cardHtml(p) {
@@ -2811,7 +2802,6 @@ function renderList(dest, outros, grid) {
   }
   outros.forEach((p, i) => wrap.appendChild(makeListItem(p, dest.length + i)));
   grid.appendChild(wrap);
-  renderDashboard();
 }
 
 function makeListItem(p, i) {
@@ -2838,12 +2828,38 @@ function makeListItem(p, i) {
   return div;
 }
 
-// ── DROPDOWN DE LINHAS (filtro geral — mesma fonte que o antigo "Todas as linhas") ──
+// ── DROPDOWNS DE LINHAS E GUIAS (filtro geral da grade, mesma lógica pros dois) ──
+let guiaFiltroAtual = '';
+
+window.toggleDashDD = (which) => {
+  const id = 'dd-' + which;
+  const isOpen = document.getElementById(id).classList.contains('open');
+  document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) document.getElementById(id).classList.add('open');
+};
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.dash-dd.open').forEach(el => {
+    if (!el.contains(e.target)) el.classList.remove('open');
+  });
+});
+
 window.selectLinha = (linha) => {
   const sel = document.getElementById('filterLinha');
   sel.value = sel.value === linha ? '' : linha;
   sel.dispatchEvent(new Event('change'));
   document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
+};
+
+window.selectGuia = (guia) => {
+  guiaFiltroAtual = guiaFiltroAtual === guia ? '' : guia;
+  document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
+  renderCards();
+};
+
+window.clearFiltrosLinhaGuia = () => {
+  document.getElementById('filterLinha').value = '';
+  guiaFiltroAtual = '';
+  renderCards();
 };
 
 function renderLinhaDropdown() {
@@ -2864,104 +2880,35 @@ function renderLinhaDropdown() {
   `).join('') || '<div class="dash-opt" style="cursor:default;opacity:.6">Nenhuma linha cadastrada</div>';
 
   document.getElementById('dash-dd-linhas-active').textContent = atual || '';
+  atualizarBotaoLimparFiltros();
 }
 
-// ── DASHBOARD: fila de áudio por guia ──
-let dashboardFilterGuia = null;
-
-window.toggleDashDD = (which) => {
-  const id = 'dd-' + which;
-  const isOpen = document.getElementById(id).classList.contains('open');
-  document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
-  if (!isOpen) document.getElementById(id).classList.add('open');
-};
-document.addEventListener('click', (e) => {
-  document.querySelectorAll('.dash-dd.open').forEach(el => {
-    if (!el.contains(e.target)) el.classList.remove('open');
-  });
-});
-
-window.renderDashboard = () => {
-  const dash = document.getElementById('dashboard');
-  if (!pontos.some(p => p.audioUrl)) {
-    dash.style.display = 'none';
-    return;
-  }
-  dash.style.display = '';
-
-  // Contar pontos com áudio por guia
-  const guiasWithAudio = {};
-  pontos.forEach(p => {
-    if (p.audioUrl && p.isGuia && p.guia) guiasWithAudio[p.guia] = (guiasWithAudio[p.guia] || 0) + 1;
-  });
-
-  // Renderizar opções de guias no dropdown
+function renderGuiaDropdown() {
   const guiasEl = document.getElementById('dashboard-guias');
-  const sortedGuias = Object.entries(guiasWithAudio).sort((a, b) => a[0].localeCompare(b[0], 'pt'));
-  guiasEl.innerHTML = sortedGuias.map(([guia, count]) => `
-    <div class="dash-opt ${dashboardFilterGuia === guia ? 'active' : ''}" onclick="filterByPlaylist('guia', '${esc(guia)}')">
-      <span class="dash-opt-check">${dashboardFilterGuia === guia ? '✓' : ''}</span>
+  if (!guiasEl) return;
+
+  const counts = {};
+  pontos.forEach(p => { if (p.guia) counts[p.guia] = (counts[p.guia] || 0) + 1; });
+
+  const sortedGuias = [...guias].sort((a, b) => a.localeCompare(b, 'pt'));
+  guiasEl.innerHTML = sortedGuias.map(guia => `
+    <div class="dash-opt ${guiaFiltroAtual === guia ? 'active' : ''}" onclick="selectGuia('${esc(guia)}')">
+      <span class="dash-opt-check">${guiaFiltroAtual === guia ? '✓' : ''}</span>
       <span class="dash-opt-label">${esc(guia)}</span>
-      <span class="dash-opt-count">${count}</span>
+      <span class="dash-opt-count">${counts[guia] || 0}</span>
     </div>
-  `).join('') || '<div class="dash-opt" style="cursor:default;opacity:.6">Nenhum guia com áudio</div>';
+  `).join('') || '<div class="dash-opt" style="cursor:default;opacity:.6">Nenhum guia cadastrado</div>';
 
-  document.getElementById('dash-dd-guias-active').textContent = dashboardFilterGuia || '';
+  document.getElementById('dash-dd-guias-active').textContent = guiaFiltroAtual || '';
+  atualizarBotaoLimparFiltros();
+}
 
-  // Mostrar botão de limpar se houver filtro ativo
+function atualizarBotaoLimparFiltros() {
   const clearBtn = document.getElementById('clear-dashboard-btn');
-  clearBtn.style.display = dashboardFilterGuia ? '' : 'none';
-};
-
-window.filterByPlaylist = (type, value) => {
-  if (type === 'guia') {
-    dashboardFilterGuia = dashboardFilterGuia === value ? null : value;
-  }
-  document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
-  renderDashboard();
-  renderFilteredByDashboard();
-};
-
-window.clearDashboardFilter = () => {
-  dashboardFilterGuia = null;
-  renderDashboard();
-  renderFilteredByDashboard();
-};
-
-window.renderFilteredByDashboard = () => {
-  if (!dashboardFilterGuia) {
-    // Se não há filtro, renderiza normalmente
-    renderCards();
-    return;
-  }
-
-  // Filtrar pontos com áudio pelo guia selecionado
-  let filtered = pontos.filter(p => p.audioUrl && p.isGuia && p.guia === dashboardFilterGuia);
-
-  document.getElementById('countInfo').textContent = filtered.length === 0 ? '' :
-    filtered.length === 1 ? '1 ponto encontrado' : `${filtered.length} pontos encontrados`;
-
-  const grid = document.getElementById('mainGrid');
-  if (!filtered.length) {
-    grid.innerHTML = '<div class="empty"><div class="empty-icon">🎙️</div><p>Nenhum ponto com áudio encontrado para este guia.</p></div>';
-    return;
-  }
-
-  const dest = filtered.filter(p => p.destaque);
-  const outros = filtered.filter(p => !p.destaque);
-
-  if (currentLayout === 'list') { 
-    renderList(dest, outros, grid); 
-    return; 
-  }
-
-  let html = '';
-  if (dest.length)
-    html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length > 1 ? 's' : ''}</div>`;
-  [...dest, ...outros].forEach(p => { html += cardHtml(p); });
-  grid.innerHTML = html;
-  renderDashboard();
-};
+  if (!clearBtn) return;
+  const linhaAtiva = document.getElementById('filterLinha')?.value;
+  clearBtn.style.display = (linhaAtiva || guiaFiltroAtual) ? '' : 'none';
+}
 
 function abrirDetalhe(id) {
   const p = pontos.find(x => x.id === id);
@@ -4583,6 +4530,7 @@ function plBuildList(){
     const match=!search||(p.nome||'').toLowerCase().includes(search)||(p.guia||'').toLowerCase().includes(search)||(p.letra||'').toLowerCase().includes(search)||(p.postadoPor||'').toLowerCase().includes(search);
     if(!match)return false;
     if(linhaFilter&&(p.linha||'')!==linhaFilter)return false;
+    if(guiaFiltroAtual&&(p.guia||'')!==guiaFiltroAtual)return false;
     if(currentFilter==='sessao')return p.destaque;
     if(currentFilter==='guia')return p.isGuia;
     if(currentFilter==='noguia')return !p.isGuia;
