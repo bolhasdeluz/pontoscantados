@@ -540,21 +540,26 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 .ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* ── DASHBOARD ── */
-.dashboard{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:16px 12px;position:sticky;top:90px;z-index:399}
+.dashboard{background:#fff;border-bottom:1px solid rgba(196,57,107,.1);padding:10px 12px;position:sticky;top:90px;z-index:399}
 .dashboard-inner{max-width:1200px;margin:0 auto}
-.dashboard-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.dashboard-title::before{content:'';width:4px;height:4px;background:var(--gold);border-radius:50%}
-.dashboard-section{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-.dashboard-section:last-child{margin-bottom:0}
-.dashboard-label{font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
-.dashboard-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.dashboard-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid rgba(196,57,107,.2);border-radius:20px;background:#fdf5f7;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.78rem;cursor:pointer;transition:all .18s;position:relative;user-select:none}
-.dashboard-chip:hover{border-color:rgba(196,57,107,.4);background:var(--gold-dim)}
-.dashboard-chip.active{background:var(--gold);color:#fff;border-color:var(--gold)}
-.dashboard-chip-label{font-weight:500;flex:1}
-.dashboard-chip-count{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:rgba(0,0,0,.08);border-radius:50%;font-size:.7rem;font-weight:700;flex-shrink:0}
-.dashboard-chip.active .dashboard-chip-count{background:rgba(255,255,255,.25)}
-.dashboard-clear{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid rgba(196,57,107,.25);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .12s;white-space:nowrap}
+.dash-filtros{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dash-dd{position:relative}
+.dash-dd-btn{display:flex;align-items:center;gap:7px;background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 12px;transition:border-color .18s}
+.dash-dd-btn:hover{border-color:var(--gold)}
+.dash-dd.open .dash-dd-btn{border-color:var(--gold);background:var(--gold-dim)}
+.dash-dd-active{color:var(--gold);font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-dd-arrow{transition:transform .2s;flex-shrink:0;color:var(--text-dim)}
+.dash-dd.open .dash-dd-arrow{transform:rotate(180deg)}
+.dash-dd-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:230px;max-height:280px;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(180,60,90,.16);padding:6px;z-index:410}
+.dash-dd.open .dash-dd-panel{display:block}
+.dash-opt{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;cursor:pointer;font-size:.83rem;color:var(--text);transition:background .15s}
+.dash-opt:hover{background:var(--gold-dim)}
+.dash-opt.active{background:var(--gold);color:#fff}
+.dash-opt-check{width:15px;height:15px;border:1.5px solid rgba(196,57,107,.35);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:transparent}
+.dash-opt.active .dash-opt-check{background:#fff;border-color:#fff;color:var(--gold)}
+.dash-opt-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-opt-count{font-size:.7rem;opacity:.65;flex-shrink:0}
+.dashboard-clear{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:7px 10px;border-radius:8px;border:1px solid rgba(196,57,107,.25);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .12s;white-space:nowrap}
 .dashboard-clear:hover{background:var(--red-dim);color:var(--red);border-color:var(--red)}
 
 </style>
@@ -699,16 +704,23 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 <!-- DASHBOARD -->
 <div class="dashboard" id="dashboard" style="display:none">
   <div class="dashboard-inner">
-    <div class="dashboard-title">Filtrar por Playlist</div>
-    <div class="dashboard-section">
-      <div class="dashboard-label">📂 Linhas</div>
-      <div class="dashboard-chips" id="dashboard-linhas"></div>
-    </div>
-    <div class="dashboard-section">
-      <div class="dashboard-label">👥 Guias</div>
-      <div class="dashboard-chips" id="dashboard-guias"></div>
-    </div>
-    <div style="display:flex;gap:6px;margin-top:10px">
+    <div class="dash-filtros">
+      <div class="dash-dd" id="dd-linhas">
+        <button class="dash-dd-btn" type="button" onclick="toggleDashDD('linhas')">
+          <span>📂 Linhas</span>
+          <span class="dash-dd-active" id="dash-dd-linhas-active"></span>
+          <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="dash-dd-panel" id="dashboard-linhas"></div>
+      </div>
+      <div class="dash-dd" id="dd-guias">
+        <button class="dash-dd-btn" type="button" onclick="toggleDashDD('guias')">
+          <span>👥 Guias</span>
+          <span class="dash-dd-active" id="dash-dd-guias-active"></span>
+          <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="dash-dd-panel" id="dashboard-guias"></div>
+      </div>
       <button class="dashboard-clear" onclick="clearDashboardFilter()" id="clear-dashboard-btn" style="display:none">✕ Limpar filtros</button>
     </div>
   </div>
@@ -2828,6 +2840,18 @@ function makeListItem(p, i) {
 let dashboardFilterLinha = null;
 let dashboardFilterGuia = null;
 
+window.toggleDashDD = (which) => {
+  const id = 'dd-' + which;
+  const isOpen = document.getElementById(id).classList.contains('open');
+  document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) document.getElementById(id).classList.add('open');
+};
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.dash-dd.open').forEach(el => {
+    if (!el.contains(e.target)) el.classList.remove('open');
+  });
+});
+
 window.renderDashboard = () => {
   const dash = document.getElementById('dashboard');
   if (!pontos.some(p => p.audioUrl)) {
@@ -2835,38 +2859,43 @@ window.renderDashboard = () => {
     return;
   }
   dash.style.display = '';
-  
+
   // Contar pontos com áudio por linha e guia
   const linhasWithAudio = {};
   const guiasWithAudio = {};
-  
+
   pontos.forEach(p => {
     if (p.audioUrl) {
       if (p.linha) linhasWithAudio[p.linha] = (linhasWithAudio[p.linha] || 0) + 1;
       if (p.isGuia && p.guia) guiasWithAudio[p.guia] = (guiasWithAudio[p.guia] || 0) + 1;
     }
   });
-  
-  // Renderizar chips de linhas
+
+  // Renderizar opções de linhas no dropdown
   const linhasEl = document.getElementById('dashboard-linhas');
   const sortedLinhas = Object.entries(linhasWithAudio).sort((a, b) => a[0].localeCompare(b[0], 'pt'));
   linhasEl.innerHTML = sortedLinhas.map(([linha, count]) => `
-    <div class="dashboard-chip ${dashboardFilterLinha === linha ? 'active' : ''}" onclick="filterByPlaylist('linha', '${esc(linha)}')">
-      <span class="dashboard-chip-label">${esc(linha)}</span>
-      <span class="dashboard-chip-count">${count}</span>
+    <div class="dash-opt ${dashboardFilterLinha === linha ? 'active' : ''}" onclick="filterByPlaylist('linha', '${esc(linha)}')">
+      <span class="dash-opt-check">${dashboardFilterLinha === linha ? '✓' : ''}</span>
+      <span class="dash-opt-label">${esc(linha)}</span>
+      <span class="dash-opt-count">${count}</span>
     </div>
-  `).join('');
-  
-  // Renderizar chips de guias
+  `).join('') || '<div class="dash-opt" style="cursor:default;opacity:.6">Nenhuma linha com áudio</div>';
+
+  // Renderizar opções de guias no dropdown
   const guiasEl = document.getElementById('dashboard-guias');
   const sortedGuias = Object.entries(guiasWithAudio).sort((a, b) => a[0].localeCompare(b[0], 'pt'));
   guiasEl.innerHTML = sortedGuias.map(([guia, count]) => `
-    <div class="dashboard-chip ${dashboardFilterGuia === guia ? 'active' : ''}" onclick="filterByPlaylist('guia', '${esc(guia)}')">
-      <span class="dashboard-chip-label">${esc(guia)}</span>
-      <span class="dashboard-chip-count">${count}</span>
+    <div class="dash-opt ${dashboardFilterGuia === guia ? 'active' : ''}" onclick="filterByPlaylist('guia', '${esc(guia)}')">
+      <span class="dash-opt-check">${dashboardFilterGuia === guia ? '✓' : ''}</span>
+      <span class="dash-opt-label">${esc(guia)}</span>
+      <span class="dash-opt-count">${count}</span>
     </div>
-  `).join('');
-  
+  `).join('') || '<div class="dash-opt" style="cursor:default;opacity:.6">Nenhum guia com áudio</div>';
+
+  document.getElementById('dash-dd-linhas-active').textContent = dashboardFilterLinha || '';
+  document.getElementById('dash-dd-guias-active').textContent = dashboardFilterGuia || '';
+
   // Mostrar botão de limpar se houver filtro ativo
   const clearBtn = document.getElementById('clear-dashboard-btn');
   if (dashboardFilterLinha || dashboardFilterGuia) {
@@ -2884,6 +2913,7 @@ window.filterByPlaylist = (type, value) => {
     dashboardFilterGuia = dashboardFilterGuia === value ? null : value;
     dashboardFilterLinha = null;
   }
+  document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
   renderDashboard();
   renderFilteredByDashboard();
 };
