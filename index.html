@@ -10,13 +10,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 
-/* ── BARRA BOLHAS DE LUZ (topo) ── */
-#topo-bdl{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 16px;background:rgba(255,245,247,.96);border-bottom:1px solid var(--border);flex-shrink:0}
-.topo-bdl-home{font-family:'Cinzel',serif;font-size:.64rem;font-weight:700;letter-spacing:.1em;color:var(--gold);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:5px}
-.topo-bdl-home:hover{color:var(--gold-light)}
-#menu-hint-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--gold);opacity:.85;transition:opacity .2s;padding:2px 4px}
-#menu-hint-btn:hover{opacity:1}
-#menu-hint-label{font-family:'Cinzel',serif;font-size:.6rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+/* ── LINHA BOLHAS DE LUZ (dentro do próprio header rosa, sem quebrar o bloco) ── */
+.topo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.topo-bdl-home{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.9);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:5px 12px;transition:background .18s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.topo-bdl-home:hover{background:rgba(255,255,255,.25)}
+#menu-hint-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.9);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:5px 12px;display:inline-flex;align-items:center;gap:6px;transition:background .18s}
+#menu-hint-btn:hover{background:rgba(255,255,255,.25)}
 #hint-arrow-svg{transition:transform .28s cubic-bezier(.4,0,.2,1)}
 #menu-hint-btn.open #hint-arrow-svg{transform:rotate(180deg)}
 
@@ -562,14 +561,6 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 </head>
 <body>
 
-<div id="topo-bdl">
-  <a class="topo-bdl-home" href="https://bolhasdeluz.ong.br">✦ Bolhas de Luz</a>
-  <button id="menu-hint-btn" onclick="toggleDrawer()">
-    <span id="menu-hint-label">Ferramentas</span>
-    <svg width="14" height="9" viewBox="0 0 20 12" fill="none" id="hint-arrow-svg"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-  </button>
-</div>
-
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
 <div id="drawer">
   <div class="drawer-handle" onclick="closeDrawer()"><div class="drawer-handle-pill"></div></div>
@@ -595,6 +586,13 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 </div>
 
 <header>
+  <div class="topo-row">
+    <a class="topo-bdl-home" href="https://bolhasdeluz.ong.br">✦ Bolhas de Luz</a>
+    <button id="menu-hint-btn" onclick="toggleDrawer()">
+      Ferramentas
+      <svg width="12" height="8" viewBox="0 0 20 12" fill="none" id="hint-arrow-svg"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
   <div class="hi">
     <div>
       <h1>Pontos</h1>
