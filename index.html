@@ -79,7 +79,7 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .layout-btn.active{background:#fff;color:var(--gold);box-shadow:0 1px 4px rgba(180,60,90,.12)}
 .main{max-width:900px;margin:20px auto 0;padding:0 16px;display:grid;gap:14px}
 @media(min-width:860px){
-  .hi,.ci,.dash-filtros{max-width:1200px}
+  .hi,.ci{max-width:1200px}
   .main{max-width:1200px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));align-items:start}
   .main.layout-list{display:flex}
   .main .sessao-banner{grid-column:1/-1}
@@ -539,8 +539,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 .ts-sec-lbl{font-family:'Cinzel',serif;font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ts-sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* ── DASHBOARD ── */
-.dash-filtros{display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:900px;margin:0 auto;padding:0 0 10px}
+/* ── DROPDOWNS DE LINHAS/GUIAS ── */
 .dash-dd{position:relative}
 .dash-dd-btn{display:flex;align-items:center;gap:7px;background:#fdf0f3;border:1.5px solid rgba(196,57,107,.2);border-radius:10px;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;padding:7px 12px;transition:border-color .18s}
 .dash-dd-btn:hover{border-color:var(--gold)}
@@ -676,14 +675,31 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <select id="filterLinha" onchange="renderCards()" style="display:none">
         <option value="">Todas as linhas</option>
       </select>
-      <select class="filter-select" id="sortBy" onchange="renderCards()">
+      <select id="sortBy" onchange="renderCards()" style="display:none">
         <option value="default">Mais recentes</option>
         <option value="az">A → Z</option>
         <option value="za">Z → A</option>
         <option value="linha">Por linha</option>
       </select>
-      <button class="filter-select" id="btn-tocar-fila" onclick="playlistStart()" title="Tocar em sequência os pontos com áudio que estão filtrados" style="cursor:pointer;white-space:nowrap">▶ Tocar fila</button>
+      <div class="dash-dd" id="dd-linhas">
+        <button class="dash-dd-btn" type="button" onclick="toggleDashDD('linhas')">
+          <span>📂 Linhas</span>
+          <span class="dash-dd-active" id="dash-dd-linhas-active"></span>
+          <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="dash-dd-panel" id="dashboard-linhas"></div>
+      </div>
+      <div class="dash-dd" id="dd-guias">
+        <button class="dash-dd-btn" type="button" onclick="toggleDashDD('guias')">
+          <span>👥 Guias</span>
+          <span class="dash-dd-active" id="dash-dd-guias-active"></span>
+          <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="dash-dd-panel" id="dashboard-guias"></div>
+      </div>
       <select class="filter-select" id="pl-select" onchange="playlistByCategory(this.value)" title="Tocar uma playlist por linha, guia ou filha" style="cursor:pointer"><option value="">♫ Playlists…</option></select>
+      <button class="filter-select" id="btn-tocar-fila" onclick="playlistStart()" title="Tocar em sequência os pontos com áudio que estão filtrados" style="cursor:pointer;white-space:nowrap">▶ Tocar fila</button>
+      <button class="dashboard-clear" onclick="clearFiltrosLinhaGuia()" id="clear-dashboard-btn" style="display:none">✕ Limpar filtros</button>
     </div>
     <div class="layout-btns">
       <button class="layout-btn active" id="btn-cards" onclick="setLayout('cards')" title="Cards">
@@ -696,25 +712,6 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <button onclick="openModal()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;padding:6px 11px;flex-shrink:0;display:flex;align-items:center;gap:4px">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo
     </button>
-  </div>
-  <div class="dash-filtros">
-    <div class="dash-dd" id="dd-linhas">
-      <button class="dash-dd-btn" type="button" onclick="toggleDashDD('linhas')">
-        <span>📂 Linhas</span>
-        <span class="dash-dd-active" id="dash-dd-linhas-active"></span>
-        <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </button>
-      <div class="dash-dd-panel" id="dashboard-linhas"></div>
-    </div>
-    <div class="dash-dd" id="dd-guias">
-      <button class="dash-dd-btn" type="button" onclick="toggleDashDD('guias')">
-        <span>👥 Guias</span>
-        <span class="dash-dd-active" id="dash-dd-guias-active"></span>
-        <svg class="dash-dd-arrow" width="10" height="7" viewBox="0 0 20 12" fill="none"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </button>
-      <div class="dash-dd-panel" id="dashboard-guias"></div>
-    </div>
-    <button class="dashboard-clear" onclick="clearFiltrosLinhaGuia()" id="clear-dashboard-btn" style="display:none">✕ Limpar filtros</button>
   </div>
 </div>
 
@@ -2833,9 +2830,20 @@ let guiaFiltroAtual = '';
 
 window.toggleDashDD = (which) => {
   const id = 'dd-' + which;
-  const isOpen = document.getElementById(id).classList.contains('open');
+  const dd = document.getElementById(id);
+  const isOpen = dd.classList.contains('open');
   document.querySelectorAll('.dash-dd.open').forEach(el => el.classList.remove('open'));
-  if (!isOpen) document.getElementById(id).classList.add('open');
+  if (!isOpen) {
+    dd.classList.add('open');
+    // posiciona o painel via position:fixed (calculado, não relativo ao pai) pra nunca
+    // ficar cortado por um container com overflow:auto/hidden no caminho até ele
+    const btn = dd.querySelector('.dash-dd-btn');
+    const panel = dd.querySelector('.dash-dd-panel');
+    const r = btn.getBoundingClientRect();
+    panel.style.position = 'fixed';
+    panel.style.top = (r.bottom + 6) + 'px';
+    panel.style.left = r.left + 'px';
+  }
 };
 document.addEventListener('click', (e) => {
   document.querySelectorAll('.dash-dd.open').forEach(el => {
