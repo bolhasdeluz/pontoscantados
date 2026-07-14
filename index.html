@@ -23,6 +23,13 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:12
 .admin-toggle-text{color:rgba(255,255,255,.85);font-size:.75rem;font-weight:500;white-space:nowrap}
 .admin-toggle input:checked ~ .admin-toggle-text{color:#fff;font-weight:600}
 .hi{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;overflow:hidden}
+.home-link{display:inline-flex;align-items:center;gap:4px;color:rgba(255,255,255,.68);font-family:'DM Sans',sans-serif;font-size:.66rem;font-weight:500;letter-spacing:.03em;text-decoration:none;transition:color .15s}
+.home-link:hover{color:#fff}
+.site-footer{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:20px 16px;margin-top:auto}
+.site-footer-inner{max-width:900px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.site-footer-home{display:inline-flex;align-items:center;gap:6px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;text-decoration:none;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 16px;transition:background .18s}
+.site-footer-home:hover{background:rgba(255,255,255,.28)}
+.site-footer-tag{color:rgba(255,255,255,.55);font-size:.68rem;font-family:'Cinzel',serif;letter-spacing:.06em;text-transform:uppercase;margin:0}
 header h1{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:#fff;letter-spacing:-.01em;white-space:nowrap}
 header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .hr{display:flex;gap:6px;align-items:center;flex-shrink:0}
@@ -192,6 +199,12 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 /* ── LIST MODE ── */
 .list-section-header{font-size:.72rem;font-weight:700;color:#9a7000;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px 4px;display:flex;align-items:center;gap:6px}
 .list-section-divider{height:1px;background:#f0d8de;margin:6px 0}
+.linha-group-header{grid-column:1/-1;font-size:.72rem;font-weight:700;color:#8c5a3c;letter-spacing:.08em;text-transform:uppercase;padding:14px 2px 0;display:flex;align-items:center;gap:7px}
+.linha-group-header:first-child{padding-top:0}
+.linha-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.filter-summary{display:flex;align-items:center;justify-content:center;gap:8px;padding:0 0 8px;font-size:.72rem;color:var(--text-dim);font-family:'Cinzel',serif;letter-spacing:.05em}
+.filter-summary-clear{font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid rgba(196,57,107,.3);background:transparent;color:var(--gold);cursor:pointer;transition:all .15s}
+.filter-summary-clear:hover{background:var(--gold);color:#fff}
 
 /* ── OVERLAYS ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(40,10,20,.55);z-index:2000;align-items:flex-start;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top));backdrop-filter:blur(4px);overflow-y:auto}
@@ -531,6 +544,10 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 <header>
   <div class="hi">
     <div>
+      <a class="home-link" href="https://bolhasdeluz.ong.br" title="Voltar para o site do Bolhas de Luz">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
+        Bolhas de Luz
+      </a>
       <h1>Pontos</h1>
       <p id="subtitle">Bolhas de Luz</p>
     </div>
@@ -609,6 +626,12 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <select class="filter-select" id="filterLinha" onchange="renderCards()">
         <option value="">Todas as linhas</option>
       </select>
+      <select class="filter-select" id="filterGuiaSelect" onchange="renderCards()">
+        <option value="">Todos os guias</option>
+      </select>
+      <select class="filter-select" id="filterPostadorSelect" onchange="renderCards()">
+        <option value="">Todos que postaram</option>
+      </select>
       <select class="filter-select" id="sortBy" onchange="renderCards()">
         <option value="default">Mais recentes</option>
         <option value="az">A → Z</option>
@@ -652,7 +675,21 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 
 <div class="main" id="mainGrid"><div class="loading"><div class="spinner"></div>Carregando pontos...</div></div>
 <div class="count-info" id="countInfo"></div>
+<div class="filter-summary" id="filterSummary" style="display:none">
+  <span id="filterSummaryText"></span>
+  <button class="filter-summary-clear" onclick="clearAllFilters()">✕ Limpar filtros</button>
+</div>
 <div class="bottom-space"></div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <a class="site-footer-home" href="https://bolhasdeluz.ong.br">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
+      Voltar para o Bolhas de Luz
+    </a>
+    <p class="site-footer-tag">Pontos Cantados · Bolhas de Luz</p>
+  </div>
+</footer>
 
 <!-- PLAYER DE FILA -->
 <div id="pl-bar">
@@ -1285,8 +1322,25 @@ const API = '/api/pontos';
 // ── ESTADO ──
 let adminMode = false;
 let currentLayout = 'cards';
+let activeFilters = new Set();
+
+const LINHA_PALETTE = ['#c4396b','#2a7a60','#1a73e8','#c8a000','#7a4fc4','#c4602a','#2a9bb0','#a83250'];
+function linhaColor(nome) {
+  if (!nome) return '#8a6070';
+  let h = 0;
+  for (let i = 0; i < nome.length; i++) h = (h * 31 + nome.charCodeAt(i)) >>> 0;
+  return LINHA_PALETTE[h % LINHA_PALETTE.length];
+}
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function linhaBadgeStyle(nome) {
+  const c = linhaColor(nome);
+  return `background:${hexToRgba(c, .14)};color:${c}`;
+}
 let pontos = [];
-let currentFilter = 'all';
 let selectedIds = new Set();
 let segmentos = [];
 let linhas = [];
@@ -2156,13 +2210,105 @@ function setLayout(l) {
 }
 
 // ── FILTROS ──
+const FILTER_BTN_MAP = { sessao:'filterSessao', guia:'filterGuia', noguia:'filterNoGuia', nossos:'filterNossos', aprender:'filterAprender', mudos:'filterMudos' };
+
 window.setFilter = f => {
-  currentFilter = f;
-  document.querySelectorAll('.hfbtn').forEach(b => b.classList.remove('active'));
-  const map = { all:'filterAll', sessao:'filterSessao', guia:'filterGuia', noguia:'filterNoGuia', nossos:'filterNossos', aprender:'filterAprender', mudos:'filterMudos' };
-  if (map[f]) document.getElementById(map[f]).classList.add('active');
+  if (f === 'all') {
+    activeFilters.clear();
+  } else if (activeFilters.has(f)) {
+    activeFilters.delete(f);
+  } else {
+    if (f === 'guia') activeFilters.delete('noguia');
+    if (f === 'noguia') activeFilters.delete('guia');
+    activeFilters.add(f);
+  }
+  updateFilterButtons();
   renderCards();
 };
+
+function updateFilterButtons() {
+  document.querySelectorAll('.hfbtn').forEach(b => b.classList.remove('active'));
+  if (activeFilters.size === 0) {
+    document.getElementById('filterAll').classList.add('active');
+  } else {
+    activeFilters.forEach(f => { if (FILTER_BTN_MAP[f]) document.getElementById(FILTER_BTN_MAP[f]).classList.add('active'); });
+  }
+}
+
+function matchesActiveFilters(p) {
+  if (activeFilters.has('sessao') && !p.destaque) return false;
+  if (activeFilters.has('guia') && !p.isGuia) return false;
+  if (activeFilters.has('noguia') && p.isGuia) return false;
+  if (activeFilters.has('nossos') && !p.audioUrl) return false;
+  if (activeFilters.has('aprender') && !p.aprender) return false;
+  if (activeFilters.has('mudos') && !((p.audioStart != null || p.audioEnd != null) && !p.audioUrl)) return false;
+  return true;
+}
+
+function getFilteredPontos() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const linhaFilter = document.getElementById('filterLinha').value;
+  const guiaFilter = document.getElementById('filterGuiaSelect')?.value || '';
+  const postadorFilter = document.getElementById('filterPostadorSelect')?.value || '';
+  return pontos.filter(p => {
+    const match = !search
+      || (p.nome || '').toLowerCase().includes(search)
+      || (p.guia || '').toLowerCase().includes(search)
+      || (p.letra || '').toLowerCase().includes(search)
+      || (p.postadoPor || '').toLowerCase().includes(search);
+    if (!match) return false;
+    if (linhaFilter && (p.linha || '') !== linhaFilter) return false;
+    if (guiaFilter && (p.guia || '') !== guiaFilter) return false;
+    if (postadorFilter && (p.postadoPor || '') !== postadorFilter) return false;
+    return matchesActiveFilters(p);
+  });
+}
+
+function sortPontos(list, sortBy) {
+  const arr = [...list];
+  if (sortBy === 'az') arr.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt'));
+  else if (sortBy === 'za') arr.sort((a, b) => (b.nome || '').localeCompare(a.nome || '', 'pt'));
+  else if (sortBy === 'linha') arr.sort((a, b) => (a.linha || '').localeCompare(b.linha || '', 'pt') || (a.nome || '').localeCompare(b.nome || '', 'pt'));
+  return arr;
+}
+
+function refreshFilterSelects() {
+  const guiaSel = document.getElementById('filterGuiaSelect');
+  const postSel = document.getElementById('filterPostadorSelect');
+  if (!guiaSel || !postSel) return;
+  const guiaVal = guiaSel.value, postVal = postSel.value;
+  const guiasSet = new Set(), postSet = new Set();
+  pontos.forEach(p => { if (p.guia) guiasSet.add(p.guia); if (p.postadoPor) postSet.add(p.postadoPor); });
+  const guiasArr = [...guiasSet].sort((a, b) => a.localeCompare(b, 'pt'));
+  const postArr = [...postSet].sort((a, b) => a.localeCompare(b, 'pt'));
+  guiaSel.innerHTML = '<option value="">Todos os guias</option>' + guiasArr.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  postSel.innerHTML = '<option value="">Todos que postaram</option>' + postArr.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if (guiasArr.includes(guiaVal)) guiaSel.value = guiaVal;
+  if (postArr.includes(postVal)) postSel.value = postVal;
+}
+
+window.clearAllFilters = () => {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterLinha').value = '';
+  const guiaSel = document.getElementById('filterGuiaSelect'); if (guiaSel) guiaSel.value = '';
+  const postSel = document.getElementById('filterPostadorSelect'); if (postSel) postSel.value = '';
+  activeFilters.clear();
+  updateFilterButtons();
+  renderCards();
+};
+
+function updateFilterSummary(count) {
+  const search = document.getElementById('searchInput').value;
+  const linhaFilter = document.getElementById('filterLinha').value;
+  const guiaFilter = document.getElementById('filterGuiaSelect')?.value || '';
+  const postadorFilter = document.getElementById('filterPostadorSelect')?.value || '';
+  const n = activeFilters.size + (search ? 1 : 0) + (linhaFilter ? 1 : 0) + (guiaFilter ? 1 : 0) + (postadorFilter ? 1 : 0);
+  const el = document.getElementById('filterSummary');
+  if (!el) return;
+  if (n === 0) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  document.getElementById('filterSummaryText').textContent = `${n} filtro${n > 1 ? 's' : ''} ativo${n > 1 ? 's' : ''} — ${count} resultado${count !== 1 ? 's' : ''}`;
+}
 
 // ── SELEÇÃO EM LOTE ──
 function toggleSelecao(id, checked) {
@@ -2598,8 +2744,7 @@ window.renderCards = () => {
   dashboardFilterGuia = null;
 
   if (typeof refreshPlaylistSelect === 'function') refreshPlaylistSelect();
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const linhaFilter = document.getElementById('filterLinha').value;
+  refreshFilterSelects();
   const sortBy = document.getElementById('sortBy').value;
 
   // pontos-trecho que ficaram sem áudio (mudos) — botão de recuperação
@@ -2609,38 +2754,18 @@ window.renderCards = () => {
     if (muteCount > 0) { mbtn.style.display = ''; mbtn.textContent = '🔇 Sem áudio (' + muteCount + ')'; }
     else {
       mbtn.style.display = 'none';
-      if (currentFilter === 'mudos') {
-        currentFilter = 'all';
-        document.querySelectorAll('.hfbtn').forEach(b => b.classList.remove('active'));
-        document.getElementById('filterAll').classList.add('active');
+      if (activeFilters.has('mudos')) {
+        activeFilters.delete('mudos');
+        updateFilterButtons();
       }
     }
   }
 
-  let filtered = pontos.filter(p => {
-    const match = !search
-      || (p.nome || '').toLowerCase().includes(search)
-      || (p.guia || '').toLowerCase().includes(search)
-      || (p.letra || '').toLowerCase().includes(search)
-      || (p.postadoPor || '').toLowerCase().includes(search);
-    if (!match) return false;
-    if (linhaFilter && (p.linha || '') !== linhaFilter) return false;
-    if (currentFilter === 'sessao') return p.destaque;
-    if (currentFilter === 'guia') return p.isGuia;
-    if (currentFilter === 'noguia') return !p.isGuia;
-    if (currentFilter === 'nossos') return !!p.audioUrl;
-    if (currentFilter === 'aprender') return !!p.aprender;
-    if (currentFilter === 'mudos') return (p.audioStart != null || p.audioEnd != null) && !p.audioUrl;
-    return true;
-  });
-
-  // Ordenação
-  if (sortBy === 'az') filtered.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt'));
-  else if (sortBy === 'za') filtered.sort((a, b) => (b.nome || '').localeCompare(a.nome || '', 'pt'));
-  else if (sortBy === 'linha') filtered.sort((a, b) => (a.linha || '').localeCompare(b.linha || '', 'pt') || (a.nome || '').localeCompare(b.nome || '', 'pt'));
+  const filtered = sortPontos(getFilteredPontos(), sortBy);
 
   document.getElementById('countInfo').textContent = filtered.length === 0 ? '' :
     filtered.length === 1 ? '1 ponto encontrado' : `${filtered.length} pontos encontrados`;
+  updateFilterSummary(filtered.length);
 
   const grid = document.getElementById('mainGrid');
   if (!filtered.length) {
@@ -2651,12 +2776,25 @@ window.renderCards = () => {
   const dest = filtered.filter(p => p.destaque);
   const outros = filtered.filter(p => !p.destaque);
 
-  if (currentLayout === 'list') { renderList(dest, outros, grid); renderDashboard(); return; }
+  if (currentLayout === 'list') { renderList(dest, outros, grid, sortBy); renderDashboard(); return; }
 
   let html = '';
-  if (dest.length && currentFilter !== 'sessao')
+  if (dest.length && !activeFilters.has('sessao'))
     html += `<div class="sessao-banner"><span class="flame">🕯️</span> Aprender para a Próxima Sessão — ${dest.length} ponto${dest.length > 1 ? 's' : ''}</div>`;
-  [...dest, ...outros].forEach(p => { html += cardHtml(p); });
+  dest.forEach(p => { html += cardHtml(p); });
+  if (sortBy === 'linha') {
+    let lastLinha = null;
+    outros.forEach(p => {
+      const linha = p.linha || 'Sem linha';
+      if (linha !== lastLinha) {
+        html += `<div class="linha-group-header"><span class="linha-dot" style="background:${linhaColor(p.linha)}"></span>${esc(linha)}</div>`;
+        lastLinha = linha;
+      }
+      html += cardHtml(p);
+    });
+  } else {
+    outros.forEach(p => { html += cardHtml(p); });
+  }
   grid.innerHTML = html;
   renderDashboard();
 };
@@ -2665,7 +2803,7 @@ function cardHtml(p) {
   const ytId = extractYtId(p.yt);
   const topBar = `<div class="card-top-bar">
     ${p.destaque ? `<div class="destaque-tag">🕯️ Aprender para a Próxima Sessão</div>` : ''}
-    ${p.linha ? `<span class="cat-badge">${esc(p.linha)}</span>` : ''}
+    ${p.linha ? `<span class="cat-badge" style="${linhaBadgeStyle(p.linha)}">${esc(p.linha)}</span>` : ''}
     <div class="card-actions" style="margin-left:auto">
       <input type="checkbox" class="card-check-input"
         onchange="toggleSelecao('${p.id}',this.checked)"
@@ -2699,7 +2837,7 @@ function cardHtml(p) {
   </div>`;
 }
 
-function renderList(dest, outros, grid) {
+function renderList(dest, outros, grid, sortBy) {
   grid.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.style.cssText = 'background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(180,60,90,.07);overflow:hidden';
@@ -2715,7 +2853,22 @@ function renderList(dest, outros, grid) {
     sep.className = 'list-section-divider';
     wrap.appendChild(sep);
   }
-  outros.forEach((p, i) => wrap.appendChild(makeListItem(p, dest.length + i)));
+  if (sortBy === 'linha') {
+    let lastLinha = null;
+    outros.forEach((p, i) => {
+      const linha = p.linha || 'Sem linha';
+      if (linha !== lastLinha) {
+        const hdr = document.createElement('div');
+        hdr.className = 'list-section-header';
+        hdr.innerHTML = `<span class="linha-dot" style="background:${linhaColor(p.linha)}"></span>${esc(linha)}`;
+        wrap.appendChild(hdr);
+        lastLinha = linha;
+      }
+      wrap.appendChild(makeListItem(p, dest.length + i));
+    });
+  } else {
+    outros.forEach((p, i) => wrap.appendChild(makeListItem(p, dest.length + i)));
+  }
   grid.appendChild(wrap);
   renderDashboard();
 }
@@ -2728,12 +2881,12 @@ function makeListItem(p, i) {
     <div class="li-main">
       <div class="li-top">
         <span class="li-name">${esc(p.nome)}</span>
-        ${p.linha ? `<span class="cat-badge" style="flex-shrink:0">${esc(p.linha)}</span>` : ''}
+        ${p.linha ? `<span class="cat-badge" style="flex-shrink:0;${linhaBadgeStyle(p.linha)}">${esc(p.linha)}</span>` : ''}
         ${p.audioUrl ? `<span class="nossos-badge">🎙️ Nosso</span>` : ''}
         ${p.aprender ? `<span class="aprender-badge">📚 Aprender</span>` : ''}
         ${p.destaque ? `<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>` : ''}
       </div>
-      <div class="li-meta">${p.tipo ? esc(p.tipo) : ''}${p.isGuia && p.guia ? (p.tipo ? ' · ' : '') + esc(p.guia) : ''}</div>
+      <div class="li-meta">${p.tipo ? esc(p.tipo) : ''}${p.isGuia && p.guia ? (p.tipo ? ' · ' : '') + esc(p.guia) : ''}${p.postadoPor ? ' · por ' + esc(p.postadoPor) : ''}</div>
     </div>
     <div class="li-actions">
       <button class="icon-btn admin-only ${p.destaque ? 'star' : ''}" style="width:26px;height:26px" title="Destaque" onclick="event.stopPropagation();toggleDestaque('${p.id}',${p.destaque})">★</button>
@@ -2867,7 +3020,7 @@ function abrirDetalhe(id) {
       <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;color:#b02d5a;font-weight:600">${esc(p.nome)}</h2>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      ${p.linha ? `<span class="cat-badge">${esc(p.linha)}</span>` : ''}
+      ${p.linha ? `<span class="cat-badge" style="${linhaBadgeStyle(p.linha)}">${esc(p.linha)}</span>` : ''}
       ${p.tipo ? `<span style="color:var(--text-dim);font-style:italic;font-size:14px">${esc(p.tipo)}</span>` : ''}
       ${p.isGuia && p.guia ? `<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>` : ''}
     </div>
@@ -4470,24 +4623,8 @@ async function reloadDrive(){
 // ── PLAYER DE FILA (playlist) ──
 let plList=[], plIdx=-1, plCurUrl='';
 function plBuildList(){
-  const search=(document.getElementById('searchInput').value||'').toLowerCase();
-  const linhaFilter=document.getElementById('filterLinha').value;
   const sortBy=document.getElementById('sortBy').value;
-  let filtered=pontos.filter(p=>{
-    const match=!search||(p.nome||'').toLowerCase().includes(search)||(p.guia||'').toLowerCase().includes(search)||(p.letra||'').toLowerCase().includes(search)||(p.postadoPor||'').toLowerCase().includes(search);
-    if(!match)return false;
-    if(linhaFilter&&(p.linha||'')!==linhaFilter)return false;
-    if(currentFilter==='sessao')return p.destaque;
-    if(currentFilter==='guia')return p.isGuia;
-    if(currentFilter==='noguia')return !p.isGuia;
-    if(currentFilter==='nossos')return !!p.audioUrl;
-    if(currentFilter==='aprender')return !!p.aprender;
-    if(currentFilter==='mudos')return (p.audioStart!=null||p.audioEnd!=null)&&!p.audioUrl;
-    return true;
-  });
-  if(sortBy==='az')filtered.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt'));
-  else if(sortBy==='za')filtered.sort((a,b)=>(b.nome||'').localeCompare(a.nome||'','pt'));
-  else if(sortBy==='linha')filtered.sort((a,b)=>(a.linha||'').localeCompare(b.linha||'','pt')||(a.nome||'').localeCompare(b.nome||'','pt'));
+  const filtered=sortPontos(getFilteredPontos(),sortBy);
   const dest=filtered.filter(p=>p.destaque),outros=filtered.filter(p=>!p.destaque);
   return [...dest,...outros].filter(p=>p.audioUrl);
 }
