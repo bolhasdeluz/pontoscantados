@@ -188,6 +188,11 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .card.destaque .card-top-bar{background:linear-gradient(135deg,#fffbe8,#fff5d0)}
 .card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 18px 10px;gap:12px}
 .card-title-wrap{flex:1;min-width:0}
+.quick-play{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#c4396b,#e8688a);border:none;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(196,57,107,.35);transition:transform .15s,box-shadow .15s;padding-left:2px}
+.quick-play.playing{padding-left:0}
+.quick-play:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(196,57,107,.45)}
+.quick-play:active{transform:scale(.96)}
+.quick-play.playing{box-shadow:0 0 0 3px var(--gold-dim),0 2px 10px rgba(196,57,107,.35)}
 .destaque-tag{background:linear-gradient(135deg,#8c5a00,#c88c00);border-radius:8px;color:#fff8e0;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;padding:4px 10px;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;letter-spacing:.01em}
 .card-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.25}
 .card-meta{margin-top:4px;font-size:.78rem;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:4px 10px}
@@ -331,17 +336,25 @@ select option{background:#fff;color:#2a1a22}
 .ts-wf-sb-thumb{position:absolute;top:3px;height:14px;min-width:40px;width:30%;left:0;background:var(--gold);border-radius:99px;cursor:grab;box-shadow:0 1px 3px rgba(196,57,107,.3);transition:background .12s}
 .ts-wf-sb-thumb:hover{background:#b02d5a}
 .ts-wf-sb-thumb:active{cursor:grabbing}
-#pl-bar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:none;align-items:center;gap:10px;padding:9px 16px;background:#fff;border-top:1px solid rgba(196,57,107,.18);box-shadow:0 -3px 16px rgba(196,57,107,.12)}
+#pl-bar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:none;align-items:center;gap:12px;padding:11px 18px;background:#fff;border-top:1px solid rgba(196,57,107,.18);box-shadow:0 -4px 20px rgba(180,60,90,.14)}
 #pl-bar.open{display:flex}
+.pl-cover{flex-shrink:0;width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#c4396b,#e8688a);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 8px rgba(196,57,107,.3)}
 .pl-btn{background:none;border:none;font-size:18px;line-height:1;cursor:pointer;color:var(--gold);padding:5px 7px;border-radius:8px;flex-shrink:0}
 .pl-btn:hover{background:rgba(196,57,107,.08)}
-.pl-main{font-size:22px}
+.pl-main{font-size:16px;width:38px;height:38px;background:var(--gold);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(196,57,107,.35)}
+.pl-main:hover{background:#b02d5a}
 .pl-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .pl-title{font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pl-bar-track{height:6px;background:rgba(196,57,107,.12);border-radius:99px;cursor:pointer;position:relative}
-.pl-bar-fill{height:100%;width:0;background:var(--gold);border-radius:99px;pointer-events:none}
+.pl-track-row{display:flex;align-items:center;gap:7px}
+.pl-time{font-size:.66rem;color:var(--text-dim);font-variant-numeric:tabular-nums;flex-shrink:0;width:30px}
+.pl-time.pl-time-end{text-align:right}
+.pl-bar-track{flex:1;height:6px;background:rgba(196,57,107,.12);border-radius:99px;cursor:pointer;position:relative}
+.pl-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#c4396b,#e8688a);border-radius:99px;pointer-events:none}
 .pl-count{font-size:.75rem;color:var(--text-dim);flex-shrink:0;font-variant-numeric:tabular-nums}
 .pl-playing{box-shadow:0 0 0 2px var(--gold)!important;border-radius:14px}
+.li-play{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c4396b,#e8688a);border:none;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 6px rgba(196,57,107,.3);transition:transform .15s;padding-left:1px}
+.li-play.playing{padding-left:0;box-shadow:0 0 0 2px var(--gold-dim),0 1px 6px rgba(196,57,107,.3)}
+.li-play:hover{transform:scale(1.08)}
 .ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:6px 0;font-style:italic;display:none}
 .ts-wf-sel-info{font-size:11.5px;color:var(--gold);margin-top:6px;font-style:italic;min-height:16px}
 .ts-drive-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
@@ -721,12 +734,17 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 
 <!-- PLAYER DE FILA -->
 <div id="pl-bar">
+  <div class="pl-cover">🎙️</div>
   <button class="pl-btn" id="pl-prev" title="Anterior">⏮</button>
   <button class="pl-btn pl-main" id="pl-toggle" title="Tocar/Pausar">⏸</button>
   <button class="pl-btn" id="pl-next" title="Próximo">⏭</button>
   <div class="pl-mid">
     <div class="pl-title" id="pl-title">—</div>
-    <div class="pl-bar-track" id="pl-track"><div class="pl-bar-fill" id="pl-fill"></div></div>
+    <div class="pl-track-row">
+      <span class="pl-time" id="pl-time-cur">0:00</span>
+      <div class="pl-bar-track" id="pl-track"><div class="pl-bar-fill" id="pl-fill"></div></div>
+      <span class="pl-time pl-time-end" id="pl-time-dur">0:00</span>
+    </div>
   </div>
   <div class="pl-count" id="pl-count"></div>
   <button class="pl-btn" id="pl-close" title="Fechar fila">✕</button>
@@ -2763,6 +2781,7 @@ function cardHtml(p) {
   return `<div class="card${p.destaque ? ' destaque' : ''}" data-id="${p.id}">
     ${topBar}
     <div class="card-header">
+      ${p.audioUrl ? `<button class="quick-play" id="qp-${p.id}" onclick="event.stopPropagation();quickPlay('${p.id}')" title="Tocar">▶</button>` : ''}
       <div class="card-title-wrap">
         <div class="card-title">${esc(p.nome)}</div>
         <div class="card-meta">
@@ -2806,6 +2825,7 @@ function makeListItem(p, i) {
   div.className = 'list-item-row' + (p.destaque ? ' destaque' : '');
   div.style.animationDelay = (i * .02) + 's';
   div.innerHTML = `
+    ${p.audioUrl ? `<button class="li-play" id="qp-${p.id}" onclick="event.stopPropagation();quickPlay('${p.id}')" title="Tocar">▶</button>` : ''}
     <div class="li-main">
       <div class="li-top">
         <span class="li-name">${esc(p.nome)}</span>
@@ -4587,6 +4607,20 @@ window.playlistStart=(fromId)=>{
   document.getElementById('pl-bar').classList.add('open');
   plLoad(i);
 };
+// tocar imediatamente um ponto específico: começa a fila (com os pontos com
+// áudio do filtro atual) a partir dele — igual clicar o play numa faixa do
+// Spotify, continua tocando as próximas da lista sozinho
+window.quickPlay = (id) => {
+  const tocandoEsse = plIdx>=0 && plList[plIdx] && String(plList[plIdx].id)===String(id) && document.getElementById('pl-bar').classList.contains('open');
+  if (tocandoEsse) { plToggle(); return; }
+  playlistStart(id);
+};
+function setQuickPlayIcon(id, playing){
+  document.querySelectorAll('.quick-play.playing,.li-play.playing').forEach(el=>{ if(!id||el.id!=='qp-'+id){ el.classList.remove('playing'); el.textContent='▶'; } });
+  if(id==null) return;
+  const btn=document.getElementById('qp-'+id);
+  if(btn){ btn.classList.toggle('playing',playing); btn.textContent=playing?'⏸':'▶'; }
+}
 function plLoad(i){
   if(i<0||i>=plList.length){ plClose(); return; }
   plIdx=i; const p=plList[i]; const a=document.getElementById('pl-audio');
@@ -4603,10 +4637,16 @@ function plLoad(i){
 }
 function plNext(){ plLoad(plIdx+1); }
 function plPrev(){ const a=document.getElementById('pl-audio'); const st=Number(a.dataset.start)||0; if(a.currentTime-st>3) plLoad(plIdx); else plLoad(plIdx>0?plIdx-1:0); }
-function plToggle(){ const a=document.getElementById('pl-audio'); if(a.paused){ a.play().catch(()=>{}); document.getElementById('pl-toggle').textContent='⏸'; } else { a.pause(); document.getElementById('pl-toggle').textContent='▶'; } }
+function plToggle(){
+  const a=document.getElementById('pl-audio');
+  const idAtual=plIdx>=0&&plList[plIdx]?plList[plIdx].id:null;
+  if(a.paused){ a.play().catch(()=>{}); document.getElementById('pl-toggle').textContent='⏸'; setQuickPlayIcon(idAtual,true); }
+  else { a.pause(); document.getElementById('pl-toggle').textContent='▶'; setQuickPlayIcon(idAtual,false); }
+}
 function plClose(){ const a=document.getElementById('pl-audio'); a.pause(); a.removeAttribute('src'); a.load(); plCurUrl=''; plIdx=-1; document.getElementById('pl-bar').classList.remove('open'); highlightPlaying(null); }
 function highlightPlaying(id){
   document.querySelectorAll('.pl-playing').forEach(el=>el.classList.remove('pl-playing'));
+  setQuickPlayIcon(id,true);
   if(id!=null){ const el=document.querySelector('[data-id="'+id+'"]'); if(el) el.classList.add('pl-playing'); }
 }
 (function(){
@@ -4617,7 +4657,12 @@ function highlightPlaying(id){
     const hasEnd=a.dataset.end!=='';
     const end=hasEnd?Number(a.dataset.end):(a.duration||0);
     const span=(end>start)?(end-start):(a.duration||0);
-    if(span>0){ const pct=Math.max(0,Math.min(100,((a.currentTime-start)/span)*100)); document.getElementById('pl-fill').style.width=pct+'%'; }
+    if(span>0){
+      const pct=Math.max(0,Math.min(100,((a.currentTime-start)/span)*100));
+      document.getElementById('pl-fill').style.width=pct+'%';
+      document.getElementById('pl-time-cur').textContent=formatTime(Math.max(0,a.currentTime-start));
+      document.getElementById('pl-time-dur').textContent=formatTime(span);
+    }
     if(hasEnd && a.currentTime>=Number(a.dataset.end)-0.05) plNext();
   });
   a.addEventListener('ended',()=>{ if(plIdx>=0) plNext(); });
