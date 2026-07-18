@@ -264,6 +264,7 @@ select option{background:#fff;color:#2a1a22}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:#fff;border:1px solid var(--gold);color:var(--gold);box-shadow:0 4px 20px rgba(196,57,107,.15);padding:11px 18px;border-radius:7px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.08em;z-index:900;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#btn-novo-fab{display:none}
 @media(max-width:600px){header{padding:10px 12px}header p{display:none}#searchInput{width:130px}.filter-btn{padding:4px 9px;font-size:.65rem}}
 @media(max-width:600px){
   #pl-bar{padding:8px 10px;gap:7px}
@@ -274,6 +275,23 @@ select option{background:#fff;color:#2a1a22}
   .pl-title{font-size:.78rem}
   .quick-play{width:40px;height:40px}
   .li-play{width:34px;height:34px}
+
+  /* degradê nas pontas das fileiras que rolam — deixa claro que dá pra arrastar */
+  .header-row2,.ci-filters{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent 100%)}
+
+  /* "+Novo" sai da fileira de filtros (que já tá cheia) e vira um botão
+     flutuante fixo, sempre visível, subindo quando o player tá tocando */
+  #btn-novo-inline{display:none!important}
+  #btn-novo-fab{
+    display:flex;align-items:center;justify-content:center;
+    position:fixed;right:16px;bottom:16px;z-index:250;
+    width:52px;height:52px;border-radius:50%;
+    background:var(--gold);color:#fff;border:none;cursor:pointer;
+    box-shadow:0 4px 16px rgba(196,57,107,.4);transition:bottom .2s;
+  }
+  #btn-novo-fab:active{transform:scale(.94)}
+  body:has(#pl-bar.open) #btn-novo-fab{bottom:78px}
+  body.admin-mode:has(.batch-bar.open) #btn-novo-fab{display:none}
 }
 
 
@@ -732,11 +750,16 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       </button>
     </div>
-    <button onclick="openModal()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;padding:6px 11px;flex-shrink:0;display:flex;align-items:center;gap:4px">
+    <button id="btn-novo-inline" onclick="openModal()" style="background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;padding:6px 11px;flex-shrink:0;display:flex;align-items:center;gap:4px">
       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo
     </button>
   </div>
 </div>
+
+<!-- FAB "+Novo" — só aparece no mobile, sempre visível, sem competir com os filtros que rolam -->
+<button id="btn-novo-fab" onclick="openModal()" title="Novo ponto" aria-label="Novo ponto">
+  <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
 
 <div class="main" id="mainGrid"><div class="loading"><div class="spinner"></div>Carregando pontos...</div></div>
 <div class="count-info" id="countInfo"></div>
