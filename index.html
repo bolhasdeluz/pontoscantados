@@ -658,7 +658,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       </div>
       <div class="sw">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCards()">
+        <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCardsDebounced()">
       </div>
       <label class="admin-toggle" id="admin-toggle" title="Modo edição">
         <input type="checkbox" id="admin-toggle-input">
@@ -2583,7 +2583,7 @@ function buildAudioPlayer(p) {
     ? `▶ ${formatTime(start)}${end != null ? ' — ' + formatTime(end) : ''}`
     : '';
   return `<div class="cplayer" id="${pid}-wrap">
-    <audio id="${pid}" preload="metadata" src="${src}" data-start="${start != null ? start : ''}" data-end="${end != null ? end : ''}"
+    <audio id="${pid}" preload="none" src="${src}" data-start="${start != null ? start : ''}" data-end="${end != null ? end : ''}"
       ontimeupdate="cpUpdate('${pid}',${start || 'null'},${end || 'null'})"
       onloadedmetadata="cpReady('${pid}',${start || 'null'})">
     </audio>
@@ -2733,6 +2733,11 @@ function uploadAudioToR2(file) {
 }
 
 // ── RENDER ──
+let renderCardsDebounceTimer=null;
+window.renderCardsDebounced = () => {
+  clearTimeout(renderCardsDebounceTimer);
+  renderCardsDebounceTimer = setTimeout(() => window.renderCards(), 220);
+};
 window.renderCards = () => {
   renderLinhaDropdown();
   renderGuiaDropdown();
