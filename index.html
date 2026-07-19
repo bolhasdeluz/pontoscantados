@@ -167,6 +167,10 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .upload-progress{height:4px;background:#f0d0d8;border-radius:4px;margin-top:8px;overflow:hidden;display:none}
 .upload-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),#e8688a);border-radius:4px;width:0;transition:width .3s}
 .nossos-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(196,57,107,.08);border:1px solid rgba(196,57,107,.25);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:.67rem;font-weight:500;letter-spacing:.04em;padding:2px 9px;border-radius:20px;text-transform:uppercase}
+.src-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;flex-shrink:0}
+.src-icon.mic{background:rgba(196,57,107,.1);font-size:.72rem}
+.src-icon.yt{background:#ff0000}
+.src-icon.yt svg{width:11px;height:11px;fill:#fff}
 
 /* ── LINHAS MODAL ── */
 .linha-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fdf5f7;border:1px solid rgba(196,57,107,.15);border-radius:8px;transition:all .15s}
@@ -2866,7 +2870,7 @@ function makeListItem(p, i) {
       <div class="li-top">
         <span class="li-name">${esc(p.nome)}</span>
         ${p.linha ? `<span class="cat-badge" style="flex-shrink:0">${esc(p.linha)}</span>` : ''}
-        ${p.audioUrl ? `<span class="nossos-badge">🎙️ Nosso</span>` : ''}
+        ${p.audioUrl ? `<span class="src-icon mic" title="Áudio gravado">🎙️</span>` : extractYtId(p.yt) ? `<span class="src-icon yt" title="YouTube"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>` : ''}
         ${p.aprender ? `<span class="aprender-badge">📚 Aprender</span>` : ''}
         ${p.destaque ? `<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>` : ''}
       </div>
