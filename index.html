@@ -171,6 +171,10 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .src-icon.mic{background:rgba(196,57,107,.1);font-size:.72rem}
 .src-icon.yt{background:#ff0000}
 .src-icon.yt svg{width:11px;height:11px;fill:#fff}
+.src-icon.letra{background:rgba(140,100,0,.12);color:#8c6400}
+.src-icon.letra svg{width:11px;height:11px}
+.src-icon.noletra{background:rgba(80,30,50,.06);color:rgba(80,30,50,.28)}
+.src-icon.noletra svg{width:11px;height:11px}
 
 /* ── LINHAS MODAL ── */
 .linha-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fdf5f7;border:1px solid rgba(196,57,107,.15);border-radius:8px;transition:all .15s}
@@ -2925,6 +2929,7 @@ function makeListItem(p, i) {
         <span class="li-name">${esc(p.nome)}</span>
         ${p.linha ? `<span class="cat-badge" style="flex-shrink:0">${esc(p.linha)}</span>` : ''}
         ${p.audioUrl ? `<span class="src-icon mic" title="Áudio gravado">🎙️</span>` : extractYtId(p.yt) ? `<span class="src-icon yt" title="YouTube"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>` : ''}
+        ${p.letra && p.letra.trim() ? `<span class="src-icon letra" title="Tem letra cadastrada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg></span>` : `<span class="src-icon noletra" title="Sem letra cadastrada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/><line x1="3" y1="20" x2="21" y2="4"/></svg></span>`}
         ${p.aprender ? `<span class="aprender-badge">📚 Aprender</span>` : ''}
         ${p.destaque ? `<span style="color:#c8a000;font-size:.8rem;flex-shrink:0" title="Próxima Sessão">✦</span>` : ''}
       </div>
