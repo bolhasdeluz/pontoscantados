@@ -387,6 +387,30 @@ select option{background:#fff;color:#2a1a22}
 .pl-count{font-size:.75rem;color:var(--text-dim);flex-shrink:0;font-variant-numeric:tabular-nums}
 .pl-playing{box-shadow:0 0 0 2px var(--gold)!important;border-radius:14px}
 .li-play{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c4396b,#e8688a);border:none;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 6px rgba(196,57,107,.3);transition:transform .15s;padding-left:1px}
+
+/* ── TOCANDO AGORA (tela cheia, letra no lugar da capa) ── */
+#pl-bar{cursor:pointer}
+#pl-fullscreen{display:none;position:fixed;inset:0;z-index:950;background:linear-gradient(160deg,#c0405a,#8c2a45 55%,#5c1c30);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#pl-fullscreen.open{display:flex;flex-direction:column}
+.plfs-topbar{display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top)) 16px 8px;flex-shrink:0}
+.plfs-collapse{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .15s;flex-shrink:0}
+.plfs-collapse:hover{background:rgba(255,255,255,.14)}
+.plfs-eyebrow{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.68)}
+.plfs-body{flex:1;display:flex;flex-direction:column;padding:8px 22px calc(28px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;width:100%;box-sizing:border-box}
+.plfs-lyrics-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:22px 20px;flex:1;min-height:220px;max-height:46vh;overflow-y:auto;margin-bottom:24px;backdrop-filter:blur(6px)}
+.plfs-lyrics-text{white-space:pre-wrap;line-height:1.9;font-size:17px;color:#fff;font-style:italic;font-weight:300;font-family:'Crimson Pro',Georgia,serif}
+.plfs-lyrics-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:rgba(255,255,255,.55);font-family:'Crimson Pro',Georgia,serif;font-style:italic;font-size:15px;text-align:center;padding:30px 10px}
+.plfs-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;color:#fff;line-height:1.25;margin-bottom:4px}
+.plfs-sub{font-family:'DM Sans',sans-serif;font-size:.95rem;color:rgba(255,255,255,.65);margin-bottom:22px}
+.plfs-track-row{display:flex;align-items:center;gap:8px}
+.plfs-time{font-size:.7rem;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums;width:34px;flex-shrink:0}
+.plfs-time.end{text-align:right}
+.plfs-bar-track{flex:1;height:5px;background:rgba(255,255,255,.22);border-radius:99px;cursor:pointer;position:relative}
+.plfs-bar-fill{height:100%;width:0;background:#fff;border-radius:99px;pointer-events:none}
+.plfs-controls{display:flex;align-items:center;justify-content:center;gap:30px;margin-top:24px}
+.plfs-btn{background:none;border:none;color:#fff;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:6px}
+.plfs-main{width:64px;height:64px;background:#fff;color:var(--gold);border-radius:50%;font-size:24px}
+.plfs-count{text-align:center;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.08em;color:rgba(255,255,255,.5);margin-top:20px}
 .li-play.playing{padding-left:0;box-shadow:0 0 0 2px var(--gold-dim),0 1px 6px rgba(196,57,107,.3)}
 .li-play:hover{transform:scale(1.08)}
 .ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:6px 0;font-style:italic;display:none}
@@ -790,6 +814,31 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
   <button class="pl-btn" id="pl-close" title="Fechar fila">✕</button>
 </div>
 <audio id="pl-audio" preload="metadata"></audio>
+
+<!-- TOCANDO AGORA — tela cheia, com a letra no lugar da capa -->
+<div id="pl-fullscreen">
+  <div class="plfs-topbar">
+    <button class="plfs-collapse" onclick="plCollapseFullscreen()" title="Fechar">⌄</button>
+    <div class="plfs-eyebrow">Tocando agora</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="plfs-body">
+    <div class="plfs-lyrics-card" id="plfs-lyrics"></div>
+    <div class="plfs-title" id="plfs-title">—</div>
+    <div class="plfs-sub" id="plfs-sub"></div>
+    <div class="plfs-track-row">
+      <span class="plfs-time" id="plfs-time-cur">0:00</span>
+      <div class="plfs-bar-track" id="plfs-track"><div class="plfs-bar-fill" id="plfs-fill"></div></div>
+      <span class="plfs-time end" id="plfs-time-dur">0:00</span>
+    </div>
+    <div class="plfs-controls">
+      <button class="plfs-btn" id="plfs-prev" title="Anterior">⏮</button>
+      <button class="plfs-btn plfs-main" id="plfs-toggle" title="Tocar/Pausar">⏸</button>
+      <button class="plfs-btn" id="plfs-next" title="Próximo">⏭</button>
+    </div>
+    <div class="plfs-count" id="plfs-count"></div>
+  </div>
+</div>
 
 <div id="admin-bar">
   <span style="color:rgba(255,255,255,.7);font-size:.78rem">Modo Admin ativo</span>
@@ -4694,9 +4743,9 @@ function onYtStateChange(e){
   const idAtual=plIdx>=0&&plList[plIdx]?plList[plIdx].id:null;
   if(e.data===YT.PlayerState.ENDED){ plNext(); }
   else if(e.data===YT.PlayerState.PLAYING){
-    document.getElementById('pl-toggle').textContent='⏸'; setQuickPlayIcon(idAtual,true); ytStartPoll();
+    document.getElementById('pl-toggle').textContent='⏸'; document.getElementById('plfs-toggle').textContent='⏸'; setQuickPlayIcon(idAtual,true); ytStartPoll();
   } else if(e.data===YT.PlayerState.PAUSED){
-    document.getElementById('pl-toggle').textContent='▶'; setQuickPlayIcon(idAtual,false); ytStopPoll();
+    document.getElementById('pl-toggle').textContent='▶'; document.getElementById('plfs-toggle').textContent='▶'; setQuickPlayIcon(idAtual,false); ytStopPoll();
   }
 }
 function ytStartPoll(){
@@ -4705,9 +4754,13 @@ function ytStartPoll(){
     if(!ytPlayer||typeof ytPlayer.getCurrentTime!=='function')return;
     const cur=ytPlayer.getCurrentTime()||0, dur=ytPlayer.getDuration()||0;
     if(dur>0){
-      document.getElementById('pl-fill').style.width=Math.min(100,(cur/dur)*100)+'%';
+      const pct=Math.min(100,(cur/dur)*100)+'%';
+      document.getElementById('pl-fill').style.width=pct;
       document.getElementById('pl-time-cur').textContent=formatTime(cur);
       document.getElementById('pl-time-dur').textContent=formatTime(dur);
+      document.getElementById('plfs-fill').style.width=pct;
+      document.getElementById('plfs-time-cur').textContent=formatTime(cur);
+      document.getElementById('plfs-time-dur').textContent=formatTime(dur);
     }
   },400);
 }
@@ -4719,6 +4772,34 @@ function plLoadYt(id){
 }
 function plStopYt(){ ytStopPoll(); if(ytPlayer&&typeof ytPlayer.pauseVideo==='function'){ try{ytPlayer.pauseVideo();}catch(e){} } }
 
+// atualiza a tela "Tocando agora" (título, sub, letra, contador) — chamada
+// toda vez que troca de ponto na fila, tela cheia aberta ou não
+function plUpdateFullscreenInfo(p, i){
+  const titulo=p.nome||'(sem nome)';
+  document.getElementById('plfs-title').textContent=titulo;
+  document.getElementById('plfs-sub').textContent=[p.guia,p.linha].filter(Boolean).join(' · ');
+  document.getElementById('plfs-count').textContent=(i+1)+'/'+plList.length;
+  const lyricsEl=document.getElementById('plfs-lyrics');
+  if(p.letra&&p.letra.trim()){
+    lyricsEl.innerHTML=`<div class="plfs-lyrics-text">${esc(p.letra)}</div>`;
+  } else {
+    lyricsEl.innerHTML=`<div class="plfs-lyrics-empty"><span style="font-size:1.6rem">${p.audioUrl?'🎙️':'📺'}</span>Essa aqui ainda não tem letra cadastrada.</div>`;
+  }
+}
+window.plExpandFullscreen=()=>{ if(plIdx>=0) document.getElementById('pl-fullscreen').classList.add('open'); };
+window.plCollapseFullscreen=()=>document.getElementById('pl-fullscreen').classList.remove('open');
+function plSeekPct(pct){
+  const cur=plList[plIdx];
+  if(cur && !cur.audioUrl){
+    if(ytPlayer&&ytPlayer.getDuration){ const dur=ytPlayer.getDuration()||0; if(dur>0){ try{ytPlayer.seekTo(pct*dur,true);}catch(err){} } }
+    return;
+  }
+  const a=document.getElementById('pl-audio');
+  const start=Number(a.dataset.start)||0;
+  const end=a.dataset.end!==''?Number(a.dataset.end):(a.duration||0);
+  const span=(end>start)?(end-start):(a.duration||0);
+  try{ a.currentTime=start+pct*span; }catch(err){}
+}
 function plLoad(i){
   if(i<0||i>=plList.length){ plClose(); return; }
   plIdx=i; const p=plList[i];
@@ -4726,6 +4807,9 @@ function plLoad(i){
   document.getElementById('pl-count').textContent=(i+1)+'/'+plList.length;
   document.getElementById('pl-fill').style.width='0%';
   document.getElementById('pl-toggle').textContent='⏸';
+  document.getElementById('plfs-fill').style.width='0%';
+  document.getElementById('plfs-toggle').textContent='⏸';
+  plUpdateFullscreenInfo(p,i);
   highlightPlaying(p.id);
   if(p.audioUrl){
     plStopYt();
@@ -4764,13 +4848,14 @@ function plToggle(){
     return; // onYtStateChange cuida do ícone/texto
   }
   const a=document.getElementById('pl-audio');
-  if(a.paused){ a.play().catch(()=>{}); document.getElementById('pl-toggle').textContent='⏸'; setQuickPlayIcon(idAtual,true); }
-  else { a.pause(); document.getElementById('pl-toggle').textContent='▶'; setQuickPlayIcon(idAtual,false); }
+  if(a.paused){ a.play().catch(()=>{}); document.getElementById('pl-toggle').textContent='⏸'; document.getElementById('plfs-toggle').textContent='⏸'; setQuickPlayIcon(idAtual,true); }
+  else { a.pause(); document.getElementById('pl-toggle').textContent='▶'; document.getElementById('plfs-toggle').textContent='▶'; setQuickPlayIcon(idAtual,false); }
 }
 function plClose(){
   const a=document.getElementById('pl-audio'); a.pause(); a.removeAttribute('src'); a.load(); plCurUrl='';
   plStopYt();
   plIdx=-1; document.getElementById('pl-bar').classList.remove('open'); highlightPlaying(null);
+  plCollapseFullscreen();
 }
 function highlightPlaying(id){
   document.querySelectorAll('.pl-playing').forEach(el=>el.classList.remove('pl-playing'));
@@ -4791,6 +4876,9 @@ function highlightPlaying(id){
       document.getElementById('pl-fill').style.width=pct+'%';
       document.getElementById('pl-time-cur').textContent=formatTime(Math.max(0,a.currentTime-start));
       document.getElementById('pl-time-dur').textContent=formatTime(span);
+      document.getElementById('plfs-fill').style.width=pct+'%';
+      document.getElementById('plfs-time-cur').textContent=formatTime(Math.max(0,a.currentTime-start));
+      document.getElementById('plfs-time-dur').textContent=formatTime(span);
     }
     if(hasEnd && a.currentTime>=Number(a.dataset.end)-0.05) plNext();
   });
@@ -4799,18 +4887,22 @@ function highlightPlaying(id){
   document.getElementById('pl-next').addEventListener('click',plNext);
   document.getElementById('pl-prev').addEventListener('click',plPrev);
   document.getElementById('pl-close').addEventListener('click',plClose);
+  document.getElementById('plfs-toggle').addEventListener('click',plToggle);
+  document.getElementById('plfs-next').addEventListener('click',plNext);
+  document.getElementById('plfs-prev').addEventListener('click',plPrev);
+  document.getElementById('pl-bar').addEventListener('click',e=>{
+    if(e.target.closest('.pl-btn,#pl-track')) return;
+    plExpandFullscreen();
+  });
   document.getElementById('pl-track').addEventListener('click',e=>{
     const rect=e.currentTarget.getBoundingClientRect();
     const pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
-    const cur=plList[plIdx];
-    if(cur && !cur.audioUrl){
-      if(ytPlayer&&ytPlayer.getDuration){ const dur=ytPlayer.getDuration()||0; if(dur>0){ try{ytPlayer.seekTo(pct*dur,true);}catch(err){} } }
-      return;
-    }
-    const start=Number(a.dataset.start)||0;
-    const end=a.dataset.end!==''?Number(a.dataset.end):(a.duration||0);
-    const span=(end>start)?(end-start):(a.duration||0);
-    try{ a.currentTime=start+pct*span; }catch(err){}
+    plSeekPct(pct);
+  });
+  document.getElementById('plfs-track').addEventListener('click',e=>{
+    const rect=e.currentTarget.getBoundingClientRect();
+    const pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+    plSeekPct(pct);
   });
 })();
 
