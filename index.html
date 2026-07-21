@@ -5045,14 +5045,90 @@ window.plCloseQueue=()=>{
   document.getElementById('pl-queue').classList.remove('open');
   document.getElementById('pl-queue-overlay').classList.remove('open');
 };
-// ── compartilhar o ponto que tá tocando (Web Share API, com fallback pra copiar o link) ──
+// ── compartilhar o ponto que tá tocando ──
+// gera um card no formato de Stories do Instagram (1080x1920) com a identidade
+// visual do app (mesmo gradiente da tela cheia), pra compartilhar como imagem
+function plWrapCenteredLines(ctx,text,x,y,maxWidth,lineHeight,maxLines){
+  const words=text.split(/\s+/).filter(Boolean);
+  const allLines=[]; let cur='';
+  for(const w of words){
+    const test=cur?cur+' '+w:w;
+    if(ctx.measureText(test).width>maxWidth && cur){ allLines.push(cur); cur=w; }
+    else cur=test;
+  }
+  if(cur) allLines.push(cur);
+  let lines=allLines;
+  if(allLines.length>maxLines){
+    lines=allLines.slice(0,maxLines);
+    let last=lines[maxLines-1];
+    while(ctx.measureText(last+'…').width>maxWidth && last.length>1) last=last.slice(0,-1);
+    lines[maxLines-1]=last+'…';
+  }
+  lines.forEach((line,i)=>ctx.fillText(line,x,y+i*lineHeight));
+  return y+lines.length*lineHeight;
+}
+async function plGenerateShareCard(p){
+  if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  const W=1080,H=1920;
+  const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  const bg=ctx.createLinearGradient(0,0,W*0.3,H);
+  bg.addColorStop(0,'#c0405a'); bg.addColorStop(.55,'#8c2a45'); bg.addColorStop(1,'#5c1c30');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.lineWidth=3;
+  ctx.strokeRect(56,56,W-112,H-112);
+  ctx.textAlign='center';
+  ctx.fillStyle='rgba(255,255,255,.72)';
+  ctx.font='600 32px "DM Sans",sans-serif';
+  ctx.fillText('PONTOS CANTADOS',W/2,190);
+  ctx.font='140px sans-serif';
+  ctx.fillText(p.audioUrl?'🎙️':'📺',W/2,420);
+  ctx.fillStyle='#fff';
+  ctx.font='700 74px "Playfair Display",Georgia,serif';
+  let y=plWrapCenteredLines(ctx,p.nome||'(sem nome)',W/2,620,W-200,88,3);
+  const sub=[p.guia,p.linha].filter(Boolean).join('  ·  ');
+  if(sub){
+    ctx.font='400 38px "DM Sans",sans-serif';
+    ctx.fillStyle='rgba(255,255,255,.75)';
+    ctx.fillText(sub,W/2,y+50);
+    y+=50;
+  }
+  if(p.letra && p.letra.trim()){
+    const trecho=p.letra.trim().split('\n').filter(Boolean).slice(0,4).join(' ');
+    ctx.font='italic 36px "Crimson Pro",Georgia,serif';
+    ctx.fillStyle='rgba(255,255,255,.92)';
+    plWrapCenteredLines(ctx,'“'+trecho+'”',W/2,y+180,W-260,56,6);
+  }
+  ctx.font='600 28px "DM Sans",sans-serif';
+  ctx.fillStyle='rgba(255,255,255,.6)';
+  ctx.fillText('Terreiro Bolhas de Luz',W/2,H-140);
+  return new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+}
 window.plShare=async ()=>{
   if(plIdx<0 || !plList[plIdx]) return;
   const p=plList[plIdx];
   const text=(p.nome||'Ponto cantado')+(p.guia?' · '+p.guia:'')+(p.linha?' · '+p.linha:'')+' — Pontos Cantados, Bolhas de Luz';
   const url=location.href.split('#')[0]+'#ponto-'+p.id;
+
+  let blob=null;
+  try{ blob=await plGenerateShareCard(p); }catch(e){ /* segue sem card, cai no fallback de texto */ }
+
+  if(blob){
+    const file=new File([blob],'ponto-'+(p.id||'card')+'.png',{ type:'image/png' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      try{ await navigator.share({ files:[file], title:'Pontos Cantados', text }); }catch(e){ /* usuário cancelou */ }
+      return;
+    }
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(file); a.download=file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    toast('Card salvo! Já pode postar no Instagram 📸');
+    return;
+  }
+
   if(navigator.share){
-    try{ await navigator.share({ title:'Pontos Cantados', text, url }); }catch(e){ /* usuário cancelou o compartilhamento */ }
+    try{ await navigator.share({ title:'Pontos Cantados', text, url }); }catch(e){ /* usuário cancelou */ }
     return;
   }
   try{ await navigator.clipboard.writeText(text+' '+url); toast('Link copiado!'); }
