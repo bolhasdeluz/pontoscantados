@@ -400,6 +400,9 @@ select option{background:#fff;color:#2a1a22}
 .plfs-collapse{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .15s;flex-shrink:0}
 .plfs-collapse:hover{background:rgba(255,255,255,.14)}
 .plfs-eyebrow{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.68)}
+.plfs-topbar-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.plfs-icon-btn{background:none;border:none;color:rgba(255,255,255,.85);cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .15s;flex-shrink:0}
+.plfs-icon-btn:hover{background:rgba(255,255,255,.14)}
 .plfs-body{flex:1;display:flex;flex-direction:column;padding:8px 22px calc(28px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;width:100%;box-sizing:border-box}
 .plfs-lyrics-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:22px 20px;flex:1;min-height:220px;max-height:46vh;overflow-y:auto;margin-bottom:24px;backdrop-filter:blur(6px)}
 .plfs-lyrics-text{white-space:pre-wrap;line-height:1.9;font-size:17px;color:#fff;font-style:italic;font-weight:300;font-family:'Crimson Pro',Georgia,serif}
@@ -411,10 +414,37 @@ select option{background:#fff;color:#2a1a22}
 .plfs-time.end{text-align:right}
 .plfs-bar-track{flex:1;height:5px;background:rgba(255,255,255,.22);border-radius:99px;cursor:pointer;position:relative}
 .plfs-bar-fill{height:100%;width:0;background:#fff;border-radius:99px;pointer-events:none}
-.plfs-controls{display:flex;align-items:center;justify-content:center;gap:30px;margin-top:24px}
+.plfs-controls{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:24px}
 .plfs-btn{background:none;border:none;color:#fff;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:6px}
 .plfs-main{width:64px;height:64px;background:#fff;color:var(--gold);border-radius:50%;font-size:24px}
+.plfs-btn.side{font-size:18px;color:rgba(255,255,255,.6);position:relative;padding:6px 6px 12px}
+.plfs-btn.side.active{color:#fff}
+.plfs-btn.side.active::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#fff}
+.plfs-repeat-badge{position:absolute;top:0;right:0;font-size:8px;font-family:'DM Sans',sans-serif;font-weight:700;background:#fff;color:var(--gold);border-radius:50%;width:12px;height:12px;line-height:12px;text-align:center}
 .plfs-count{text-align:center;font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.08em;color:rgba(255,255,255,.5);margin-top:20px}
+.plfs-secondary{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px}
+.plfs-pill-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:7px 14px;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .18s}
+.plfs-pill-btn:hover{background:rgba(255,255,255,.18)}
+/* fila de reprodução — mesmo padrão visual do gavetão de baixo */
+#pl-queue-overlay{display:none;position:fixed;inset:0;z-index:1090;background:rgba(46,26,14,.4);backdrop-filter:blur(2px)}
+#pl-queue-overlay.open{display:block}
+#pl-queue{position:fixed;left:0;right:0;bottom:0;z-index:1091;max-height:70vh;background:var(--bg);border-top:1px solid var(--border);border-radius:18px 18px 0 0;box-shadow:0 -8px 32px rgba(46,26,14,.14);transform:translateY(100%);transition:transform .34s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+#pl-queue.open{transform:translateY(0)}
+.pq-header{padding:6px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.pq-title-label{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:var(--text);letter-spacing:.05em}
+.pq-close{background:none;border:none;font-size:1.4rem;color:var(--text-dim);line-height:1;padding:2px 6px;cursor:pointer}
+.pq-close:hover{color:var(--gold)}
+.pq-body{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;padding:6px 12px calc(20px + env(safe-area-inset-bottom))}
+.pq-section-label{font-family:'Cinzel',serif;font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);padding:12px 8px 6px}
+.pq-item{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:10px;cursor:pointer;transition:background .15s}
+.pq-item:hover{background:var(--gold-dim)}
+.pq-item.current{background:var(--gold-dim)}
+.pq-item-icon{flex-shrink:0;width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#c4396b,#e8688a);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+.pq-item-info{flex:1;min-width:0}
+.pq-item-name{font-size:.82rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pq-item.current .pq-item-name{color:var(--gold)}
+.pq-item-sub{font-size:.68rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pq-empty{padding:30px 10px;text-align:center;color:var(--text-dim);font-family:'Crimson Pro',serif;font-style:italic;font-size:.85rem}
 .li-play.playing{padding-left:0;box-shadow:0 0 0 2px var(--gold-dim),0 1px 6px rgba(196,57,107,.3)}
 .li-play:hover{transform:scale(1.08)}
 .ts-wf-loading{font-size:12px;color:var(--text-dim);text-align:center;padding:6px 0;font-style:italic;display:none}
@@ -824,7 +854,14 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
   <div class="plfs-topbar">
     <button class="plfs-collapse" onclick="plCollapseFullscreen()" title="Fechar">⌄</button>
     <div class="plfs-eyebrow">Tocando agora</div>
-    <div style="width:36px"></div>
+    <div class="plfs-topbar-actions">
+      <button class="plfs-icon-btn" id="plfs-share" title="Compartilhar">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+      <button class="plfs-icon-btn" id="plfs-queue" title="Fila de reprodução">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><line x1="4" y1="6" x2="14" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="9" y2="18"/><path d="M15 15l6 3-6 3z" fill="currentColor" stroke="none"/></svg>
+      </button>
+    </div>
   </div>
   <div class="plfs-body">
     <div class="plfs-lyrics-card" id="plfs-lyrics"></div>
@@ -836,12 +873,30 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <span class="plfs-time end" id="plfs-time-dur">0:00</span>
     </div>
     <div class="plfs-controls">
+      <button class="plfs-btn side" id="plfs-shuffle" title="Modo aleatório">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      </button>
       <button class="plfs-btn" id="plfs-prev" title="Anterior">⏮</button>
       <button class="plfs-btn plfs-main" id="plfs-toggle" title="Tocar/Pausar">⏸</button>
       <button class="plfs-btn" id="plfs-next" title="Próximo">⏭</button>
+      <button class="plfs-btn side" id="plfs-repeat" title="Repetir">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span class="plfs-repeat-badge" id="plfs-repeat-badge" style="display:none">1</span>
+      </button>
     </div>
     <div class="plfs-count" id="plfs-count"></div>
   </div>
+</div>
+
+<!-- FILA DE REPRODUÇÃO — bottom sheet com a faixa atual e as próximas -->
+<div id="pl-queue-overlay" onclick="plCloseQueue()"></div>
+<div id="pl-queue">
+  <div class="drawer-handle" onclick="plCloseQueue()"><div class="drawer-handle-pill"></div></div>
+  <div class="pq-header">
+    <span class="pq-title-label">Fila de reprodução</span>
+    <button class="pq-close" onclick="plCloseQueue()">×</button>
+  </div>
+  <div class="pq-body" id="pq-body"></div>
 </div>
 
 <div id="admin-bar">
@@ -4649,6 +4704,19 @@ async function reloadDrive(){
 // ── INIT ──
 // ── PLAYER DE FILA (playlist) ──
 let plList=[], plIdx=-1, plCurUrl='';
+let plShuffle=false, plRepeat='off'; // plRepeat: 'off' | 'all' | 'one'
+let plShuffleOrder=[], plOrderPos=-1;
+// monta uma ordem embaralhada dos índices da fila atual; se centerIndex vier
+// preenchido, ele é colocado na posição 0 (pra não pular a faixa que já tá tocando)
+function plBuildShuffleOrder(centerIndex){
+  const idxs=plList.map((_,i)=>i);
+  for(let i=idxs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idxs[i],idxs[j]]=[idxs[j],idxs[i]]; }
+  if(centerIndex!=null && centerIndex>=0){
+    const pos=idxs.indexOf(centerIndex);
+    if(pos>0){ idxs.splice(pos,1); idxs.unshift(centerIndex); }
+  }
+  plShuffleOrder=idxs; plOrderPos=0;
+}
 function plBuildList(){
   const search=(document.getElementById('searchInput').value||'').toLowerCase();
   const linhaFilter=document.getElementById('filterLinha').value;
@@ -4698,7 +4766,10 @@ window.playlistByCategory=(val)=>{
   list.sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt'));
   if(sel) sel.value='';
   if(!list.length){ toast('Nenhum ponto com áudio em "'+key+'"'); return; }
-  plList=list; plCurUrl=''; document.getElementById('pl-bar').classList.add('open'); plLoad(0);
+  plList=list; plCurUrl=''; document.getElementById('pl-bar').classList.add('open');
+  if(plShuffle) plBuildShuffleOrder(0);
+  plLoad(0);
+  plExpandFullscreen();
   toast('▶ Tocando: '+key+' ('+list.length+')');
 };
 window.playlistStart=(fromId)=>{
@@ -4706,7 +4777,9 @@ window.playlistStart=(fromId)=>{
   if(!plList.length){ toast('Nenhum ponto com áudio no filtro atual'); return; }
   let i=0; if(fromId){ const k=plList.findIndex(p=>p.id===fromId||String(p.id)===String(fromId)); if(k>=0)i=k; }
   document.getElementById('pl-bar').classList.add('open');
+  if(plShuffle) plBuildShuffleOrder(i);
   plLoad(i);
+  plExpandFullscreen();
 };
 // tocar imediatamente um ponto específico: começa a fila (com os pontos com
 // áudio ou YouTube do filtro atual) a partir dele — igual clicar o play numa
@@ -4746,7 +4819,7 @@ function ytCreatePlayer(){
 }
 function onYtStateChange(e){
   const idAtual=plIdx>=0&&plList[plIdx]?plList[plIdx].id:null;
-  if(e.data===YT.PlayerState.ENDED){ plNext(); }
+  if(e.data===YT.PlayerState.ENDED){ plAdvanceOnEnd(); }
   else if(e.data===YT.PlayerState.PLAYING){
     document.getElementById('pl-toggle').textContent='⏸'; document.getElementById('plfs-toggle').textContent='⏸'; setQuickPlayIcon(idAtual,true); ytStartPoll();
   } else if(e.data===YT.PlayerState.PAUSED){
@@ -4832,17 +4905,78 @@ function plLoad(i){
     document.getElementById('pl-cover-yt').style.display='';
     plLoadYt(extractYtId(p.yt));
   }
+  plUpdateShuffleRepeatUI();
+  if(document.getElementById('pl-queue').classList.contains('open')) plRenderQueue();
 }
-function plNext(){ plLoad(plIdx+1); }
+// avança na fila. manual=true quando foi o usuário que apertou o botão "próximo"
+// (ignora o repeat-one, que só faz sentido quando a faixa termina sozinha).
+// manual=false é chamado pelos listeners de "acabou a faixa" (ended / YT ENDED).
+function plAdvance(manual){
+  if(!manual && plRepeat==='one'){ plRestartCurrent(); return; }
+  let newIndex;
+  if(plShuffle && plShuffleOrder.length){
+    plOrderPos++;
+    if(plOrderPos>=plShuffleOrder.length){
+      if(plRepeat==='all'){ plBuildShuffleOrder(null); } else { plClose(); return; }
+    }
+    newIndex=plShuffleOrder[plOrderPos];
+  } else {
+    newIndex=plIdx+1;
+    if(newIndex>=plList.length){
+      if(plRepeat==='all'){ newIndex=0; } else { plClose(); return; }
+    }
+  }
+  plLoad(newIndex);
+}
+function plRestartCurrent(){
+  const p=plList[plIdx]; if(!p) return;
+  if(!p.audioUrl){
+    if(ytPlayer&&typeof ytPlayer.seekTo==='function'){ try{ ytPlayer.seekTo(0,true); ytPlayer.playVideo(); }catch(e){} }
+    return;
+  }
+  const a=document.getElementById('pl-audio'); const start=Number(a.dataset.start)||0;
+  try{ a.currentTime=start; }catch(e){}
+  a.play().catch(()=>{});
+}
+function plNext(){ plAdvance(true); }
+function plAdvanceOnEnd(){ plAdvance(false); }
+function plGoPrevTrack(){
+  let newIndex;
+  if(plShuffle && plShuffleOrder.length){
+    plOrderPos--;
+    if(plOrderPos<0) plOrderPos = plRepeat==='all' ? plShuffleOrder.length-1 : 0;
+    newIndex=plShuffleOrder[plOrderPos];
+  } else {
+    newIndex = plIdx>0 ? plIdx-1 : (plRepeat==='all' ? plList.length-1 : 0);
+  }
+  plLoad(newIndex);
+}
 function plPrev(){
   const cur=plList[plIdx];
   if(cur && !cur.audioUrl){
     const t=(ytPlayer&&ytPlayer.getCurrentTime)?ytPlayer.getCurrentTime():0;
-    if(t>3){ plLoad(plIdx); } else { plLoad(plIdx>0?plIdx-1:0); }
+    if(t>3){ plLoad(plIdx); } else { plGoPrevTrack(); }
     return;
   }
   const a=document.getElementById('pl-audio'); const st=Number(a.dataset.start)||0;
-  if(a.currentTime-st>3) plLoad(plIdx); else plLoad(plIdx>0?plIdx-1:0);
+  if(a.currentTime-st>3) plLoad(plIdx); else plGoPrevTrack();
+}
+window.plToggleShuffle=()=>{
+  plShuffle=!plShuffle;
+  if(plShuffle) plBuildShuffleOrder(plIdx>=0?plIdx:null);
+  plUpdateShuffleRepeatUI();
+};
+window.plToggleRepeat=()=>{
+  plRepeat = plRepeat==='off' ? 'all' : plRepeat==='all' ? 'one' : 'off';
+  plUpdateShuffleRepeatUI();
+};
+function plUpdateShuffleRepeatUI(){
+  const sh=document.getElementById('plfs-shuffle');
+  if(sh) sh.classList.toggle('active',plShuffle);
+  const rp=document.getElementById('plfs-repeat');
+  if(rp) rp.classList.toggle('active',plRepeat!=='off');
+  const badge=document.getElementById('plfs-repeat-badge');
+  if(badge) badge.style.display = plRepeat==='one' ? 'block' : 'none';
 }
 function plToggle(){
   const cur=plList[plIdx];
@@ -4861,12 +4995,69 @@ function plClose(){
   plStopYt();
   plIdx=-1; document.getElementById('pl-bar').classList.remove('open'); highlightPlaying(null);
   plCollapseFullscreen();
+  plCloseQueue();
 }
 function highlightPlaying(id){
   document.querySelectorAll('.pl-playing').forEach(el=>el.classList.remove('pl-playing'));
   setQuickPlayIcon(id,true);
   if(id!=null){ const el=document.querySelector('[data-id="'+id+'"]'); if(el) el.classList.add('pl-playing'); }
 }
+// ── fila de reprodução (bottom sheet com a faixa atual e as próximas) ──
+function plRenderQueue(){
+  const body=document.getElementById('pq-body'); if(!body) return;
+  if(plIdx<0 || !plList.length || !plList[plIdx]){ body.innerHTML='<div class="pq-empty">Nada tocando no momento.</div>'; return; }
+  const order = (plShuffle && plShuffleOrder.length) ? plShuffleOrder : plList.map((_,i)=>i);
+  const pos = (plShuffle && plShuffleOrder.length) ? plOrderPos : plIdx;
+  const upcoming = order.slice(pos+1);
+  const itemHtml=(idx)=>{
+    const p=plList[idx]; if(!p) return '';
+    return `<div class="pq-item" data-idx="${idx}" onclick="plJumpToQueueIndex(${idx})">
+      <div class="pq-item-icon">${p.audioUrl?'🎙️':'📺'}</div>
+      <div class="pq-item-info">
+        <div class="pq-item-name">${esc(p.nome||'(sem nome)')}</div>
+        <div class="pq-item-sub">${esc([p.guia,p.linha].filter(Boolean).join(' · '))}</div>
+      </div>
+    </div>`;
+  };
+  const curP=plList[plIdx];
+  let html=`<div class="pq-section-label">Tocando agora</div>
+    <div class="pq-item current" data-idx="${plIdx}">
+      <div class="pq-item-icon">${curP.audioUrl?'🎙️':'📺'}</div>
+      <div class="pq-item-info">
+        <div class="pq-item-name">${esc(curP.nome||'(sem nome)')}</div>
+        <div class="pq-item-sub">${esc([curP.guia,curP.linha].filter(Boolean).join(' · '))}</div>
+      </div>
+    </div>`;
+  if(upcoming.length) html+=`<div class="pq-section-label">A seguir</div>`+upcoming.map(itemHtml).join('');
+  body.innerHTML=html;
+}
+window.plJumpToQueueIndex=(idx)=>{
+  if(plShuffle && plShuffleOrder.length){ const pos=plShuffleOrder.indexOf(idx); if(pos>=0) plOrderPos=pos; }
+  plLoad(idx);
+  plCloseQueue();
+};
+window.plOpenQueue=()=>{
+  plRenderQueue();
+  document.getElementById('pl-queue').classList.add('open');
+  document.getElementById('pl-queue-overlay').classList.add('open');
+};
+window.plCloseQueue=()=>{
+  document.getElementById('pl-queue').classList.remove('open');
+  document.getElementById('pl-queue-overlay').classList.remove('open');
+};
+// ── compartilhar o ponto que tá tocando (Web Share API, com fallback pra copiar o link) ──
+window.plShare=async ()=>{
+  if(plIdx<0 || !plList[plIdx]) return;
+  const p=plList[plIdx];
+  const text=(p.nome||'Ponto cantado')+(p.guia?' · '+p.guia:'')+(p.linha?' · '+p.linha:'')+' — Pontos Cantados, Bolhas de Luz';
+  const url=location.href.split('#')[0]+'#ponto-'+p.id;
+  if(navigator.share){
+    try{ await navigator.share({ title:'Pontos Cantados', text, url }); }catch(e){ /* usuário cancelou o compartilhamento */ }
+    return;
+  }
+  try{ await navigator.clipboard.writeText(text+' '+url); toast('Link copiado!'); }
+  catch(e){ toast('Não foi possível copiar o link'); }
+};
 (function(){
   const a=document.getElementById('pl-audio'); if(!a) return;
   a.addEventListener('timeupdate',()=>{
@@ -4885,9 +5076,9 @@ function highlightPlaying(id){
       document.getElementById('plfs-time-cur').textContent=formatTime(Math.max(0,a.currentTime-start));
       document.getElementById('plfs-time-dur').textContent=formatTime(span);
     }
-    if(hasEnd && a.currentTime>=Number(a.dataset.end)-0.05) plNext();
+    if(hasEnd && a.currentTime>=Number(a.dataset.end)-0.05) plAdvanceOnEnd();
   });
-  a.addEventListener('ended',()=>{ if(plIdx>=0) plNext(); });
+  a.addEventListener('ended',()=>{ if(plIdx>=0) plAdvanceOnEnd(); });
   document.getElementById('pl-toggle').addEventListener('click',plToggle);
   document.getElementById('pl-next').addEventListener('click',plNext);
   document.getElementById('pl-prev').addEventListener('click',plPrev);
@@ -4895,6 +5086,10 @@ function highlightPlaying(id){
   document.getElementById('plfs-toggle').addEventListener('click',plToggle);
   document.getElementById('plfs-next').addEventListener('click',plNext);
   document.getElementById('plfs-prev').addEventListener('click',plPrev);
+  document.getElementById('plfs-shuffle').addEventListener('click',plToggleShuffle);
+  document.getElementById('plfs-repeat').addEventListener('click',plToggleRepeat);
+  document.getElementById('plfs-queue').addEventListener('click',plOpenQueue);
+  document.getElementById('plfs-share').addEventListener('click',plShare);
   document.getElementById('pl-bar').addEventListener('click',e=>{
     if(e.target.closest('.pl-btn,#pl-track')) return;
     plExpandFullscreen();
