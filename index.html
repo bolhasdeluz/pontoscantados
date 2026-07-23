@@ -1952,9 +1952,23 @@ function logAuth(line) {
 // seja preciso investigar de novo no futuro.
 function renderAuthLog() {}
 
+// os <script src> do SDK compat do Firebase ficam no fim do <body>, depois do
+// load() que dispara initFirebaseAuth() — num login manual isso não é
+// problema (a pessoa demora a clicar "Entrar"), mas no handoff automático,
+// que tenta logar assim que a página abre, o SDK pode ainda não ter
+// carregado. Espera até 8s por window.firebase.app antes de desistir.
+function waitForFirebaseSdk(timeoutMs = 8000) {
+  if (window.firebase?.app) return Promise.resolve(true);
+  return new Promise(resolve => {
+    const inicio = Date.now();
+    const iv = setInterval(() => {
+      if (window.firebase?.app) { clearInterval(iv); resolve(true); }
+      else if (Date.now() - inicio > timeoutMs) { clearInterval(iv); resolve(false); }
+    }, 100);
+  });
+}
+
 async function initFirebaseAuth() {
-  // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-  if (handoffToken) alert('DEBUG pontoscantados: initFirebaseAuth() começou, handoffToken presente. firebaseAuthReady=' + firebaseAuthReady);
   const btn = document.getElementById('profile-login-btn');
   let cfg = getStoredFirebaseConfig();
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
@@ -1965,10 +1979,15 @@ async function initFirebaseAuth() {
       if (cfg.apiKey && cfg.authDomain && cfg.projectId) setFirebaseConfig(cfg);
     } catch {}
   }
-  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !window.firebase?.app) {
+  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
+    if (btn) btn.textContent = 'Configurar Firebase';
+    return;
+  }
+  if (!window.firebase?.app) await waitForFirebaseSdk();
+  if (!window.firebase?.app) {
     if (btn) btn.textContent = 'Configurar Firebase';
     // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-    if (handoffToken) alert(`DEBUG pontoscantados: initFirebaseAuth() saiu cedo — apiKey=${!!cfg.apiKey} authDomain=${!!cfg.authDomain} projectId=${!!cfg.projectId} window.firebase.app=${!!window.firebase?.app}`);
+    if (handoffToken) alert('DEBUG pontoscantados: SDK do Firebase não carregou depois de esperar 8s.');
     return;
   }
   if (!firebaseApp) {
