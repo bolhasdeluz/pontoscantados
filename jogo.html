@@ -198,6 +198,18 @@ function normalizeText(s){
 }
 function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// \u00edndices das linhas cujo texto (normalizado) N\u00c3O se repete em nenhuma outra
+// linha do ponto \u2014 s\u00f3 essas podem virar a lacuna, sen\u00e3o a resposta fica
+// vis\u00edvel ali embaixo (ou em cima) numa linha repetida
+function indicesLinhasUnicas(lines){
+  const norm = lines.map(normalizeText);
+  const contagem = {};
+  norm.forEach(n => { contagem[n] = (contagem[n]||0) + 1; });
+  const indices = [];
+  norm.forEach((n, i) => { if(contagem[n] === 1) indices.push(i); });
+  return indices;
+}
+
 function saveState(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, turnIdx, playedIds }));
@@ -221,7 +233,10 @@ async function init(){
   eligivel = allPontos.filter(p => {
     if(!p.letra || !p.letra.trim()) return false;
     const lines = p.letra.split('\n').map(l=>l.trim()).filter(Boolean);
-    return lines.length >= 2;
+    if(lines.length < 2) return false;
+    // precisa ter pelo menos uma linha que não se repete, senão não dá pra
+    // esconder nada sem a resposta aparecer em outra linha
+    return indicesLinhasUnicas(lines).length > 0;
   });
 
   document.getElementById('loading').style.display = 'none';
@@ -311,7 +326,12 @@ function startRound(){
   const ponto = pickPonto();
   playedIds.push(ponto.id);
   const lines = ponto.letra.split('\n').map(l=>l.trim()).filter(Boolean);
-  const blankIdx = lines.length > 1 ? 1 + Math.floor(Math.random()*(lines.length-1)) : 0;
+  const unicas = indicesLinhasUnicas(lines);
+  // prefere não esconder a primeira linha (mantém contexto pra quem vai
+  // completar), mas usa ela se for a única linha que não se repete
+  const candidatas = unicas.filter(i => i > 0);
+  const pool = candidatas.length ? candidatas : unicas;
+  const blankIdx = pool[Math.floor(Math.random()*pool.length)];
   current = { ponto, lines, blankIdx, answer: lines[blankIdx] };
 
   // dica: linha/guia/dificuldade
