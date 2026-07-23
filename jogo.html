@@ -348,7 +348,7 @@ async function syncProfile(user){
     if(res.ok && data.user) novoUser = data.user;
   }catch(e){ console.error('Falha ao sincronizar perfil:', e); }
   window.renderHeaderUserBadge?.(novoUser);
-  if(novoUser) window.adicionarJogadorAutomatico?.(novoUser.name || novoUser.email);
+  if(novoUser) window.iniciarJogoAutomatico?.(novoUser.name || novoUser.email);
 }
 
 setPersistence(auth, browserLocalPersistence).catch(() => {});
@@ -430,20 +430,22 @@ function renderHeaderUserBadge(user) {
 function handleHeaderPillClick() {
   window.jogoFazerLogin?.();
 }
-// pré-adiciona quem está logada na lista de jogadores, uma única vez por
-// carregamento de página, e só se ainda não escolheu jogadores nem retomou
-// uma partida salva
-let jaAdicionouJogadorAuto = false;
-function adicionarJogadorAutomatico(nome) {
-  if (!nome || jaAdicionouJogadorAuto) return;
+// jogo solo com ranking geral — quem chega logada (handoff ou sessão já
+// ativa) pula direto pro jogo com a própria conta, sem passar pela tela
+// "Quem vai jogar?" (essa tela continua existindo só pra quem visita sem
+// login, que ainda pode jogar em grupo digitando nomes). Dispara uma única
+// vez por carregamento, e só se a tela de setup ainda estiver visível (ou
+// seja: não tem partida salva sendo retomada, nem lista de pontos vazia).
+let jaIniciouJogoAuto = false;
+function iniciarJogoAutomatico(nome) {
+  if (!nome || jaIniciouJogoAuto) return;
   if (document.getElementById('setup-screen').style.display === 'none') return;
-  if (players.some(p => p.name === nome)) return;
-  jaAdicionouJogadorAuto = true;
-  players.push({ name: nome, score: 0 });
-  renderPlayerChips();
+  jaIniciouJogoAuto = true;
+  players = [{ name: nome, score: 0 }];
+  iniciarJogo();
 }
 window.renderHeaderUserBadge = renderHeaderUserBadge;
-window.adicionarJogadorAutomatico = adicionarJogadorAutomatico;
+window.iniciarJogoAutomatico = iniciarJogoAutomatico;
 
 function normalizeText(s){
   return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
@@ -546,13 +548,14 @@ function addPlayer(){
 }
 document.getElementById('btn-add-player').addEventListener('click', addPlayer);
 document.getElementById('player-input').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); addPlayer(); } });
-document.getElementById('btn-start').addEventListener('click', () => {
+function iniciarJogo(){
   turnIdx = 0; playedIds = [];
   saveState();
   renderScoreboard();
   startRound();
   showScreen('game');
-});
+}
+document.getElementById('btn-start').addEventListener('click', iniciarJogo);
 
 // ── placar ──
 function renderScoreboard(){
