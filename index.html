@@ -1566,6 +1566,9 @@ let handoffToken = null;
 (function capturarHandoffToken() {
   try {
     const hash = window.location.hash || '';
+    // TEMP debug: mostra o hash cru com que a página chegou — remover depois
+    // que o handoff estiver confirmado funcionando.
+    if (hash) alert('DEBUG pontoscantados: chegou com hash = ' + hash);
     const m = hash.match(/[#&]ct=([^&]+)/);
     if (!m) return;
     handoffToken = decodeURIComponent(m[1]);
@@ -2006,6 +2009,8 @@ async function initFirebaseAuth() {
           logAuth('Login automático via handoff concluído.');
         } catch (e) {
           logAuth(`Falha no login automático via handoff — ${e?.message || e}`);
+          // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
+          alert('DEBUG pontoscantados: signInWithCustomToken falhou — ' + (e?.code || '') + ' ' + (e?.message || e));
         }
       }
 
