@@ -108,6 +108,7 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 .g-hint-words{display:none;gap:6px;flex-wrap:wrap;margin-bottom:6px}
 .g-hint-word{font-family:'Crimson Pro',serif;font-style:italic;font-size:.92rem;color:var(--text-dim);background:var(--gold-dim);border-radius:6px;padding:2px 8px;letter-spacing:.04em}
 .g-hint-word.revealed{color:var(--gold);font-weight:600;background:rgba(196,57,107,.14)}
+.g-hint-word.errada{color:var(--red);font-weight:700;background:var(--red-dim)}
 .g-points-badge{font-size:.7rem;font-weight:700;color:var(--gold);background:var(--gold-dim);border-radius:12px;padding:3px 10px;margin-left:6px;white-space:nowrap}
 
 .g-feedback{border-radius:12px;padding:12px 16px;font-size:.86rem;text-align:center;display:none}
@@ -524,6 +525,17 @@ function respostaAceitavel(digitado, resposta){
   if(!wd.length) return false;
   return distanciaPalavras(wd, wr) <= 1;
 }
+// diagnóstico pra segunda chance: só faz sentido quando dá pra apontar
+// exatamente quais palavras estão erradas, ou seja, a mesma quantidade de
+// palavras (senão não tem como saber qual corrigir sem revelar tudo)
+function diagnosticarPalavras(digitado, resposta){
+  const wd = normalizeText(digitado).split(' ').filter(Boolean);
+  const wr = normalizeText(resposta).split(' ').filter(Boolean);
+  if(!wd.length || wd.length !== wr.length) return null;
+  const status = wr.map((w, i) => palavrasParecidas(wd[i], w));
+  const erradas = status.reduce((acc, ok, i) => { if(!ok) acc.push(i); return acc; }, []);
+  return { wr, status, erradas };
+}
 
 // \u00edndices das linhas cujo texto (normalizado) N\u00c3O se repete em nenhuma outra
 // linha do ponto \u2014 s\u00f3 essas podem virar a lacuna, sen\u00e3o a resposta fica
@@ -643,7 +655,7 @@ function startRound(){
     blankIdx = pool[Math.floor(Math.random()*pool.length)];
   }
   const answer = lines[blankIdx];
-  current = { ponto, lines, blankIdx, answer, answerWords: removerMarcadorRepeticao(answer).split(/\s+/).filter(Boolean), hintsUsados: 0 };
+  current = { ponto, lines, blankIdx, answer, answerWords: removerMarcadorRepeticao(answer).split(/\s+/).filter(Boolean), hintsUsados: 0, segundaChance: false };
 
   // dica: linha/guia/dificuldade/pontos da rodada
   const hints = [ponto.linha, ponto.guia].filter(Boolean);
@@ -774,20 +786,42 @@ function playCurrentAudio(){
   a.ontimeupdate = () => { if(end != null && a.currentTime >= end - 0.05) a.pause(); };
 }
 
-function checkAnswer(){
-  if(checked) return;
+// mostra quais palavras já estavam certas (sem revelar as erradas) e deixa
+// tentar de novo só pra corrigir — acertar na segunda vale metade do valor
+// da rodada
+function ofertarSegundaChance(diag){
+  current.segundaChance = true;
+  const fb = document.getElementById('feedback');
+  const qtd = diag.erradas.length;
+  fb.className = 'g-feedback show no';
+  fb.innerHTML = `Quase! Só ${qtd === 1 ? '1 palavra' : qtd + ' palavras'} errada${qtd === 1 ? '' : 's'} — confira as certas embaixo e tenta de novo (vale metade dos pontos).`;
+
+  const strip = document.getElementById('hint-words');
+  if(strip){
+    strip.style.display = 'flex';
+    strip.innerHTML = diag.wr.map((w,i) => diag.status[i]
+      ? `<span class="g-hint-word revealed">${esc(w)}</span>`
+      : `<span class="g-hint-word errada">✗</span>`
+    ).join('');
+  }
+  const btnHint = document.getElementById('btn-hint');
+  if(btnHint) btnHint.disabled = true;
+
+  const input = document.getElementById('blank-input');
+  input.classList.add('wrong');
+  input.select();
+  input.focus();
+}
+function finalizarRodada(isCorrect, valor){
   checked = true;
   const input = document.getElementById('blank-input');
-  const typed = input.value;
-  const isCorrect = respostaAceitavel(typed, current.answer);
   input.disabled = true;
   input.value = current.answer;
 
   const fb = document.getElementById('feedback');
   if(isCorrect){
     fb.className = 'g-feedback show ok';
-    const valor = valorRodada();
-    fb.innerHTML = `🎉 Acertou! <b>+${formatarPontos(valor)}</b>`;
+    fb.innerHTML = `🎉 Acertou${current.segundaChance ? ' na segunda' : ''}! <b>+${formatarPontos(valor)}</b>`;
     awardPoint(valor);
   } else {
     input.classList.add('wrong');
@@ -799,6 +833,28 @@ function checkAnswer(){
   document.getElementById('actions-next').style.display = 'flex';
   document.getElementById('rate-row').style.display = 'block';
   document.getElementById('btn-suggest-toggle').style.display = 'block';
+}
+function checkAnswer(){
+  if(checked) return;
+  const input = document.getElementById('blank-input');
+  const typed = input.value;
+  const acertou = respostaAceitavel(typed, current.answer);
+
+  if(acertou){
+    const valor = current.segundaChance ? (Math.round(valorRodada() * 0.5 * 2) / 2) : valorRodada();
+    finalizarRodada(true, valor);
+    return;
+  }
+
+  if(!current.segundaChance){
+    const diag = diagnosticarPalavras(typed, current.answer);
+    if(diag && diag.erradas.length >= 1 && diag.erradas.length <= 2){
+      ofertarSegundaChance(diag);
+      return;
+    }
+  }
+
+  finalizarRodada(false, 0);
 }
 function revealAnswer(){
   if(checked) return;
