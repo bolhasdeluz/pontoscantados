@@ -75,16 +75,6 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 /* ── tela de configuração de jogadores ── */
 .g-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 18px;box-shadow:0 2px 14px rgba(46,26,14,.05)}
 .g-card h2{font-family:'Cinzel',serif;font-size:.92rem;color:var(--gold);letter-spacing:.05em;margin-bottom:14px}
-.g-add-row{display:flex;gap:8px;margin-bottom:14px}
-#player-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);background:#fff;outline:none}
-#player-input:focus{border-color:var(--gold)}
-.g-btn-add{background:var(--gold);border:none;color:#fff;border-radius:10px;padding:0 18px;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.06em;font-weight:700;cursor:pointer}
-.g-btn-add:hover{background:var(--gold-light)}
-.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
-.g-chip{display:inline-flex;align-items:center;gap:7px;background:var(--gold-dim);border:1px solid var(--border);border-radius:20px;padding:6px 8px 6px 14px;font-size:.82rem;color:var(--text)}
-.g-chip button{background:none;border:none;color:var(--text-dim);font-size:.95rem;line-height:1;cursor:pointer;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.g-chip button:hover{background:rgba(184,64,64,.14);color:var(--red)}
-.g-empty-players{color:var(--text-dim);font-size:.82rem;font-style:italic;padding:4px 2px 10px}
 .g-btn-start{width:100%;background:var(--gold);border:none;color:#fff;border-radius:12px;padding:13px;font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.08em;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity .15s}
 .g-btn-start:disabled{opacity:.4;cursor:not-allowed}
 .g-btn-start:not(:disabled):hover{background:var(--gold-light)}
@@ -217,16 +207,11 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 <div class="g-main">
   <div id="loading" class="g-loading"><div class="spinner"></div>Carregando os pontos…</div>
 
-  <div id="setup-screen" style="display:none">
-    <div class="g-card">
-      <h2>Quem vai jogar?</h2>
-      <div class="g-add-row">
-        <input id="player-input" type="text" placeholder="Nome do jogador ou time" maxlength="24">
-        <button class="g-btn-add" id="btn-add-player">Adicionar</button>
-      </div>
-      <div class="g-chips" id="players-chips"></div>
-      <div class="g-empty-players" id="players-empty">Ninguém adicionado ainda — pode ser por pessoa ou por time.</div>
-      <button class="g-btn-start" id="btn-start" disabled>▶ Começar o jogo</button>
+  <div id="login-screen" style="display:none">
+    <div class="g-card" style="text-align:center">
+      <h2>Entrar para jogar</h2>
+      <p style="color:var(--text-dim);font-size:.86rem;margin:10px 0 18px">Pra jogar o Completa o Ponto e entrar no ranking, faça login com sua conta Google.</p>
+      <button class="g-btn-start" onclick="jogoFazerLogin()">Entrar com Google</button>
       <div class="g-count-info" id="pontos-count-info"></div>
     </div>
   </div>
@@ -316,13 +301,17 @@ function normalizarNomeRanking(nome){
   return (nome||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
 }
 
-window.registrarPontoRanking = async (nome, valor) => {
+window.registrarPontoRanking = async (nome, valor, uid) => {
   if(!db || !nome) return;
   const pontos = typeof valor === 'number' ? valor : 1;
+  // agora que o jogo exige login, o ranking é guardado pelo uid de verdade
+  // (uma conta = uma linha no ranking, não importa se troca o nome exibido)
+  // — só cai pro slug do nome se por algum motivo vier sem uid
   const slug = normalizarNomeRanking(nome).replace(/[^a-z0-9]/gi,'_') || 'anonimo';
+  const chave = uid ? ('uid_' + uid) : ('nome_' + slug);
   try{
-    await setDoc(doc(db, 'completa_ponto_resultados', 'nome_' + slug), {
-      nome, uid: null, pontos: increment(pontos), data: serverTimestamp(),
+    await setDoc(doc(db, 'completa_ponto_resultados', chave), {
+      nome, uid: uid || null, pontos: increment(pontos), data: serverTimestamp(),
     }, { merge: true });
   }catch(e){ /* offline ou sem permissão — não trava o jogo */ }
 };
@@ -355,7 +344,7 @@ async function syncProfile(user){
     if(res.ok && data.user) novoUser = data.user;
   }catch(e){ console.error('Falha ao sincronizar perfil:', e); }
   window.renderHeaderUserBadge?.(novoUser);
-  if(novoUser) window.iniciarJogoAutomatico?.(novoUser.name || novoUser.email);
+  if(novoUser) window.iniciarJogoAutomatico?.(novoUser.name || novoUser.email, novoUser.id);
 }
 
 setPersistence(auth, browserLocalPersistence).catch(() => {});
@@ -396,6 +385,8 @@ let current = null;  // { ponto, lines, blankIdx, answer }
 let checked = false;
 let dificuldadeAtual = { facil: 0, medio: 0, dificil: 0 };
 let jaVotouDificuldade = false;
+let pontosProntos = false; // true quando init() já terminou de carregar/filtrar os pontos
+let nomeJogadorPendente = null; // guarda {nome,uid} se o login resolver antes dos pontos carregarem
 
 // ── barra de topo (drawer) e pill de login — mesmo cabeçalho padrão do
 // Pontos Cantados, só que aqui na tela do jogo ──
@@ -444,11 +435,27 @@ function handleHeaderPillClick() {
 // vez por carregamento, e só se a tela de setup ainda estiver visível (ou
 // seja: não tem partida salva sendo retomada, nem lista de pontos vazia).
 let jaIniciouJogoAuto = false;
-function iniciarJogoAutomatico(nome) {
+function iniciarJogoAutomatico(nome, uid) {
   if (!nome || jaIniciouJogoAuto) return;
-  if (document.getElementById('setup-screen').style.display === 'none') return;
+  if (!pontosProntos) { nomeJogadorPendente = { nome, uid }; return; } // login resolveu antes do fetch de pontos — init() chama de novo quando terminar
+  if (document.getElementById('empty-screen').style.display !== 'none') return; // sem pontos elegíveis pra jogar
   jaIniciouJogoAuto = true;
-  players = [{ name: nome, score: 0 }];
+
+  // retoma uma partida salva (ex: recarregou a página no meio do jogo), mas
+  // só se for a mesma pessoa — outra conta logada no mesmo aparelho começa
+  // do zero, não herda o placar de quem jogou antes
+  const saved = loadState();
+  if (saved && Array.isArray(saved.players) && saved.players.length && saved.players[0].name === nome) {
+    players = saved.players;
+    turnIdx = saved.turnIdx || 0;
+    playedIds = saved.playedIds || [];
+    renderScoreboard();
+    startRound();
+    showScreen('game');
+    return;
+  }
+
+  players = [{ name: nome, uid: uid || null, score: 0 }];
   iniciarJogo();
 }
 window.renderHeaderUserBadge = renderHeaderUserBadge;
@@ -561,60 +568,32 @@ async function init(){
   });
 
   document.getElementById('loading').style.display = 'none';
+  pontosProntos = true;
 
   if(!eligivel.length){
     document.getElementById('empty-screen').style.display = 'block';
     return;
   }
 
-  const saved = loadState();
-  if(saved && Array.isArray(saved.players) && saved.players.length){
-    players = saved.players;
-    turnIdx = saved.turnIdx || 0;
-    playedIds = saved.playedIds || [];
-    renderScoreboard();
-    startRound();
-    showScreen('game');
-    return;
-  }
-
+  // não pergunta nome — ou já está logada (o módulo de auth chama
+  // iniciarJogoAutomatico assim que souber) ou precisa entrar primeiro
   document.getElementById('pontos-count-info').textContent = eligivel.length + ' ponto(s) com letra cadastrada, prontos pra jogar.';
-  renderPlayerChips();
-  showScreen('setup');
+  showScreen('login');
+
+  // o login pode ter resolvido mais rápido que esse fetch (sessão já ativa,
+  // sem precisar de handoff) — se já tinha um nome esperando, começa agora
+  if(nomeJogadorPendente){
+    const pendente = nomeJogadorPendente;
+    nomeJogadorPendente = null;
+    iniciarJogoAutomatico(pendente.nome, pendente.uid);
+  }
 }
 
 function showScreen(name){
-  document.getElementById('setup-screen').style.display = name==='setup' ? 'block' : 'none';
+  document.getElementById('login-screen').style.display = name==='login' ? 'block' : 'none';
   document.getElementById('game-screen').style.display = name==='game' ? 'block' : 'none';
 }
 
-// ── configuração de jogadores ──
-function renderPlayerChips(){
-  const wrap = document.getElementById('players-chips');
-  const empty = document.getElementById('players-empty');
-  empty.style.display = players.length ? 'none' : 'block';
-  wrap.innerHTML = players.map((p,i) => `<span class="g-chip">${esc(p.name)}<button data-i="${i}" aria-label="Remover">×</button></span>`).join('');
-  wrap.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
-    players.splice(Number(btn.dataset.i), 1);
-    renderPlayerChips();
-    updateStartBtn();
-  }));
-  updateStartBtn();
-}
-function updateStartBtn(){
-  document.getElementById('btn-start').disabled = players.length < 1;
-}
-function addPlayer(){
-  const input = document.getElementById('player-input');
-  const name = input.value.trim();
-  if(!name) return;
-  players.push({ name, score: 0 });
-  input.value = '';
-  renderPlayerChips();
-  input.focus();
-}
-document.getElementById('btn-add-player').addEventListener('click', addPlayer);
-document.getElementById('player-input').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); addPlayer(); } });
 function iniciarJogo(){
   turnIdx = 0; playedIds = [];
   saveState();
@@ -622,7 +601,6 @@ function iniciarJogo(){
   startRound();
   showScreen('game');
 }
-document.getElementById('btn-start').addEventListener('click', iniciarJogo);
 
 // ── placar ──
 function renderScoreboard(){
@@ -842,7 +820,7 @@ function awardPoint(valor){
   players[turnIdx].score = Math.round((players[turnIdx].score + v) * 10) / 10;
   renderScoreboard();
   saveState();
-  if(window.registrarPontoRanking) window.registrarPontoRanking(players[turnIdx].name, v);
+  if(window.registrarPontoRanking) window.registrarPontoRanking(players[turnIdx].name, v, players[turnIdx].uid);
 }
 function nextRound(){
   document.getElementById('btn-force-correct').style.display = 'none';
@@ -865,11 +843,12 @@ document.getElementById('btn-force-correct').addEventListener('click', () => {
 });
 document.getElementById('btn-reset').addEventListener('click', () => {
   if(!confirm('Reiniciar o jogo? O placar atual vai ser perdido.')) return;
-  players = []; turnIdx = 0; playedIds = [];
+  const nome = players[0]?.name;
   try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-  document.getElementById('pontos-count-info').textContent = eligivel.length + ' ponto(s) com letra cadastrada, prontos pra jogar.';
-  renderPlayerChips();
-  showScreen('setup');
+  if(!nome){ showScreen('login'); return; } // segurança — não deveria acontecer, já que só chega aqui logada
+  players = [{ name: nome, score: 0 }];
+  turnIdx = 0; playedIds = [];
+  iniciarJogo();
 });
 
 // ── sugerir correção (letra errada, resposta que devia ter sido aceita, etc.) ──
