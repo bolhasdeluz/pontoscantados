@@ -181,6 +181,47 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 
 <audio id="game-audio" preload="none"></audio>
 
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, setDoc, increment, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// mesmo projeto Firebase do site principal (Bolhas de Luz) — os pontos daqui
+// entram no ranking geral e nos painéis de "Sua Terreirinha", igual aos
+// outros jogos (Palavra do Dia, Verdadeiro ou Falso). Sem exigir login: cada
+// jogador entra pelo nome digitado, mesma convenção "anônima" que os outros
+// jogos já usam pra quem não está logada.
+const firebaseConfig = {
+  apiKey: "AIzaSyDZ_vFMHZ7t7nyJWJPRfD280VZzagqY5Ws",
+  authDomain: "terreiro-bolhas-de-luz.firebaseapp.com",
+  projectId: "terreiro-bolhas-de-luz",
+  storageBucket: "terreiro-bolhas-de-luz.firebasestorage.app",
+  messagingSenderId: "179602931861",
+  appId: "1:179602931861:web:5cf336e9077334cee05b9c",
+  measurementId: "G-6Z1WED2GB1",
+};
+
+let db = null;
+try{
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+}catch(e){ /* sem ranking, mas o jogo continua funcionando normal */ }
+
+function normalizarNomeRanking(nome){
+  return (nome||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+}
+
+window.registrarPontoRanking = async (nome) => {
+  if(!db || !nome) return;
+  const slug = normalizarNomeRanking(nome).replace(/[^a-z0-9]/gi,'_') || 'anonimo';
+  try{
+    await setDoc(doc(db, 'completa_ponto_resultados', 'nome_' + slug), {
+      nome, uid: null, pontos: increment(1), data: serverTimestamp(),
+    }, { merge: true });
+  }catch(e){ /* offline ou sem permissão — não trava o jogo */ }
+};
+</script>
+
 <script>
 const STORAGE_KEY = 'jogo_completa_ponto_state';
 let allPontos = [];
@@ -468,6 +509,7 @@ function awardPoint(){
   players[turnIdx].score += 1;
   renderScoreboard();
   saveState();
+  if(window.registrarPontoRanking) window.registrarPontoRanking(players[turnIdx].name);
 }
 function nextRound(){
   document.getElementById('btn-force-correct').style.display = 'none';
