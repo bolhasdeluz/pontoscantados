@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Completa o Ponto — Jogo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff5f7;--surface:#ffffff;--border:rgba(196,57,107,0.15);--gold:#c4396b;--gold-light:#e8688a;--gold-dim:rgba(196,57,107,0.08);--text:#2a1a22;--text-dim:rgba(80,30,50,0.5);--red:#b84040;--red-dim:rgba(184,64,64,0.08);--green:#2e8b57;--green-dim:rgba(46,139,87,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14px 18px 18px;text-align:center;box-shadow:0 2px 20px rgba(180,60,90,.25)}
+.g-header-top{display:flex;justify-content:flex-start;margin-bottom:10px}
+.g-back{color:rgba(255,255,255,.85);text-decoration:none;font-size:.78rem;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:5px 12px}
+.g-title{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:.04em}
+.g-sub{font-family:'Crimson Pro',serif;font-style:italic;color:rgba(255,255,255,.82);font-size:.86rem;margin-top:4px}
+
+.g-main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:18px}
+
+.g-loading,.g-empty{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.spinner{width:26px;height:26px;border:2px solid rgba(196,57,107,.15);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── tela de configuração de jogadores ── */
+.g-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 18px;box-shadow:0 2px 14px rgba(46,26,14,.05)}
+.g-card h2{font-family:'Cinzel',serif;font-size:.92rem;color:var(--gold);letter-spacing:.05em;margin-bottom:14px}
+.g-add-row{display:flex;gap:8px;margin-bottom:14px}
+#player-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--text);background:#fff;outline:none}
+#player-input:focus{border-color:var(--gold)}
+.g-btn-add{background:var(--gold);border:none;color:#fff;border-radius:10px;padding:0 18px;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.06em;font-weight:700;cursor:pointer}
+.g-btn-add:hover{background:var(--gold-light)}
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.g-chip{display:inline-flex;align-items:center;gap:7px;background:var(--gold-dim);border:1px solid var(--border);border-radius:20px;padding:6px 8px 6px 14px;font-size:.82rem;color:var(--text)}
+.g-chip button{background:none;border:none;color:var(--text-dim);font-size:.95rem;line-height:1;cursor:pointer;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.g-chip button:hover{background:rgba(184,64,64,.14);color:var(--red)}
+.g-empty-players{color:var(--text-dim);font-size:.82rem;font-style:italic;padding:4px 2px 10px}
+.g-btn-start{width:100%;background:var(--gold);border:none;color:#fff;border-radius:12px;padding:13px;font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.08em;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity .15s}
+.g-btn-start:disabled{opacity:.4;cursor:not-allowed}
+.g-btn-start:not(:disabled):hover{background:var(--gold-light)}
+.g-count-info{text-align:center;color:var(--text-dim);font-size:.76rem;margin-top:2px}
+
+/* ── placar ── */
+#scoreboard{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+#scoreboard::-webkit-scrollbar{display:none}
+.g-score-chip{flex-shrink:0;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:8px 14px;text-align:center;min-width:78px}
+.g-score-chip.turn{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 3px var(--gold-dim)}
+.g-score-name{font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.g-score-pts{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-top:2px}
+
+/* ── rodada ── */
+.g-turn-banner{text-align:center;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)}
+.g-turn-banner b{color:var(--gold)}
+.g-hint-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.g-hint-chip{background:var(--gold-dim);color:var(--gold);border-radius:14px;padding:4px 12px;font-size:.72rem;font-weight:600}
+.g-play-btn{background:linear-gradient(135deg,#c4396b,#e8688a);border:none;color:#fff;border-radius:20px;padding:8px 16px;font-size:.8rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin:0 auto}
+.g-play-btn:hover{opacity:.92}
+
+.g-lyrics-card{background:linear-gradient(160deg,#fff,#fff7f8);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:0 2px 14px rgba(46,26,14,.06)}
+.g-lyrics-line{font-family:'Crimson Pro',serif;font-size:1.08rem;line-height:1.85;color:var(--text);font-weight:400}
+.g-lyrics-line.blank-line{margin:4px 0}
+#blank-input{width:100%;border:none;border-bottom:2px dashed var(--gold);background:var(--gold-dim);border-radius:6px 6px 0 0;padding:8px 10px;font-family:'Crimson Pro',serif;font-style:italic;font-size:1.08rem;color:var(--gold);outline:none}
+#blank-input:focus{background:rgba(196,57,107,.14)}
+#blank-input::placeholder{color:var(--text-dim);opacity:.7}
+#blank-input:disabled{background:transparent;color:var(--green);font-style:normal;font-weight:600}
+#blank-input.wrong{color:var(--red)}
+
+.g-feedback{border-radius:12px;padding:12px 16px;font-size:.86rem;text-align:center;display:none}
+.g-feedback.show{display:block}
+.g-feedback.ok{background:var(--green-dim);color:var(--green)}
+.g-feedback.no{background:var(--red-dim);color:var(--red)}
+.g-feedback .g-answer{font-weight:700}
+
+.g-actions{display:flex;gap:10px;flex-wrap:wrap}
+.g-btn{flex:1;min-width:120px;border-radius:12px;padding:12px;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.06em;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text)}
+.g-btn:hover{border-color:var(--gold);color:var(--gold)}
+.g-btn.primary{background:var(--gold);border-color:var(--gold);color:#fff}
+.g-btn.primary:hover{background:var(--gold-light);color:#fff}
+.g-btn.ghost{background:none;border-color:transparent;color:var(--text-dim);font-weight:500;letter-spacing:0;font-family:'DM Sans',sans-serif}
+.g-btn.ghost:hover{color:var(--red);border-color:transparent}
+.g-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.g-footer-row{text-align:center;padding-top:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="g-header-top"><a class="g-back" href="index.html">← Pontos Cantados</a></div>
+  <div class="g-title">Completa o Ponto</div>
+  <div class="g-sub">Jogo de roda · Terreiro Bolhas de Luz</div>
+</header>
+
+<div class="g-main">
+  <div id="loading" class="g-loading"><div class="spinner"></div>Carregando os pontos…</div>
+
+  <div id="setup-screen" style="display:none">
+    <div class="g-card">
+      <h2>Quem vai jogar?</h2>
+      <div class="g-add-row">
+        <input id="player-input" type="text" placeholder="Nome do jogador ou time" maxlength="24">
+        <button class="g-btn-add" id="btn-add-player">Adicionar</button>
+      </div>
+      <div class="g-chips" id="players-chips"></div>
+      <div class="g-empty-players" id="players-empty">Ninguém adicionado ainda — pode ser por pessoa ou por time.</div>
+      <button class="g-btn-start" id="btn-start" disabled>▶ Começar o jogo</button>
+      <div class="g-count-info" id="pontos-count-info"></div>
+    </div>
+  </div>
+
+  <div id="empty-screen" class="g-empty" style="display:none">
+    Nenhum ponto com letra cadastrada foi encontrado ainda.<br>Cadastre letras no <a href="index.html" style="color:var(--gold)">Pontos Cantados</a> pra poder jogar.
+  </div>
+
+  <div id="game-screen" style="display:none">
+    <div id="scoreboard"></div>
+
+    <div class="g-turn-banner">Vez de <b id="turn-name">—</b></div>
+
+    <div class="g-hint-row" id="hint-row"></div>
+
+    <div class="g-lyrics-card" id="lyrics-card"></div>
+
+    <div class="g-feedback" id="feedback"></div>
+
+    <div class="g-actions" id="actions-check">
+      <button class="g-btn" id="btn-skip">Pular / Revelar</button>
+      <button class="g-btn primary" id="btn-check">Conferir</button>
+    </div>
+    <div class="g-actions" id="actions-next" style="display:none">
+      <button class="g-btn" id="btn-force-correct" style="display:none">Considerar certo (+1)</button>
+      <button class="g-btn primary" id="btn-next">Próxima rodada →</button>
+    </div>
+
+    <div class="g-footer-row">
+      <button class="g-btn ghost" id="btn-reset">Reiniciar jogo</button>
+    </div>
+  </div>
+</div>
+
+<audio id="game-audio" preload="none"></audio>
+
+<script>
+const STORAGE_KEY = 'jogo_completa_ponto_state';
+let allPontos = [];
+let eligivel = [];   // pontos com letra suficiente pra jogar
+let players = [];    // [{name, score}]
+let turnIdx = 0;
+let playedIds = [];
+let current = null;  // { ponto, lines, blankIdx, answer }
+let checked = false;
+
+function normalizeText(s){
+  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
+}
+function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, turnIdx, playedIds }));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+
+async function init(){
+  try{
+    const res = await fetch('/api/pontos');
+    allPontos = await res.json();
+  }catch(e){
+    allPontos = [];
+  }
+  eligivel = allPontos.filter(p => {
+    if(!p.letra || !p.letra.trim()) return false;
+    const lines = p.letra.split('\n').map(l=>l.trim()).filter(Boolean);
+    return lines.length >= 2;
+  });
+
+  document.getElementById('loading').style.display = 'none';
+
+  if(!eligivel.length){
+    document.getElementById('empty-screen').style.display = 'block';
+    return;
+  }
+
+  const saved = loadState();
+  if(saved && Array.isArray(saved.players) && saved.players.length){
+    players = saved.players;
+    turnIdx = saved.turnIdx || 0;
+    playedIds = saved.playedIds || [];
+    renderScoreboard();
+    startRound();
+    showScreen('game');
+    return;
+  }
+
+  document.getElementById('pontos-count-info').textContent = eligivel.length + ' ponto(s) com letra cadastrada, prontos pra jogar.';
+  renderPlayerChips();
+  showScreen('setup');
+}
+
+function showScreen(name){
+  document.getElementById('setup-screen').style.display = name==='setup' ? 'block' : 'none';
+  document.getElementById('game-screen').style.display = name==='game' ? 'block' : 'none';
+}
+
+// ── configuração de jogadores ──
+function renderPlayerChips(){
+  const wrap = document.getElementById('players-chips');
+  const empty = document.getElementById('players-empty');
+  empty.style.display = players.length ? 'none' : 'block';
+  wrap.innerHTML = players.map((p,i) => `<span class="g-chip">${esc(p.name)}<button data-i="${i}" aria-label="Remover">×</button></span>`).join('');
+  wrap.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    players.splice(Number(btn.dataset.i), 1);
+    renderPlayerChips();
+    updateStartBtn();
+  }));
+  updateStartBtn();
+}
+function updateStartBtn(){
+  document.getElementById('btn-start').disabled = players.length < 1;
+}
+function addPlayer(){
+  const input = document.getElementById('player-input');
+  const name = input.value.trim();
+  if(!name) return;
+  players.push({ name, score: 0 });
+  input.value = '';
+  renderPlayerChips();
+  input.focus();
+}
+document.getElementById('btn-add-player').addEventListener('click', addPlayer);
+document.getElementById('player-input').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); addPlayer(); } });
+document.getElementById('btn-start').addEventListener('click', () => {
+  turnIdx = 0; playedIds = [];
+  saveState();
+  renderScoreboard();
+  startRound();
+  showScreen('game');
+});
+
+// ── placar ──
+function renderScoreboard(){
+  const wrap = document.getElementById('scoreboard');
+  wrap.innerHTML = players.map((p,i) => `
+    <div class="g-score-chip${i===turnIdx?' turn':''}">
+      <div class="g-score-name">${esc(p.name)}</div>
+      <div class="g-score-pts">${p.score}</div>
+    </div>`).join('');
+  document.getElementById('turn-name').textContent = players[turnIdx] ? players[turnIdx].name : '—';
+}
+
+// ── rodada ──
+function pickPonto(){
+  if(playedIds.length >= eligivel.length) playedIds = [];
+  let pool = eligivel.filter(p => !playedIds.includes(p.id));
+  if(!pool.length) pool = eligivel;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function startRound(){
+  checked = false;
+  const ponto = pickPonto();
+  playedIds.push(ponto.id);
+  const lines = ponto.letra.split('\n').map(l=>l.trim()).filter(Boolean);
+  const blankIdx = lines.length > 1 ? 1 + Math.floor(Math.random()*(lines.length-1)) : 0;
+  current = { ponto, lines, blankIdx, answer: lines[blankIdx] };
+
+  // dica: linha/guia
+  const hints = [ponto.linha, ponto.guia].filter(Boolean);
+  document.getElementById('hint-row').innerHTML = hints.map(h => `<span class="g-hint-chip">${esc(h)}</span>`).join('')
+    + (ponto.audioUrl ? `<button class="g-play-btn" id="btn-play-audio">▶ Ouvir</button>` : '');
+  const playBtn = document.getElementById('btn-play-audio');
+  if(playBtn) playBtn.addEventListener('click', () => playCurrentAudio());
+
+  renderLyrics();
+  document.getElementById('feedback').className = 'g-feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('actions-check').style.display = 'flex';
+  document.getElementById('actions-next').style.display = 'none';
+  document.getElementById('btn-check').disabled = false;
+  saveState();
+}
+function renderLyrics(){
+  const card = document.getElementById('lyrics-card');
+  card.innerHTML = current.lines.map((line,i) => {
+    if(i === current.blankIdx){
+      return `<div class="g-lyrics-line blank-line"><input id="blank-input" type="text" placeholder="Complete a linha que falta…" autocomplete="off"></div>`;
+    }
+    return `<div class="g-lyrics-line">${esc(line)}</div>`;
+  }).join('');
+  const input = document.getElementById('blank-input');
+  input.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); checkAnswer(); } });
+  input.focus();
+}
+function playCurrentAudio(){
+  const p = current.ponto;
+  const a = document.getElementById('game-audio');
+  const start = p.audioStart != null ? p.audioStart : 0;
+  const end = p.audioEnd != null ? p.audioEnd : null;
+  const go = () => { if(start>0){ try{ a.currentTime = start; }catch(e){} } a.play().catch(()=>{}); };
+  a.onloadedmetadata = go;
+  a.src = p.audioUrl;
+  a.load();
+  a.ontimeupdate = () => { if(end != null && a.currentTime >= end - 0.05) a.pause(); };
+}
+
+function checkAnswer(){
+  if(checked) return;
+  checked = true;
+  const input = document.getElementById('blank-input');
+  const typed = input.value;
+  const isCorrect = normalizeText(typed) === normalizeText(current.answer) && normalizeText(typed).length > 0;
+  input.disabled = true;
+  input.value = current.answer;
+
+  const fb = document.getElementById('feedback');
+  if(isCorrect){
+    fb.className = 'g-feedback show ok';
+    fb.innerHTML = '🎉 Acertou!';
+    awardPoint();
+  } else {
+    input.classList.add('wrong');
+    fb.className = 'g-feedback show no';
+    fb.innerHTML = 'Quase! A resposta era: <span class="g-answer">' + esc(current.answer) + '</span>';
+    document.getElementById('btn-force-correct').style.display = 'inline-block';
+  }
+  document.getElementById('actions-check').style.display = 'none';
+  document.getElementById('actions-next').style.display = 'flex';
+}
+function revealAnswer(){
+  if(checked) return;
+  checked = true;
+  const input = document.getElementById('blank-input');
+  input.disabled = true;
+  input.value = current.answer;
+  const fb = document.getElementById('feedback');
+  fb.className = 'g-feedback show no';
+  fb.innerHTML = 'A resposta era: <span class="g-answer">' + esc(current.answer) + '</span>';
+  document.getElementById('actions-check').style.display = 'none';
+  document.getElementById('actions-next').style.display = 'flex';
+  document.getElementById('btn-force-correct').style.display = 'inline-block';
+}
+function awardPoint(){
+  players[turnIdx].score += 1;
+  renderScoreboard();
+  saveState();
+}
+function nextRound(){
+  document.getElementById('btn-force-correct').style.display = 'none';
+  turnIdx = players.length ? (turnIdx + 1) % players.length : 0;
+  renderScoreboard();
+  startRound();
+}
+
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-skip').addEventListener('click', revealAnswer);
+document.getElementById('btn-next').addEventListener('click', nextRound);
+document.getElementById('btn-force-correct').addEventListener('click', () => {
+  document.getElementById('btn-force-correct').style.display = 'none';
+  const fb = document.getElementById('feedback');
+  fb.className = 'g-feedback show ok';
+  fb.innerHTML = '🎉 Considerado certo!';
+  awardPoint();
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if(!confirm('Reiniciar o jogo? O placar atual vai ser perdido.')) return;
+  players = []; turnIdx = 0; playedIds = [];
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  document.getElementById('pontos-count-info').textContent = eligivel.length + ' ponto(s) com letra cadastrada, prontos pra jogar.';
+  renderPlayerChips();
+  showScreen('setup');
+});
+
+init();
+</script>
+</body>
+</html>
