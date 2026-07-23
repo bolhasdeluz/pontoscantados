@@ -539,7 +539,6 @@ select option{background:#fff;color:#2a1a22}
 .playlist-point-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(196,57,107,.12);border-radius:8px;background:#fcf8fa}
 .playlist-point-row input{width:16px;height:16px;accent-color:var(--gold)}
 .playlist-point-row span{font-size:.84rem;color:var(--text)}
-@media(min-width:860px){.profile-shell{grid-template-columns:1.1fr .9fr;align-items:start}}
 
 .ts-secquick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .ts-secquick-btn{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.05em;padding:6px 12px;border-radius:20px;border:1px dashed rgba(196,57,107,.35);background:transparent;color:var(--gold);cursor:pointer;transition:all .12s;text-transform:uppercase}
@@ -741,31 +740,6 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 </header>
 
 <div class="profile-shell">
-  <div class="profile-card" id="profile-card">
-    <div class="profile-card-header">
-      <div>
-        <div class="profile-eyebrow">Conta & perfil</div>
-        <h3 id="profile-title">Seu perfil na casa</h3>
-      </div>
-      <button class="profile-btn secondary" id="profile-login-btn" onclick="loginWithGoogle()" style="display:none">Trocar conta</button>
-    </div>
-    <div class="profile-auth-error" id="profile-auth-error" style="display:none">
-      <div class="profile-auth-error-head">
-        <span aria-hidden="true">⚠️</span>
-        <strong>Não foi possível entrar</strong>
-        <button type="button" onclick="clearAuthError()" aria-label="Fechar">✕</button>
-      </div>
-      <div class="profile-auth-error-body" id="profile-auth-error-body"></div>
-    </div>
-    <div class="profile-content" id="profile-content">
-      <div class="profile-empty"><span class="profile-empty-icon" aria-hidden="true">🔒</span><span>Toque em <strong>Entrar</strong>, no topo da página, para fazer login com Google e criar seu perfil e playlists.</span></div>
-    </div>
-    <div class="profile-client-id" style="display:none">
-      <textarea id="firebaseConfigInput" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}'></textarea>
-      <button class="profile-btn secondary" onclick="saveFirebaseConfig()">Salvar config</button>
-    </div>
-  </div>
-
   <div class="playlists-card">
     <div class="playlists-header">
       <div>
