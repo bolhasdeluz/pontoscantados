@@ -1566,9 +1566,6 @@ let handoffToken = null;
 (function capturarHandoffToken() {
   try {
     const hash = window.location.hash || '';
-    // TEMP debug: mostra o hash cru com que a página chegou — remover depois
-    // que o handoff estiver confirmado funcionando.
-    if (hash) alert('DEBUG pontoscantados: chegou com hash = ' + hash);
     const m = hash.match(/[#&]ct=([^&]+)/);
     if (!m) return;
     handoffToken = decodeURIComponent(m[1]);
@@ -1986,8 +1983,6 @@ async function initFirebaseAuth() {
   if (!window.firebase?.app) await waitForFirebaseSdk();
   if (!window.firebase?.app) {
     if (btn) btn.textContent = 'Configurar Firebase';
-    // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-    if (handoffToken) alert('DEBUG pontoscantados: SDK do Firebase não carregou depois de esperar 8s.');
     return;
   }
   if (!firebaseApp) {
@@ -2023,8 +2018,6 @@ async function initFirebaseAuth() {
         }
       });
 
-      // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-      alert(`DEBUG pontoscantados: checando handoff — handoffToken=${handoffToken ? 'presente' : 'null/vazio'} firebaseAuth.currentUser=${firebaseAuth.currentUser ? (firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid) : 'null'}`);
       if (handoffToken && !firebaseAuth.currentUser) {
         const tokenParaUsar = handoffToken;
         handoffToken = null; // uso único
@@ -2032,12 +2025,8 @@ async function initFirebaseAuth() {
         try {
           await firebaseAuth.signInWithCustomToken(tokenParaUsar);
           logAuth('Login automático via handoff concluído.');
-          // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-          alert('DEBUG pontoscantados: signInWithCustomToken OK — uid=' + (firebaseAuth.currentUser?.uid || '?'));
         } catch (e) {
           logAuth(`Falha no login automático via handoff — ${e?.message || e}`);
-          // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-          alert('DEBUG pontoscantados: signInWithCustomToken falhou — ' + (e?.code || '') + ' ' + (e?.message || e));
         }
       }
 
@@ -2123,8 +2112,6 @@ async function fetchAuthUser() {
         ? `resposta não é JSON (provavelmente a Cloudflare Function /api/auth não está publicada e o Pages devolveu a própria página em vez da API) — início da resposta: "${preview}"`
         : (data?.error ? `erro retornado: ${data.error}` : 'resposta JSON sem o campo "user"');
       logAuth(`/api/auth respondeu status ${res.status} — ${diag}`);
-      // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-      alert(`DEBUG pontoscantados: /api/auth falhou (status ${res.status}) — ${diag}`);
       if (!authUser) {
         authUser = null;
         authToken = '';
@@ -2141,8 +2128,6 @@ async function fetchAuthUser() {
   } catch (e) {
     logAuth(`Falha de rede ao chamar /api/auth: ${e?.message || e}`);
     console.error(e);
-    // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
-    alert('DEBUG pontoscantados: erro de rede em /api/auth — ' + (e?.message || e));
     if (!authUser) {
       authUser = null;
       authToken = '';
