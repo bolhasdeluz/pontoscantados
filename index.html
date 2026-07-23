@@ -2004,6 +2004,8 @@ async function initFirebaseAuth() {
         }
       });
 
+      // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
+      alert(`DEBUG pontoscantados: checando handoff — handoffToken=${handoffToken ? 'presente' : 'null/vazio'} firebaseAuth.currentUser=${firebaseAuth.currentUser ? (firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid) : 'null'}`);
       if (handoffToken && !firebaseAuth.currentUser) {
         const tokenParaUsar = handoffToken;
         handoffToken = null; // uso único
