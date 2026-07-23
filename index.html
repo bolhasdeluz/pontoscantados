@@ -1953,6 +1953,8 @@ function logAuth(line) {
 function renderAuthLog() {}
 
 async function initFirebaseAuth() {
+  // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
+  if (handoffToken) alert('DEBUG pontoscantados: initFirebaseAuth() começou, handoffToken presente. firebaseAuthReady=' + firebaseAuthReady);
   const btn = document.getElementById('profile-login-btn');
   let cfg = getStoredFirebaseConfig();
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId) {
@@ -1965,6 +1967,8 @@ async function initFirebaseAuth() {
   }
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !window.firebase?.app) {
     if (btn) btn.textContent = 'Configurar Firebase';
+    // TEMP debug — remover depois que o handoff estiver confirmado funcionando.
+    if (handoffToken) alert(`DEBUG pontoscantados: initFirebaseAuth() saiu cedo — apiKey=${!!cfg.apiKey} authDomain=${!!cfg.authDomain} projectId=${!!cfg.projectId} window.firebase.app=${!!window.firebase?.app}`);
     return;
   }
   if (!firebaseApp) {
