@@ -1,7 +1,7 @@
-const ADMIN_EMAIL = 'bolhasdeluz@gmail.com';
+const ADMIN_EMAILS = ['bolhasdeluz@gmail.com', 'annagomes.bdl@gmail.com'];
 
 export function isAdmin(email) {
-  return !!email && email.toLowerCase() === ADMIN_EMAIL;
+  return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
 }
 
 export function createProfilePayload(user) {
