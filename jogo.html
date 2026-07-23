@@ -70,6 +70,29 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 .g-feedback.no{background:var(--red-dim);color:var(--red)}
 .g-feedback .g-answer{font-weight:700}
 
+.g-diff-badge{border-radius:14px;padding:4px 12px;font-size:.72rem;font-weight:600}
+.g-diff-badge.facil{background:var(--green-dim);color:var(--green)}
+.g-diff-badge.medio{background:rgba(196,150,57,.14);color:#a67c1e}
+.g-diff-badge.dificil{background:var(--red-dim);color:var(--red)}
+.g-diff-badge.sem-dados{background:var(--gold-dim);color:var(--text-dim);font-weight:500;font-style:italic}
+
+.g-rate-row{text-align:center;display:none}
+.g-rate-label{font-size:.78rem;color:var(--text-dim);margin-bottom:8px}
+.g-rate-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.g-rate-btn{border:1.5px solid var(--border);background:#fff;border-radius:12px;padding:8px 14px;font-size:.8rem;font-family:'DM Sans',sans-serif;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px}
+.g-rate-btn:hover{border-color:var(--gold)}
+.g-rate-btn.picked{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);font-weight:600}
+.g-rate-btn:disabled{opacity:.55;cursor:default}
+.g-rate-emoji{font-size:1.25rem}
+
+.g-suggest-toggle{background:none;border:none;color:var(--text-dim);font-size:.78rem;text-decoration:underline;cursor:pointer;display:none;margin:0 auto}
+.g-suggest-box{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.g-suggest-box.open{display:block}
+.g-suggest-box textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);resize:vertical;min-height:60px;outline:none;margin-bottom:10px;box-sizing:border-box}
+.g-suggest-box textarea:focus{border-color:var(--gold)}
+.g-suggest-sent{color:var(--green);font-size:.82rem;text-align:center;display:none;padding:4px 0}
+.g-suggest-sent.show{display:block}
+
 .g-actions{display:flex;gap:10px;flex-wrap:wrap}
 .g-btn{flex:1;min-width:120px;border-radius:12px;padding:12px;font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.06em;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text)}
 .g-btn:hover{border-color:var(--gold);color:var(--gold)}
@@ -131,6 +154,25 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
       <button class="g-btn primary" id="btn-next">Próxima rodada →</button>
     </div>
 
+    <div class="g-rate-row" id="rate-row">
+      <div class="g-rate-label">Quão difícil foi essa rodada?</div>
+      <div class="g-rate-btns">
+        <button class="g-rate-btn" data-nivel="facil"><span class="g-rate-emoji">😌</span>Fácil</button>
+        <button class="g-rate-btn" data-nivel="medio"><span class="g-rate-emoji">🤔</span>Médio</button>
+        <button class="g-rate-btn" data-nivel="dificil"><span class="g-rate-emoji">😵</span>Difícil</button>
+      </div>
+    </div>
+
+    <button class="g-suggest-toggle" id="btn-suggest-toggle">💬 Sugerir correção nesse ponto</button>
+    <div class="g-suggest-box" id="suggest-box">
+      <textarea id="suggest-text" placeholder="O que parece errado? (letra com erro de digitação, resposta que devia ter sido aceita, etc.)"></textarea>
+      <div class="g-actions">
+        <button class="g-btn" id="btn-suggest-cancel">Cancelar</button>
+        <button class="g-btn primary" id="btn-suggest-send">Enviar sugestão</button>
+      </div>
+    </div>
+    <div class="g-suggest-sent" id="suggest-sent">Obrigado! A sugestão foi enviada. 💌</div>
+
     <div class="g-footer-row">
       <button class="g-btn ghost" id="btn-reset">Reiniciar jogo</button>
     </div>
@@ -148,6 +190,8 @@ let turnIdx = 0;
 let playedIds = [];
 let current = null;  // { ponto, lines, blankIdx, answer }
 let checked = false;
+let dificuldadeAtual = { facil: 0, medio: 0, dificil: 0 };
+let jaVotouDificuldade = false;
 
 function normalizeText(s){
   return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
@@ -263,18 +307,21 @@ function pickPonto(){
 }
 function startRound(){
   checked = false;
+  jaVotouDificuldade = false;
   const ponto = pickPonto();
   playedIds.push(ponto.id);
   const lines = ponto.letra.split('\n').map(l=>l.trim()).filter(Boolean);
   const blankIdx = lines.length > 1 ? 1 + Math.floor(Math.random()*(lines.length-1)) : 0;
   current = { ponto, lines, blankIdx, answer: lines[blankIdx] };
 
-  // dica: linha/guia
+  // dica: linha/guia/dificuldade
   const hints = [ponto.linha, ponto.guia].filter(Boolean);
   document.getElementById('hint-row').innerHTML = hints.map(h => `<span class="g-hint-chip">${esc(h)}</span>`).join('')
+    + '<span class="g-diff-badge sem-dados" id="diff-badge">…</span>'
     + (ponto.audioUrl ? `<button class="g-play-btn" id="btn-play-audio">▶ Ouvir</button>` : '');
   const playBtn = document.getElementById('btn-play-audio');
   if(playBtn) playBtn.addEventListener('click', () => playCurrentAudio());
+  carregarDificuldade(ponto.id);
 
   renderLyrics();
   document.getElementById('feedback').className = 'g-feedback';
@@ -282,8 +329,57 @@ function startRound(){
   document.getElementById('actions-check').style.display = 'flex';
   document.getElementById('actions-next').style.display = 'none';
   document.getElementById('btn-check').disabled = false;
+  document.getElementById('rate-row').style.display = 'none';
+  document.querySelectorAll('.g-rate-btn').forEach(b => { b.disabled = false; b.classList.remove('picked'); });
+  document.getElementById('btn-suggest-toggle').style.display = 'none';
+  document.getElementById('suggest-box').classList.remove('open');
+  document.getElementById('suggest-text').value = '';
+  document.getElementById('suggest-sent').classList.remove('show');
   saveState();
 }
+
+// ── dificuldade (avaliada por quem joga, depois de cada rodada) ──
+async function carregarDificuldade(pontoId){
+  try{
+    const res = await fetch('/api/dificuldade?pontoId=' + encodeURIComponent(pontoId));
+    dificuldadeAtual = await res.json();
+  }catch(e){
+    dificuldadeAtual = { facil: 0, medio: 0, dificil: 0 };
+  }
+  renderDiffBadge();
+}
+function renderDiffBadge(){
+  const badge = document.getElementById('diff-badge');
+  if(!badge) return;
+  const { facil = 0, medio = 0, dificil = 0 } = dificuldadeAtual || {};
+  const total = facil + medio + dificil;
+  if(!total){
+    badge.className = 'g-diff-badge sem-dados';
+    badge.textContent = 'Ainda sem avaliação';
+    return;
+  }
+  const entries = [['facil', facil], ['medio', medio], ['dificil', dificil]];
+  entries.sort((a, b) => b[1] - a[1]);
+  const nivel = entries[0][0];
+  const label = { facil: '🟢 Fácil', medio: '🟡 Médio', dificil: '🔴 Difícil' }[nivel];
+  badge.className = 'g-diff-badge ' + nivel;
+  badge.textContent = label + ' · ' + total + (total === 1 ? ' avaliação' : ' avaliações');
+}
+document.querySelectorAll('.g-rate-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if(jaVotouDificuldade || !current) return;
+    jaVotouDificuldade = true;
+    document.querySelectorAll('.g-rate-btn').forEach(b => { b.disabled = true; b.classList.toggle('picked', b === btn); });
+    try{
+      const res = await fetch('/api/dificuldade', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pontoId: current.ponto.id, nivel: btn.dataset.nivel }),
+      });
+      dificuldadeAtual = await res.json();
+      renderDiffBadge();
+    }catch(e){}
+  });
+});
 function renderLyrics(){
   const card = document.getElementById('lyrics-card');
   card.innerHTML = current.lines.map((line,i) => {
@@ -330,6 +426,8 @@ function checkAnswer(){
   }
   document.getElementById('actions-check').style.display = 'none';
   document.getElementById('actions-next').style.display = 'flex';
+  document.getElementById('rate-row').style.display = 'block';
+  document.getElementById('btn-suggest-toggle').style.display = 'block';
 }
 function revealAnswer(){
   if(checked) return;
@@ -343,6 +441,8 @@ function revealAnswer(){
   document.getElementById('actions-check').style.display = 'none';
   document.getElementById('actions-next').style.display = 'flex';
   document.getElementById('btn-force-correct').style.display = 'inline-block';
+  document.getElementById('rate-row').style.display = 'block';
+  document.getElementById('btn-suggest-toggle').style.display = 'block';
 }
 function awardPoint(){
   players[turnIdx].score += 1;
@@ -373,6 +473,37 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   document.getElementById('pontos-count-info').textContent = eligivel.length + ' ponto(s) com letra cadastrada, prontos pra jogar.';
   renderPlayerChips();
   showScreen('setup');
+});
+
+// ── sugerir correção (letra errada, resposta que devia ter sido aceita, etc.) ──
+document.getElementById('btn-suggest-toggle').addEventListener('click', () => {
+  document.getElementById('suggest-box').classList.add('open');
+  document.getElementById('btn-suggest-toggle').style.display = 'none';
+  document.getElementById('suggest-text').focus();
+});
+document.getElementById('btn-suggest-cancel').addEventListener('click', () => {
+  document.getElementById('suggest-box').classList.remove('open');
+  document.getElementById('suggest-text').value = '';
+  document.getElementById('btn-suggest-toggle').style.display = 'block';
+});
+document.getElementById('btn-suggest-send').addEventListener('click', async () => {
+  const textEl = document.getElementById('suggest-text');
+  const texto = textEl.value.trim();
+  if(!texto || !current) return;
+  const btn = document.getElementById('btn-suggest-send');
+  btn.disabled = true;
+  try{
+    await fetch('/api/correcoes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pontoId: current.ponto.id, pontoNome: current.ponto.nome, texto }),
+    });
+    document.getElementById('suggest-box').classList.remove('open');
+    textEl.value = '';
+    document.getElementById('suggest-sent').classList.add('show');
+  }catch(e){
+    alert('Não deu pra enviar agora, tenta de novo.');
+  }
+  btn.disabled = false;
 });
 
 init();
