@@ -913,6 +913,8 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
   </button>
   <button class="hbtn" onclick="tsAbrir()" style="background:rgba(255,255,255,.12)">🎙️ Transcrever</button>
   <button class="hbtn" id="btn-abrir-correcoes" onclick="abrirCorrecoes()" style="background:rgba(255,255,255,.12)">💡 Sugestões</button>
+  <button class="hbtn" onclick="abrirRevisarPontos()" style="background:rgba(255,255,255,.12)">🎯 Revisar Pontos</button>
+  <button class="hbtn" onclick="abrirRankingJogo()" style="background:rgba(255,255,255,.12)">🏆 Ranking do Jogo</button>
   <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
 </div>
 
@@ -1083,6 +1085,30 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <h2>Sugestões de correção</h2>
     <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Mandadas por quem jogou "Completa o Ponto". Não aplicam nada sozinhas — revise e edite o ponto na mão se fizer sentido.</p>
     <div id="correcoes-list" style="display:flex;flex-direction:column;gap:10px;min-height:40px"></div>
+  </div>
+</div>
+
+<!-- REVISAR PONTOS (um a um) -->
+<div class="overlay" id="ov-revisar">
+  <div class="modal" style="max-width:560px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-revisar')">✕</button>
+    <h2>Revisar Pontos</h2>
+    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px" id="revisar-contador"></p>
+    <div id="revisar-card"></div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn-cancel" onclick="revisarAnterior()">◀ Anterior</button>
+      <button class="btn-cancel" onclick="revisarProximo()">Próximo ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- RANKING DO JOGO COMPLETA O PONTO -->
+<div class="overlay" id="ov-ranking-jogo">
+  <div class="modal" style="max-width:480px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-ranking-jogo')">✕</button>
+    <h2>🏆 Ranking — Completa o Ponto</h2>
+    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Pontuação acumulada de quem já jogou, somando todas as rodadas.</p>
+    <div id="ranking-jogo-list" style="display:flex;flex-direction:column;gap:8px;min-height:40px"></div>
   </div>
 </div>
 
@@ -1669,6 +1695,133 @@ async function descartarCorrecao(id) {
     toast('Não deu pra remover agora.');
   }
 }
+
+// ── revisar pontos um a um (editar letra, fixar a frase do jogo, tirar do
+// jogo ou excluir de vez) — mesma lógica de "linha elegível" que o
+// Completa o Ponto usa (só linhas que não se repetem na letra podem virar
+// a lacuna, senão a resposta vaza em outra linha) ──
+let revisarIdx = 0;
+function linhasElegiveisJogo(letra) {
+  const lines = (letra || '').split('\n').map(l => l.trim()).filter(Boolean);
+  const norm = lines.map(l => l.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim());
+  const contagem = {};
+  norm.forEach(n => { contagem[n] = (contagem[n]||0) + 1; });
+  return lines.filter((l,i) => contagem[norm[i]] === 1);
+}
+function abrirRevisarPontos() {
+  if (!pontos.length) { toast('Nenhum ponto cadastrado ainda.'); return; }
+  if (revisarIdx >= pontos.length) revisarIdx = 0;
+  renderRevisarCard();
+  abrirModal('ov-revisar');
+}
+function revisarAnterior() {
+  if (!pontos.length) return;
+  revisarIdx = (revisarIdx - 1 + pontos.length) % pontos.length;
+  renderRevisarCard();
+}
+function revisarProximo() {
+  if (!pontos.length) return;
+  revisarIdx = (revisarIdx + 1) % pontos.length;
+  renderRevisarCard();
+}
+function renderRevisarCard() {
+  const contador = document.getElementById('revisar-contador');
+  const el = document.getElementById('revisar-card');
+  if (!pontos.length) {
+    contador.textContent = '';
+    el.innerHTML = '<p class="linhas-empty">Nenhum ponto cadastrado.</p>';
+    return;
+  }
+  if (revisarIdx >= pontos.length) revisarIdx = 0;
+  const p = pontos[revisarIdx];
+  contador.textContent = (revisarIdx + 1) + ' de ' + pontos.length;
+  const linhasElegiveis = linhasElegiveisJogo(p.letra);
+  el.innerHTML = `
+    <div class="form-row">
+      <label>${esc(p.nome || '(sem nome)')}</label>
+      <p style="font-size:.76rem;color:var(--text-dim);margin-top:2px">${[p.linha, p.tipo].filter(Boolean).map(esc).join(' · ') || '—'}</p>
+    </div>
+    <div class="form-row">
+      <label>Letra</label>
+      <textarea id="revisar-letra" style="min-height:160px">${esc(p.letra || '')}</textarea>
+    </div>
+    <div class="form-row">
+      <label>Frase selecionada para o jogo (Completa o Ponto)</label>
+      <select id="revisar-frase-jogo">
+        <option value="">Aleatório (padrão)</option>
+        ${linhasElegiveis.map(l => `<option value="${esc(l)}" ${p.linhaJogoFixa === l ? 'selected' : ''}>${esc(l)}</option>`).join('')}
+      </select>
+      ${!linhasElegiveis.length ? '<span style="font-size:.72rem;color:var(--text-dim)">Nenhuma linha elegível ainda (precisa de pelo menos uma linha que não se repete na letra).</span>' : ''}
+    </div>
+    <div class="form-row" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="revisar-fora-jogo" ${p.foraDoJogo ? 'checked' : ''} style="width:auto">
+      <label style="margin:0" for="revisar-fora-jogo">Fora do jogo (não aparece no Completa o Ponto)</label>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn-cancel" style="color:var(--red);border-color:var(--red)" onclick="revisarExcluir('${p.id}')">🗑️ Excluir ponto</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn-cancel" onclick="fecharModal('ov-revisar');openEdit('${p.id}')">✏️ Edição completa</button>
+        <button class="btn-save" onclick="revisarSalvar('${p.id}')">Salvar</button>
+      </div>
+    </div>
+  `;
+}
+async function revisarSalvar(id) {
+  const letra = document.getElementById('revisar-letra').value;
+  const linhaJogoFixa = document.getElementById('revisar-frase-jogo').value;
+  const foraDoJogo = document.getElementById('revisar-fora-jogo').checked;
+  try {
+    const res = await fetch(API, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id, letra, linhaJogoFixa, foraDoJogo }) });
+    const updated = await res.json();
+    const idx = pontos.findIndex(x => x.id === id);
+    if (idx !== -1) pontos[idx] = updated;
+    renderCards();
+    toast('Ponto atualizado');
+    renderRevisarCard();
+  } catch (e) {
+    toast('Não deu pra salvar agora.');
+  }
+}
+async function revisarExcluir(id) {
+  const antes = pontos.length;
+  await window.deletePonto(id);
+  if (pontos.length === antes) return; // não confirmou a exclusão
+  if (revisarIdx >= pontos.length) revisarIdx = Math.max(0, pontos.length - 1);
+  renderRevisarCard();
+}
+window.abrirRevisarPontos = abrirRevisarPontos;
+window.revisarAnterior = revisarAnterior;
+window.revisarProximo = revisarProximo;
+window.revisarSalvar = revisarSalvar;
+window.revisarExcluir = revisarExcluir;
+
+// ── ranking do jogo Completa o Ponto (lido do Firestore pelo módulo mais
+// abaixo, window._carregarRankingJogo) ──
+async function abrirRankingJogo() {
+  const el = document.getElementById('ranking-jogo-list');
+  el.innerHTML = '<p class="linhas-empty">Carregando…</p>';
+  abrirModal('ov-ranking-jogo');
+  if (!window._carregarRankingJogo) {
+    el.innerHTML = '<p class="linhas-empty">Ranking ainda não carregou — tenta de novo em um instante.</p>';
+    return;
+  }
+  const lista = await window._carregarRankingJogo();
+  if (lista === null) {
+    el.innerHTML = '<p class="linhas-empty">Não deu pra carregar o ranking agora.</p>';
+    return;
+  }
+  if (!lista.length) {
+    el.innerHTML = '<p class="linhas-empty">Ninguém jogou ainda.</p>';
+    return;
+  }
+  el.innerHTML = lista.map((r, i) => `
+    <div class="linha-item">
+      <span style="font-family:'Cinzel',serif;font-size:.72rem;color:var(--gold);min-width:22px">${i+1}º</span>
+      <span style="flex:1;font-size:.86rem">${esc(r.nome || 'Anônimo')}</span>
+      <strong style="color:var(--gold)">${(r.pontos ?? 0).toString().replace('.', ',')} pts</strong>
+    </div>`).join('');
+}
+window.abrirRankingJogo = abrirRankingJogo;
 
 function renderLinhasModal() {
   const el = document.getElementById('linhas-list');
@@ -5329,5 +5482,28 @@ load();
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, query, orderBy }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// lê o ranking do jogo "Completa o Ponto" (mesmo projeto/coleção que
+// jogo.html grava, completa_ponto_resultados) — nome de app separado do
+// SDK compat usado no resto da página, pra não conflitar com ele
+window._carregarRankingJogo = async () => {
+  try {
+    const cfg = window.getStoredFirebaseConfig ? window.getStoredFirebaseConfig() : null;
+    if (!cfg || !cfg.apiKey || !cfg.projectId) return null;
+    const app = initializeApp(cfg, 'ranking-jogo');
+    const db = getFirestore(app);
+    const q = query(collection(db, 'completa_ponto_resultados'), orderBy('pontos', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  } catch (e) {
+    console.error('Falha ao carregar ranking do jogo:', e);
+    return null;
+  }
+};
+</script>
 </body>
 </html>

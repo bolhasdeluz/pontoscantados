@@ -492,6 +492,7 @@ async function init(){
     allPontos = [];
   }
   eligivel = allPontos.filter(p => {
+    if(p.foraDoJogo) return false; // admin tirou esse ponto do jogo
     if(!p.letra || !p.letra.trim()) return false;
     const lines = p.letra.split('\n').map(l=>l.trim()).filter(Boolean);
     if(lines.length < 2) return false;
@@ -589,11 +590,21 @@ function startRound(){
   playedIds.push(ponto.id);
   const lines = ponto.letra.split('\n').map(l=>l.trim()).filter(Boolean);
   const unicas = indicesLinhasUnicas(lines);
-  // prefere não esconder a primeira linha (mantém contexto pra quem vai
-  // completar), mas usa ela se for a única linha que não se repete
-  const candidatas = unicas.filter(i => i > 0);
-  const pool = candidatas.length ? candidatas : unicas;
-  const blankIdx = pool[Math.floor(Math.random()*pool.length)];
+  // admin pode fixar qual linha vira a lacuna (revisão em index.html); só
+  // usa se ela ainda existir na letra atual e continuar elegível (não
+  // repetida) — senão cai pro sorteio normal
+  let blankIdx = null;
+  if(ponto.linhaJogoFixa){
+    const fixaIdx = lines.findIndex(l => l === ponto.linhaJogoFixa);
+    if(fixaIdx !== -1 && unicas.includes(fixaIdx)) blankIdx = fixaIdx;
+  }
+  if(blankIdx == null){
+    // prefere não esconder a primeira linha (mantém contexto pra quem vai
+    // completar), mas usa ela se for a única linha que não se repete
+    const candidatas = unicas.filter(i => i > 0);
+    const pool = candidatas.length ? candidatas : unicas;
+    blankIdx = pool[Math.floor(Math.random()*pool.length)];
+  }
   const answer = lines[blankIdx];
   current = { ponto, lines, blankIdx, answer, answerWords: answer.split(/\s+/).filter(Boolean), hintsUsados: 0 };
 
