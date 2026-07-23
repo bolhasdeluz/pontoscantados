@@ -115,6 +115,11 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 #blank-input:disabled{background:transparent;color:var(--green);font-style:normal;font-weight:600}
 #blank-input.wrong{color:var(--red)}
 
+.g-hint-words{display:none;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.g-hint-word{font-family:'Crimson Pro',serif;font-style:italic;font-size:.92rem;color:var(--text-dim);background:var(--gold-dim);border-radius:6px;padding:2px 8px;letter-spacing:.04em}
+.g-hint-word.revealed{color:var(--gold);font-weight:600;background:rgba(196,57,107,.14)}
+.g-points-badge{font-size:.7rem;font-weight:700;color:var(--gold);background:var(--gold-dim);border-radius:12px;padding:3px 10px;margin-left:6px;white-space:nowrap}
+
 .g-feedback{border-radius:12px;padding:12px 16px;font-size:.86rem;text-align:center;display:none}
 .g-feedback.show{display:block}
 .g-feedback.ok{background:var(--green-dim);color:var(--green)}
@@ -242,11 +247,12 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
     <div class="g-feedback" id="feedback"></div>
 
     <div class="g-actions" id="actions-check">
+      <button class="g-btn" id="btn-hint">💡 Dica</button>
       <button class="g-btn" id="btn-skip">Pular / Revelar</button>
       <button class="g-btn primary" id="btn-check">Conferir</button>
     </div>
     <div class="g-actions" id="actions-next" style="display:none">
-      <button class="g-btn" id="btn-force-correct" style="display:none">Considerar certo (+1)</button>
+      <button class="g-btn" id="btn-force-correct" style="display:none">Considerar certo</button>
       <button class="g-btn primary" id="btn-next">Próxima rodada →</button>
     </div>
 
@@ -310,12 +316,13 @@ function normalizarNomeRanking(nome){
   return (nome||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
 }
 
-window.registrarPontoRanking = async (nome) => {
+window.registrarPontoRanking = async (nome, valor) => {
   if(!db || !nome) return;
+  const pontos = typeof valor === 'number' ? valor : 1;
   const slug = normalizarNomeRanking(nome).replace(/[^a-z0-9]/gi,'_') || 'anonimo';
   try{
     await setDoc(doc(db, 'completa_ponto_resultados', 'nome_' + slug), {
-      nome, uid: null, pontos: increment(1), data: serverTimestamp(),
+      nome, uid: null, pontos: increment(pontos), data: serverTimestamp(),
     }, { merge: true });
   }catch(e){ /* offline ou sem permissão — não trava o jogo */ }
 };
@@ -563,7 +570,7 @@ function renderScoreboard(){
   wrap.innerHTML = players.map((p,i) => `
     <div class="g-score-chip${i===turnIdx?' turn':''}">
       <div class="g-score-name">${esc(p.name)}</div>
-      <div class="g-score-pts">${p.score}</div>
+      <div class="g-score-pts">${formatarPontos(p.score)}</div>
     </div>`).join('');
   document.getElementById('turn-name').textContent = players[turnIdx] ? players[turnIdx].name : '—';
 }
@@ -587,12 +594,14 @@ function startRound(){
   const candidatas = unicas.filter(i => i > 0);
   const pool = candidatas.length ? candidatas : unicas;
   const blankIdx = pool[Math.floor(Math.random()*pool.length)];
-  current = { ponto, lines, blankIdx, answer: lines[blankIdx] };
+  const answer = lines[blankIdx];
+  current = { ponto, lines, blankIdx, answer, answerWords: answer.split(/\s+/).filter(Boolean), hintsUsados: 0 };
 
-  // dica: linha/guia/dificuldade
+  // dica: linha/guia/dificuldade/pontos da rodada
   const hints = [ponto.linha, ponto.guia].filter(Boolean);
   document.getElementById('hint-row').innerHTML = hints.map(h => `<span class="g-hint-chip">${esc(h)}</span>`).join('')
     + '<span class="g-diff-badge sem-dados" id="diff-badge">…</span>'
+    + '<span class="g-points-badge" id="pontos-rodada-badge"></span>'
     + (ponto.audioUrl ? `<button class="g-play-btn" id="btn-play-audio">▶ Ouvir</button>` : '');
   const playBtn = document.getElementById('btn-play-audio');
   if(playBtn) playBtn.addEventListener('click', () => playCurrentAudio());
@@ -659,13 +668,51 @@ function renderLyrics(){
   const card = document.getElementById('lyrics-card');
   card.innerHTML = current.lines.map((line,i) => {
     if(i === current.blankIdx){
-      return `<div class="g-lyrics-line blank-line"><input id="blank-input" type="text" placeholder="Complete a linha que falta…" autocomplete="off"></div>`;
+      return `<div class="g-lyrics-line blank-line">
+        <div class="g-hint-words" id="hint-words"></div>
+        <input id="blank-input" type="text" placeholder="Complete a linha que falta…" autocomplete="off">
+      </div>`;
     }
     return `<div class="g-lyrics-line">${esc(line)}</div>`;
   }).join('');
+  renderHintWords();
   const input = document.getElementById('blank-input');
   input.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); checkAnswer(); } });
   input.focus();
+}
+
+// ── sistema de dica: revela uma palavra por vez da linha escondida, e cada
+// dica usada reduz o valor da rodada (5 pontos sem ajuda, -0.5 por dica,
+// mínimo 0). A dica só revela texto pra ajudar a lembrar — quem quiser o
+// ponto continua precisando digitar e clicar em "Conferir"; o botão de
+// dica desativa sozinho quando não há mais palavra pra revelar ou o valor
+// já chegou a zero ──
+function valorRodada(){
+  return Math.max(0, 5 - (current?.hintsUsados || 0) * 0.5);
+}
+function formatarPontos(v){
+  return (Math.round(v * 10) / 10).toString().replace('.', ',');
+}
+function renderHintWords(){
+  const wrap = document.getElementById('hint-words');
+  const badge = document.getElementById('pontos-rodada-badge');
+  const valor = valorRodada();
+  if(badge) badge.textContent = 'vale ' + formatarPontos(valor) + (valor === 1 ? ' ponto' : ' pontos');
+  const btnHint = document.getElementById('btn-hint');
+  if(btnHint) btnHint.disabled = !current || current.hintsUsados >= current.answerWords.length || valor <= 0;
+  if(!wrap || !current) return;
+  if(current.hintsUsados <= 0){ wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+  wrap.style.display = 'flex';
+  wrap.innerHTML = current.answerWords.map((w,i) => i < current.hintsUsados
+    ? `<span class="g-hint-word revealed">${esc(w)}</span>`
+    : `<span class="g-hint-word">•••</span>`
+  ).join('');
+}
+function pedirDica(){
+  if(checked || !current) return;
+  if(current.hintsUsados >= current.answerWords.length || valorRodada() <= 0) return;
+  current.hintsUsados++;
+  renderHintWords();
 }
 function playCurrentAudio(){
   const p = current.ponto;
@@ -691,8 +738,9 @@ function checkAnswer(){
   const fb = document.getElementById('feedback');
   if(isCorrect){
     fb.className = 'g-feedback show ok';
-    fb.innerHTML = '🎉 Acertou!';
-    awardPoint();
+    const valor = valorRodada();
+    fb.innerHTML = `🎉 Acertou! <b>+${formatarPontos(valor)}</b>`;
+    awardPoint(valor);
   } else {
     input.classList.add('wrong');
     fb.className = 'g-feedback show no';
@@ -719,11 +767,12 @@ function revealAnswer(){
   document.getElementById('rate-row').style.display = 'block';
   document.getElementById('btn-suggest-toggle').style.display = 'block';
 }
-function awardPoint(){
-  players[turnIdx].score += 1;
+function awardPoint(valor){
+  const v = typeof valor === 'number' ? valor : 1;
+  players[turnIdx].score = Math.round((players[turnIdx].score + v) * 10) / 10;
   renderScoreboard();
   saveState();
-  if(window.registrarPontoRanking) window.registrarPontoRanking(players[turnIdx].name);
+  if(window.registrarPontoRanking) window.registrarPontoRanking(players[turnIdx].name, v);
 }
 function nextRound(){
   document.getElementById('btn-force-correct').style.display = 'none';
@@ -733,14 +782,16 @@ function nextRound(){
 }
 
 document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-hint').addEventListener('click', pedirDica);
 document.getElementById('btn-skip').addEventListener('click', revealAnswer);
 document.getElementById('btn-next').addEventListener('click', nextRound);
 document.getElementById('btn-force-correct').addEventListener('click', () => {
   document.getElementById('btn-force-correct').style.display = 'none';
   const fb = document.getElementById('feedback');
+  const valor = valorRodada();
   fb.className = 'g-feedback show ok';
-  fb.innerHTML = '🎉 Considerado certo!';
-  awardPoint();
+  fb.innerHTML = `🎉 Considerado certo! <b>+${formatarPontos(valor)}</b>`;
+  awardPoint(valor);
 });
 document.getElementById('btn-reset').addEventListener('click', () => {
   if(!confirm('Reiniciar o jogo? O placar atual vai ser perdido.')) return;
