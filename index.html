@@ -1559,6 +1559,22 @@ let firebaseApp = null;
 let firebaseAuth = null;
 let firebaseAuthReady = false;
 
+// ── HANDOFF DE LOGIN AUTOMÁTICO VINDO DO HOMEPAGE ──
+// captura o #ct=<customToken> anexado pelo homepage assim que a página
+// carrega e já limpa a URL, antes de qualquer outra coisa mexer no hash
+let handoffToken = null;
+(function capturarHandoffToken() {
+  try {
+    const hash = window.location.hash || '';
+    const m = hash.match(/[#&]ct=([^&]+)/);
+    if (!m) return;
+    handoffToken = decodeURIComponent(m[1]);
+    const hashLimpo = hash.replace(/[#&]ct=[^&]+/, '').replace(/^&/, '');
+    const novoHash = hashLimpo && hashLimpo !== '#' ? (hashLimpo.startsWith('#') ? hashLimpo : '#' + hashLimpo) : '';
+    history.replaceState(null, '', window.location.pathname + window.location.search + novoHash);
+  } catch {}
+})();
+
 // ── LINHAS ──
 function loadLinhas() {
   try { linhas = JSON.parse(localStorage.getItem('pontos_linhas') || '[]'); }
@@ -1980,6 +1996,19 @@ async function initFirebaseAuth() {
           renderProfileState();
         }
       });
+
+      if (handoffToken && !firebaseAuth.currentUser) {
+        const tokenParaUsar = handoffToken;
+        handoffToken = null; // uso único
+        logAuth('Tentando login automático via handoff do homepage…');
+        try {
+          await firebaseAuth.signInWithCustomToken(tokenParaUsar);
+          logAuth('Login automático via handoff concluído.');
+        } catch (e) {
+          logAuth(`Falha no login automático via handoff — ${e?.message || e}`);
+        }
+      }
+
       logAuth(`currentUser ao carregar a página: ${firebaseAuth.currentUser ? (firebaseAuth.currentUser.email || firebaseAuth.currentUser.uid) : 'nenhum'}`);
       if (firebaseAuth.currentUser) {
         applyFirebaseUserToState(firebaseAuth.currentUser);
