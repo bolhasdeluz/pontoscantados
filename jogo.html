@@ -454,8 +454,15 @@ function iniciarJogoAutomatico(nome) {
 window.renderHeaderUserBadge = renderHeaderUserBadge;
 window.iniciarJogoAutomatico = iniciarJogoAutomatico;
 
+// algumas letras marcam repeti\u00e7\u00e3o no fim da linha (ex: "...noite 4x", "(2x)")
+// \u2014 isso \u00e9 s\u00f3 uma anota\u00e7\u00e3o de quantas vezes se canta, ningu\u00e9m "fala" o "4x"
+// ao completar a frase, ent\u00e3o nem a compara\u00e7\u00e3o de resposta nem as palavras
+// de dica devem considerar esse marcador como parte do texto
+function removerMarcadorRepeticao(s){
+  return (s||'').replace(/\s*\(?\d+\s*[xX]\)?\s*$/, '').trim();
+}
 function normalizeText(s){
-  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
+  return removerMarcadorRepeticao(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
 }
 function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -606,7 +613,7 @@ function startRound(){
     blankIdx = pool[Math.floor(Math.random()*pool.length)];
   }
   const answer = lines[blankIdx];
-  current = { ponto, lines, blankIdx, answer, answerWords: answer.split(/\s+/).filter(Boolean), hintsUsados: 0 };
+  current = { ponto, lines, blankIdx, answer, answerWords: removerMarcadorRepeticao(answer).split(/\s+/).filter(Boolean), hintsUsados: 0 };
 
   // dica: linha/guia/dificuldade/pontos da rodada
   const hints = [ponto.linha, ponto.guia].filter(Boolean);
