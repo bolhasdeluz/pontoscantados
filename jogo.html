@@ -10,10 +10,61 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14px 18px 18px;text-align:center;box-shadow:0 2px 20px rgba(180,60,90,.25)}
-.g-header-top{display:flex;justify-content:flex-start;margin-bottom:10px}
+.g-header-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .g-back{color:rgba(255,255,255,.85);text-decoration:none;font-size:.78rem;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:5px 12px}
 .g-title{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;color:#fff;letter-spacing:.04em}
 .g-sub{font-family:'Crimson Pro',serif;font-style:italic;color:rgba(255,255,255,.82);font-size:.86rem;margin-top:4px}
+
+/* ── barra de topo + avatar de login + drawer — mesmo componente do index.html,
+   pra manter o cabeçalho padrão do site também aqui no jogo ── */
+.topo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.topo-bdl-home{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.9);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:5px 12px;transition:background .18s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.topo-bdl-home:hover{background:rgba(255,255,255,.25)}
+#menu-hint-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.9);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:5px 12px;display:inline-flex;align-items:center;gap:6px;transition:background .18s}
+#menu-hint-btn:hover{background:rgba(255,255,255,.25)}
+#hint-arrow-svg{transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#menu-hint-btn.open #hint-arrow-svg{transform:rotate(180deg)}
+
+#drawer-overlay{display:none;position:fixed;inset:0;z-index:1050;background:rgba(46,26,14,.4);backdrop-filter:blur(2px)}
+#drawer-overlay.open{display:block}
+#drawer{position:fixed;left:0;right:0;bottom:0;z-index:1060;max-height:78vh;background:var(--bg);border-top:1px solid var(--border);border-radius:18px 18px 0 0;box-shadow:0 -8px 32px rgba(46,26,14,.14);transform:translateY(100%);transition:transform .34s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+#drawer.open{transform:translateY(0)}
+.drawer-handle{display:flex;align-items:center;justify-content:center;padding:10px 0 4px;cursor:pointer;flex-shrink:0}
+.drawer-handle-pill{width:32px;height:3px;border-radius:3px;background:rgba(196,90,30,.18)}
+.drawer-header{padding:6px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.drawer-logo{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;color:var(--gold);letter-spacing:.1em}
+.drawer-close{background:none;border:none;font-size:1.4rem;color:var(--text-dim);line-height:1;padding:2px 6px;cursor:pointer}
+.drawer-close:hover{color:var(--gold)}
+.drawer-body-scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.drawer-section{padding:14px 16px 4px}
+.drawer-section-label{font-family:'Cinzel',serif;font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(196,90,30,.5);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.drawer-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.drawer-link{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid rgba(196,90,30,.07);font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.05em;color:var(--text);background:none;width:100%;text-align:left;transition:color .2s;text-decoration:none}
+.drawer-link:hover{color:var(--gold)}
+.drawer-link:last-child{border-bottom:none}
+.drawer-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:rgba(196,90,30,.22)}
+.drawer-dot.mem{background:rgba(196,57,107,.28)}
+.drawer-footer{padding:14px 20px;border-top:1px solid var(--border);font-family:'Crimson Pro',serif;font-size:.78rem;color:var(--text-dim);font-style:italic;text-align:center;flex-shrink:0}
+
+.header-user-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 8px 5px 5px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(8px);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.16);max-width:210px;transition:background .18s,border-color .18s;flex-shrink:1;min-width:0}
+.header-user-pill.is-guest{cursor:pointer}
+.header-user-pill.is-guest:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.45)}
+.header-user-pill.is-guest:active{transform:scale(.97)}
+.header-user-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.22);flex-shrink:0}
+.header-user-text{display:flex;flex-direction:column;line-height:1.15;min-width:0;overflow:hidden}
+.header-user-name{font-weight:700;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-user-meta{display:block;font-size:.68rem;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.header-logout-btn{margin-left:2px;flex-shrink:0;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:5px 9px;font-size:.68rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.header-logout-btn:hover{background:rgba(255,255,255,.3)}
+@media(max-width:600px){
+  .header-user-pill{max-width:132px}
+  .header-user-meta{display:none}
+  .header-user-avatar{width:26px;height:26px}
+}
+@media(max-width:420px){
+  .header-user-pill{max-width:44px;padding:5px}
+  .header-user-text{display:none}
+}
 
 .g-main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:18px}
 
@@ -107,8 +158,53 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 </head>
 <body>
 
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="drawer-handle" onclick="closeDrawer()"><div class="drawer-handle-pill"></div></div>
+  <div class="drawer-header">
+    <span class="drawer-logo">Bolhas de Luz</span>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body-scroll">
+    <div class="drawer-section">
+      <div class="drawer-section-label">Público</div>
+      <a class="drawer-link" href="https://bolhasdeluz.ong.br"><span class="drawer-dot"></span>← Voltar ao site</a>
+      <a class="drawer-link" href="https://bolhasdeluz.ong.br/calendario.html"><span class="drawer-dot"></span>Sessões & Eventos</a>
+      <a class="drawer-link" href="https://floraselojas.pages.dev" target="_blank"><span class="drawer-dot"></span>Guia de Lojas</a>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-label">Jogos</div>
+      <a class="drawer-link" href="jogo.html"><span class="drawer-dot"></span>Completa o Ponto</a>
+    </div>
+    <div class="drawer-section" id="drawer-corrente" style="display:none">
+      <div class="drawer-section-label">Corrente</div>
+      <a class="drawer-link" href="https://bolhasdeluz.ong.br/tesouraria"><span class="drawer-dot mem"></span>Tesouraria</a>
+      <a class="drawer-link" href="https://bolhasdeluz.ong.br/filhas"><span class="drawer-dot mem"></span>Filhas da Casa</a>
+      <a class="drawer-link" href="https://regimentointerno.bolhasdeluz.workers.dev/" target="_blank"><span class="drawer-dot mem"></span>Regimento Interno</a>
+    </div>
+  </div>
+  <div class="drawer-footer">Terreiro Bolhas de Luz · Porto Alegre, RS</div>
+</div>
+
 <header>
-  <div class="g-header-top"><a class="g-back" href="index.html">← Pontos Cantados</a></div>
+  <div class="topo-row">
+    <a class="topo-bdl-home" href="https://bolhasdeluz.ong.br">✦ Bolhas de Luz</a>
+    <button id="menu-hint-btn" onclick="toggleDrawer()">
+      Ferramentas
+      <svg width="12" height="8" viewBox="0 0 20 12" fill="none" id="hint-arrow-svg"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="g-header-top">
+    <a class="g-back" href="index.html">← Pontos Cantados</a>
+    <div class="header-user-pill is-guest" id="header-user-pill" onclick="handleHeaderPillClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')handleHeaderPillClick()">
+      <img class="header-user-avatar" id="header-user-avatar" src="https://placehold.co/40x40?text=U" alt="avatar">
+      <span class="header-user-text">
+        <span class="header-user-name" id="header-user-name">Entrar</span>
+        <span class="header-user-meta" id="header-user-meta">com Google</span>
+      </span>
+      <button class="header-logout-btn" id="header-logout-btn" type="button" onclick="event.stopPropagation();jogoLogout()" style="display:none">Sair</button>
+    </div>
+  </div>
   <div class="g-title">Completa o Ponto</div>
   <div class="g-sub">Jogo de roda · Terreiro Bolhas de Luz</div>
 </header>
@@ -185,12 +281,16 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, setDoc, increment, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
+  signInWithCustomToken, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 // mesmo projeto Firebase do site principal (Bolhas de Luz) — os pontos daqui
 // entram no ranking geral e nos painéis de "Sua Terreirinha", igual aos
-// outros jogos (Palavra do Dia, Verdadeiro ou Falso). Sem exigir login: cada
-// jogador entra pelo nome digitado, mesma convenção "anônima" que os outros
-// jogos já usam pra quem não está logada.
+// outros jogos (Palavra do Dia, Verdadeiro ou Falso). O jogo em si continua
+// sem exigir login (cada jogador pode entrar só pelo nome digitado), mas
+// quem chega logada (direto ou via handoff do homepage) tem a conta
+// reconhecida no cabeçalho e pré-adicionada como jogadora.
 const firebaseConfig = {
   apiKey: "AIzaSyDZ_vFMHZ7t7nyJWJPRfD280VZzagqY5Ws",
   authDomain: "terreiro-bolhas-de-luz.firebaseapp.com",
@@ -201,11 +301,10 @@ const firebaseConfig = {
   measurementId: "G-6Z1WED2GB1",
 };
 
+const firebaseApp = initializeApp(firebaseConfig);
+
 let db = null;
-try{
-  const app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-}catch(e){ /* sem ranking, mas o jogo continua funcionando normal */ }
+try{ db = getFirestore(firebaseApp); }catch(e){ /* sem ranking, mas o jogo continua funcionando normal */ }
 
 function normalizarNomeRanking(nome){
   return (nome||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
@@ -220,6 +319,63 @@ window.registrarPontoRanking = async (nome) => {
     }, { merge: true });
   }catch(e){ /* offline ou sem permissão — não trava o jogo */ }
 };
+
+// ── LOGIN (handoff automático do homepage + botão manual) ──
+// captura o #ct=<customToken> anexado pelo homepage (mesmo mecanismo do
+// index.html) assim que a página carrega, antes de qualquer outra coisa
+// mexer no hash
+let handoffToken = null;
+(function capturarHandoffToken(){
+  try{
+    const hash = window.location.hash || '';
+    const m = hash.match(/[#&]ct=([^&]+)/);
+    if(!m) return;
+    handoffToken = decodeURIComponent(m[1]);
+    const hashLimpo = hash.replace(/[#&]ct=[^&]+/, '').replace(/^&/, '');
+    const novoHash = hashLimpo && hashLimpo !== '#' ? (hashLimpo.startsWith('#') ? hashLimpo : '#' + hashLimpo) : '';
+    history.replaceState(null, '', window.location.pathname + window.location.search + novoHash);
+  }catch(e){}
+})();
+
+const auth = getAuth(firebaseApp);
+
+async function syncProfile(user){
+  let novoUser = null;
+  try{
+    const idToken = await user.getIdToken();
+    const res = await fetch('/api/auth', { headers: { Authorization: `Bearer ${idToken}` } });
+    const data = await res.json().catch(() => ({}));
+    if(res.ok && data.user) novoUser = data.user;
+  }catch(e){ console.error('Falha ao sincronizar perfil:', e); }
+  window.renderHeaderUserBadge?.(novoUser);
+  if(novoUser) window.adicionarJogadorAutomatico?.(novoUser.name || novoUser.email);
+}
+
+setPersistence(auth, browserLocalPersistence).catch(() => {});
+onAuthStateChanged(auth, user => {
+  if(user) syncProfile(user);
+  else window.renderHeaderUserBadge?.(null);
+});
+
+(async () => {
+  if(handoffToken){
+    const token = handoffToken;
+    handoffToken = null; // uso único
+    try{ await signInWithCustomToken(auth, token); }
+    catch(e){ console.error('Login automático via handoff falhou:', e); }
+  }
+  try{ await getRedirectResult(auth); }catch(e){}
+})();
+
+window.jogoFazerLogin = async () => {
+  const provider = new GoogleAuthProvider();
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  try{
+    if(isMobile) await signInWithRedirect(auth, provider);
+    else await signInWithPopup(auth, provider);
+  }catch(e){ console.error('Login com Google falhou:', e); }
+};
+window.jogoLogout = () => signOut(auth).catch(() => {});
 </script>
 
 <script>
@@ -233,6 +389,61 @@ let current = null;  // { ponto, lines, blankIdx, answer }
 let checked = false;
 let dificuldadeAtual = { facil: 0, medio: 0, dificil: 0 };
 let jaVotouDificuldade = false;
+
+// ── barra de topo (drawer) e pill de login — mesmo cabeçalho padrão do
+// Pontos Cantados, só que aqui na tela do jogo ──
+function toggleDrawer() {
+  const d = document.getElementById('drawer'), o = document.getElementById('drawer-overlay'), t = document.getElementById('menu-hint-btn');
+  const open = d.classList.contains('open');
+  d.classList.toggle('open'); o.classList.toggle('open'); t.classList.toggle('open');
+  document.body.style.overflow = open ? '' : 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('menu-hint-btn').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function renderHeaderUserBadge(user) {
+  const pill = document.getElementById('header-user-pill');
+  const name = document.getElementById('header-user-name');
+  const meta = document.getElementById('header-user-meta');
+  const avatar = document.getElementById('header-user-avatar');
+  const logoutBtn = document.getElementById('header-logout-btn');
+  const drawerCorrente = document.getElementById('drawer-corrente');
+  if (drawerCorrente) drawerCorrente.style.display = user ? 'block' : 'none';
+  if (!pill || !name || !meta || !avatar) return;
+  if (!user) {
+    pill.classList.add('is-guest');
+    name.textContent = 'Entrar';
+    meta.textContent = 'com Google';
+    avatar.src = 'https://placehold.co/40x40?text=%3F';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    return;
+  }
+  pill.classList.remove('is-guest');
+  name.textContent = user.name || user.email || 'Usuário';
+  meta.textContent = user.isAdmin ? 'Administrador' : 'Usuário logado';
+  avatar.src = user.picture || 'https://placehold.co/40x40?text=U';
+  if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+}
+function handleHeaderPillClick() {
+  window.jogoFazerLogin?.();
+}
+// pré-adiciona quem está logada na lista de jogadores, uma única vez por
+// carregamento de página, e só se ainda não escolheu jogadores nem retomou
+// uma partida salva
+let jaAdicionouJogadorAuto = false;
+function adicionarJogadorAutomatico(nome) {
+  if (!nome || jaAdicionouJogadorAuto) return;
+  if (document.getElementById('setup-screen').style.display === 'none') return;
+  if (players.some(p => p.name === nome)) return;
+  jaAdicionouJogadorAuto = true;
+  players.push({ name: nome, score: 0 });
+  renderPlayerChips();
+}
+window.renderHeaderUserBadge = renderHeaderUserBadge;
+window.adicionarJogadorAutomatico = adicionarJogadorAutomatico;
 
 function normalizeText(s){
   return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
