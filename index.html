@@ -912,6 +912,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup
   </button>
   <button class="hbtn" onclick="tsAbrir()" style="background:rgba(255,255,255,.12)">🎙️ Transcrever</button>
+  <button class="hbtn" id="btn-abrir-correcoes" onclick="abrirCorrecoes()" style="background:rgba(255,255,255,.12)">💡 Sugestões</button>
   <button class="hbtn" onclick="sairAdmin()" style="background:rgba(0,0,0,.15)">Sair</button>
 </div>
 
@@ -1072,6 +1073,16 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
       <input type="text" id="nova-linha-input" placeholder="Nome da linha...">
       <button class="btn-save" onclick="adicionarLinha()" style="padding:9px 16px;flex-shrink:0">Adicionar</button>
     </div>
+  </div>
+</div>
+
+<!-- SUGESTÕES DE CORREÇÃO (mandadas do jogo Completa o Ponto) -->
+<div class="overlay" id="ov-correcoes">
+  <div class="modal" style="max-width:480px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-correcoes')">✕</button>
+    <h2>Sugestões de correção</h2>
+    <p style="font-size:.8rem;color:var(--text-dim);margin:-6px 0 14px">Mandadas por quem jogou "Completa o Ponto". Não aplicam nada sozinhas — revise e edite o ponto na mão se fizer sentido.</p>
+    <div id="correcoes-list" style="display:flex;flex-direction:column;gap:10px;min-height:40px"></div>
   </div>
 </div>
 
@@ -1593,6 +1604,56 @@ function abrirGerenciarLinhas() {
   abrirModal('ov-linhas');
 }
 
+// ── sugestões de correção (mandadas pelo jogo "Completa o Ponto") ──
+async function atualizarContadorCorrecoes() {
+  const btn = document.getElementById('btn-abrir-correcoes');
+  if (!btn) return;
+  try {
+    const res = await fetch('/api/correcoes');
+    const lista = await res.json();
+    btn.textContent = '💡 Sugestões' + (lista.length ? ` (${lista.length})` : '');
+  } catch (e) {}
+}
+async function abrirCorrecoes() {
+  const el = document.getElementById('correcoes-list');
+  el.innerHTML = '<p class="linhas-empty">Carregando…</p>';
+  abrirModal('ov-correcoes');
+  try {
+    const res = await fetch('/api/correcoes');
+    const lista = await res.json();
+    renderCorrecoesModal(lista);
+  } catch (e) {
+    el.innerHTML = '<p class="linhas-empty">Erro ao carregar sugestões.</p>';
+  }
+}
+function renderCorrecoesModal(lista) {
+  const el = document.getElementById('correcoes-list');
+  if (!lista.length) {
+    el.innerHTML = '<p class="linhas-empty">Nenhuma sugestão pendente. 🎉</p>';
+    return;
+  }
+  el.innerHTML = lista.map(c => `
+    <div class="linha-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <strong style="color:var(--gold);font-size:.85rem">${esc(c.pontoNome || c.pontoId)}</strong>
+        <button class="btn-rm-linha" onclick="descartarCorrecao('${c.id}')" title="Marcar como revisada">✕</button>
+      </div>
+      <div style="font-size:.85rem;color:var(--text);white-space:pre-wrap">${esc(c.texto)}</div>
+      <div style="font-size:.7rem;color:var(--text-dim)">${new Date(c.criadoEm).toLocaleString('pt-BR')}</div>
+    </div>`).join('');
+}
+async function descartarCorrecao(id) {
+  try {
+    await fetch('/api/correcoes?id=' + encodeURIComponent(id), { method: 'DELETE' });
+    const res = await fetch('/api/correcoes');
+    const lista = await res.json();
+    renderCorrecoesModal(lista);
+    atualizarContadorCorrecoes();
+  } catch (e) {
+    toast('Não deu pra remover agora.');
+  }
+}
+
 function renderLinhasModal() {
   const el = document.getElementById('linhas-list');
   if (!linhas.length) {
@@ -1796,6 +1857,7 @@ function ativarAdmin() {
   document.getElementById('admin-toggle-input').checked = true;
   document.getElementById('admin-bar').style.display = 'flex';
   document.getElementById('subtitle').textContent = '✏️ Modo edição ativo';
+  atualizarContadorCorrecoes();
 }
 
 function sairAdmin() {
