@@ -466,6 +466,58 @@ function normalizeText(s){
 }
 function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// \u2500\u2500 toler\u00e2ncia a pequenos erros de digita\u00e7\u00e3o/portugu\u00eas \u2500\u2500
+// compara a resposta digitada com a certa palavra por palavra: erro de
+// letra dentro de uma palavra (typo, "roza"/"rosa") n\u00e3o conta contra a
+// pessoa; o or\u00e7amento de 1 "edi\u00e7\u00e3o de palavra inteira" no total perdoa uma
+// conectiva curta faltando/sobrando ("a", "o", "e"...), mas nunca aceita
+// uma palavra de conte\u00fado diferente no lugar de outra (isso j\u00e1 n\u00e3o \u00e9
+// "pequeno erro", \u00e9 resposta errada mesmo)
+function distanciaLevenshtein(a, b){
+  const m = a.length, n = b.length;
+  if(m === 0) return n;
+  if(n === 0) return m;
+  const dp = new Array(n+1);
+  for(let j=0;j<=n;j++) dp[j] = j;
+  for(let i=1;i<=m;i++){
+    let prev = dp[0];
+    dp[0] = i;
+    for(let j=1;j<=n;j++){
+      const temp = dp[j];
+      dp[j] = a[i-1] === b[j-1] ? prev : 1 + Math.min(prev, dp[j], dp[j-1]);
+      prev = temp;
+    }
+  }
+  return dp[n];
+}
+function toleranciaPalavra(len){ return len <= 3 ? 1 : (len <= 7 ? 2 : 3); }
+function palavrasParecidas(a, b){
+  if(a === b) return true;
+  return distanciaLevenshtein(a, b) <= toleranciaPalavra(Math.max(a.length, b.length));
+}
+function distanciaPalavras(wd, wr){
+  const m = wd.length, n = wr.length;
+  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0] = i;
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      // palavra parecida (typo) custa 0; palavra diferente custa 2 (igual a
+      // apagar + inserir), ent\u00e3o s\u00f3 inserir OU s\u00f3 apagar uma palavra
+      // inteira (custo 1) cabe no or\u00e7amento \u2014 trocar por uma diferente n\u00e3o
+      const custoSub = palavrasParecidas(wd[i-1], wr[j-1]) ? 0 : 2;
+      dp[i][j] = Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + custoSub);
+    }
+  }
+  return dp[m][n];
+}
+function respostaAceitavel(digitado, resposta){
+  const wd = normalizeText(digitado).split(' ').filter(Boolean);
+  const wr = normalizeText(resposta).split(' ').filter(Boolean);
+  if(!wd.length) return false;
+  return distanciaPalavras(wd, wr) <= 1;
+}
+
 // \u00edndices das linhas cujo texto (normalizado) N\u00c3O se repete em nenhuma outra
 // linha do ponto \u2014 s\u00f3 essas podem virar a lacuna, sen\u00e3o a resposta fica
 // vis\u00edvel ali embaixo (ou em cima) numa linha repetida
@@ -749,7 +801,7 @@ function checkAnswer(){
   checked = true;
   const input = document.getElementById('blank-input');
   const typed = input.value;
-  const isCorrect = normalizeText(typed) === normalizeText(current.answer) && normalizeText(typed).length > 0;
+  const isCorrect = respostaAceitavel(typed, current.answer);
   input.disabled = true;
   input.value = current.answer;
 
