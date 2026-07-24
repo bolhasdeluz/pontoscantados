@@ -94,6 +94,7 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 .g-hint-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .g-hint-chip{background:var(--gold-dim);color:var(--gold);border-radius:14px;padding:4px 12px;font-size:.72rem;font-weight:600}
 .g-play-btn{background:linear-gradient(135deg,#c4396b,#e8688a);border:none;color:#fff;border-radius:20px;padding:8px 16px;font-size:.8rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin:0 auto}
+#actions-next .g-play-btn{margin:0}
 .g-play-btn:hover{opacity:.92}
 
 .g-lyrics-card{background:linear-gradient(160deg,#fff,#fff7f8);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:0 2px 14px rgba(46,26,14,.06)}
@@ -238,6 +239,7 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
       <button class="g-btn primary" id="btn-check">Conferir</button>
     </div>
     <div class="g-actions" id="actions-next" style="display:none">
+      <button class="g-play-btn" id="btn-play-audio" style="display:none">▶ Ouvir</button>
       <button class="g-btn" id="btn-force-correct" style="display:none">Considerar certo</button>
       <button class="g-btn primary" id="btn-next">Próxima rodada →</button>
     </div>
@@ -657,14 +659,15 @@ function startRound(){
   const answer = lines[blankIdx];
   current = { ponto, lines, blankIdx, answer, answerWords: removerMarcadorRepeticao(answer).split(/\s+/).filter(Boolean), hintsUsados: 0, segundaChance: false };
 
-  // dica: linha/guia/dificuldade/pontos da rodada
+  // dica: linha/guia/dificuldade/pontos da rodada — sem o "Ouvir" aqui de
+  // propósito, pra não deixar escutar o áudio (e colar a resposta) enquanto
+  // ainda está tentando responder; ele só aparece depois que a rodada acaba
+  // (finalizarRodada/revealAnswer mostram o botão junto com "Próxima rodada")
   const hints = [ponto.linha, ponto.guia].filter(Boolean);
   document.getElementById('hint-row').innerHTML = hints.map(h => `<span class="g-hint-chip">${esc(h)}</span>`).join('')
     + '<span class="g-diff-badge sem-dados" id="diff-badge">…</span>'
-    + '<span class="g-points-badge" id="pontos-rodada-badge"></span>'
-    + (ponto.audioUrl ? `<button class="g-play-btn" id="btn-play-audio">▶ Ouvir</button>` : '');
-  const playBtn = document.getElementById('btn-play-audio');
-  if(playBtn) playBtn.addEventListener('click', () => playCurrentAudio());
+    + '<span class="g-points-badge" id="pontos-rodada-badge"></span>';
+  document.getElementById('btn-play-audio').style.display = 'none';
   carregarDificuldade(ponto.id);
 
   renderLyrics();
@@ -831,6 +834,7 @@ function finalizarRodada(isCorrect, valor){
   }
   document.getElementById('actions-check').style.display = 'none';
   document.getElementById('actions-next').style.display = 'flex';
+  document.getElementById('btn-play-audio').style.display = current.ponto.audioUrl ? 'inline-flex' : 'none';
   document.getElementById('rate-row').style.display = 'block';
   document.getElementById('btn-suggest-toggle').style.display = 'block';
 }
@@ -867,6 +871,7 @@ function revealAnswer(){
   fb.innerHTML = 'A resposta era: <span class="g-answer">' + esc(current.answer) + '</span>';
   document.getElementById('actions-check').style.display = 'none';
   document.getElementById('actions-next').style.display = 'flex';
+  document.getElementById('btn-play-audio').style.display = current.ponto.audioUrl ? 'inline-flex' : 'none';
   document.getElementById('btn-force-correct').style.display = 'inline-block';
   document.getElementById('rate-row').style.display = 'block';
   document.getElementById('btn-suggest-toggle').style.display = 'block';
@@ -887,6 +892,7 @@ function nextRound(){
 
 document.getElementById('btn-check').addEventListener('click', checkAnswer);
 document.getElementById('btn-hint').addEventListener('click', pedirDica);
+document.getElementById('btn-play-audio').addEventListener('click', () => playCurrentAudio());
 document.getElementById('btn-skip').addEventListener('click', revealAnswer);
 document.getElementById('btn-next').addEventListener('click', nextRound);
 document.getElementById('btn-force-correct').addEventListener('click', () => {
