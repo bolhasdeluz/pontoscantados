@@ -165,7 +165,7 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
   <div class="drawer-body-scroll">
     <div class="drawer-section">
       <div class="drawer-section-label">Público</div>
-      <a class="drawer-link" href="https://bolhasdeluz.ong.br"><span class="drawer-dot"></span>← Voltar ao site</a>
+      <a class="drawer-link" href="https://bolhasdeluz.ong.br" onclick="voltarParaHomepage('jogos');return false"><span class="drawer-dot"></span>← Voltar ao site</a>
       <a class="drawer-link" href="https://bolhasdeluz.ong.br/calendario.html"><span class="drawer-dot"></span>Sessões & Eventos</a>
       <a class="drawer-link" href="https://floraselojas.pages.dev" target="_blank"><span class="drawer-dot"></span>Guia de Lojas</a>
     </div>
@@ -185,7 +185,7 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 
 <header>
   <div class="topo-row">
-    <a class="topo-bdl-home" href="https://bolhasdeluz.ong.br">✦ Bolhas de Luz</a>
+    <a class="topo-bdl-home" href="https://bolhasdeluz.ong.br" onclick="voltarParaHomepage('jogos');return false">✦ Bolhas de Luz</a>
     <button id="menu-hint-btn" onclick="toggleDrawer()">
       Ferramentas
       <svg width="12" height="8" viewBox="0 0 20 12" fill="none" id="hint-arrow-svg"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -375,6 +375,37 @@ window.jogoFazerLogin = async () => {
   }catch(e){ console.error('Login com Google falhou:', e); }
 };
 window.jogoLogout = () => signOut(auth).catch(() => {});
+
+// ── handoff de volta pro homepage — mesmo mecanismo usado no sentido
+// contrário (link "Completa o Ponto" do menu do homepage), só que aqui
+// saindo. Sem isso o "Voltar ao site" abre deslogada, mesmo já tendo
+// entrado por aqui antes (sessões do Firebase Auth são isoladas por
+// origem/domínio). Se der qualquer errado, cai pro link normal. ──
+window.voltarParaHomepage = async (pagina) => {
+  const url = new URL('https://bolhasdeluz.ong.br/');
+  try {
+    if (auth.currentUser) {
+      const idToken = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/mint-handoff-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+      if (res.ok) {
+        const { customToken } = await res.json();
+        if (customToken) {
+          const params = new URLSearchParams();
+          params.set('ct', customToken);
+          if (pagina) params.set('pagina', pagina);
+          url.hash = params.toString();
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Handoff de volta pro homepage falhou:', e);
+  }
+  window.location.href = url.toString();
+};
 </script>
 
 <script>
