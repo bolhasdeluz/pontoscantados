@@ -230,6 +230,8 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .yt-player-wrap iframe{width:100%;height:100%;border:none;display:block}
 .yt-btn{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:var(--red-dim);border:1px solid rgba(184,64,64,.3);color:#e07070;padding:7px 14px;border-radius:5px;text-decoration:none;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
 .yt-btn:hover{background:rgba(184,64,64,.2)}
+.detalhe-share-btn{display:inline-flex;align-items:center;gap:6px;margin-top:2px;background:var(--gold-dim);border:1px solid var(--border);color:var(--gold);padding:7px 14px;border-radius:5px;cursor:pointer;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
+.detalhe-share-btn:hover{background:var(--gold);color:#fff}
 .empty{text-align:center;padding:60px 20px;color:var(--text-dim)}
 .empty-icon{font-size:36px;opacity:.3;margin-bottom:14px}
 .count-info{text-align:center;font-size:12px;color:var(--text-dim);font-family:'Cinzel',serif;letter-spacing:.08em;padding:4px 0 8px}
@@ -2801,6 +2803,7 @@ async function load() {
     syncGuiasFromData(); saveGuias();
     syncFilhasFromData(); saveFilhas();
     renderCards();
+    abrirPontoPeloHash();
     await fetchAuthUser();
   } catch (e) {
     clearTimeout(timeout);
@@ -3384,11 +3387,34 @@ function abrirDetalhe(id) {
       ${p.tipo ? `<span style="color:var(--text-dim);font-style:italic;font-size:14px">${esc(p.tipo)}</span>` : ''}
       ${p.isGuia && p.guia ? `<span style="font-size:14px;color:var(--text-dim)">🙏 ${esc(p.guia)}</span>` : ''}
     </div>
+    <button class="detalhe-share-btn" onclick="compartilharPonto('${p.id}')">🔗 Compartilhar este ponto</button>
     ${p.letra ? `<div class="detail-lyrics">${esc(p.letra).replace(/\n/g, '<br>')}</div>` : ''}
     ${p.audioUrl ? `${buildAudioPlayer(p)}` : ''}
     ${ytId ? `<button class="yt-toggle-btn" onclick="togglePlayer(this)">▶ Tocar aqui</button><div class="yt-player-wrap"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1&controls=1" allowfullscreen allow="autoplay"></iframe></div><a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">↗ Abrir no YouTube</a>` : p.yt ? `<a href="${esc(p.yt)}" target="_blank" rel="noopener" class="yt-btn">▶ Abrir no YouTube</a>` : ''}
     ${p.postadoPor ? `<p style="color:rgba(80,30,50,.4);font-size:13px;font-style:italic">por ${esc(p.postadoPor)}</p>` : ''}`;
   abrirModal('ov-detalhe');
+}
+
+// link direto de um ponto: mesmo formato que o botão de compartilhar da tela
+// "tocando agora" já usa (#ponto-<id>) — copia/compartilha e, no carregamento
+// da página, abre a página inteira já no ponto certo (ver abrirPontoPeloHash)
+window.compartilharPonto = async (id) => {
+  const p = pontos.find(x => x.id === id);
+  if (!p) return;
+  const url = location.href.split('#')[0] + '#ponto-' + p.id;
+  const text = (p.nome || 'Ponto cantado') + (p.guia ? ' · ' + p.guia : '') + (p.linha ? ' · ' + p.linha : '') + ' — Pontos Cantados, Bolhas de Luz';
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Pontos Cantados', text, url }); } catch (e) { /* usuário cancelou */ }
+    return;
+  }
+  try { await navigator.clipboard.writeText(url); toast('Link copiado!'); }
+  catch (e) { toast('Não foi possível copiar o link'); }
+};
+function abrirPontoPeloHash() {
+  const m = (window.location.hash || '').match(/^#ponto-(.+)$/);
+  if (!m) return;
+  const id = decodeURIComponent(m[1]);
+  if (pontos.some(p => p.id === id)) abrirDetalhe(id);
 }
 
 // ── CRUD ──
