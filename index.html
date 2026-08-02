@@ -1295,6 +1295,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
           <span class="ts-wf-hint">Arrastar=trecho · 2×clique=marcação · <span style="color:#2a7a60">faixa verde = já virou ponto</span></span>
           <button class="ts-zoom-btn" id="ts-toggle-green" style="margin-left:auto" title="Mostrar/ocultar as faixas verdes dos trechos que já viraram ponto">🟢 Ocultar verdes</button>
         </div>
+        <div class="ts-wf-hint" style="display:block;padding:0 2px 6px" title="Só funcionam fora de campos de texto">⌨ Espaço=play/pause · ←→=5s (Shift=30s) · I/O=início/fim do trecho · Enter=usar como ponto · Delete=limpar · M=marcar ponto na parte ativa</div>
         <div class="ts-wf-scroll" id="ts-wf-scroll">
           <canvas id="ts-ruler-canvas" height="24"></canvas>
           <canvas id="ts-wf-canvas" height="140"></canvas>
@@ -4778,6 +4779,24 @@ g('ts-btn-copy-trecho').addEventListener('click',()=>{
   if(selS===null)return;
   const ww=words.filter(w=>w.start>=selS&&w.end<=selE+0.1);
   navigator.clipboard.writeText('['+fmt(selS)+' → '+fmt(selE)+']\n'+ww.map(w=>w.word).join(' ')).then(()=>toast('Copiado ✓'));
+});
+
+// ── atalhos de teclado pra edição/corte — só ativos com a ferramenta de
+// transcrição aberta e fora de campos de texto (senão atrapalha digitar) ──
+document.addEventListener('keydown',e=>{
+  if(!g('ov-transcricao')?.classList.contains('open'))return;
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||e.target.isContentEditable)return;
+  switch(e.code){
+    case 'Space': e.preventDefault(); g('ts-play-btn').click(); break;
+    case 'ArrowLeft': e.preventDefault(); aud.currentTime=Math.max(0,aud.currentTime-(e.shiftKey?30:5)); break;
+    case 'ArrowRight': e.preventDefault(); aud.currentTime=Math.min(aud.duration||Infinity,aud.currentTime+(e.shiftKey?30:5)); break;
+    case 'KeyI': e.preventDefault(); g('ts-btn-selset-start').click(); break;
+    case 'KeyO': e.preventDefault(); g('ts-btn-selset-end').click(); break;
+    case 'Enter': e.preventDefault(); g('ts-btn-usar').click(); break;
+    case 'Backspace': case 'Delete': e.preventDefault(); clearSel(); break;
+    case 'KeyM': e.preventDefault(); g('ts-btn-mark-ponto').click(); break;
+  }
 });
 
 g('ts-btn-search-google').addEventListener('click',()=>{
