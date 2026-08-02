@@ -17,6 +17,15 @@ export async function onRequest(context) {
   const KV = env.PONTOS_KV;
   if (!KV) return json({ error: 'KV não configurado.' }, 500);
 
+  // leitura de UMA playlist pública por id não exige login — é o que permite o
+  // link de compartilhamento funcionar pra quem recebe, mesmo sem conta na casa.
+  // playlist privada cai pro fluxo autenticado normal logo abaixo.
+  const idParam = url.searchParams.get('id');
+  if (request.method === 'GET' && idParam) {
+    const playlistPublica = await KV.get(idParam, { type: 'json' }).catch(() => null);
+    if (playlistPublica && playlistPublica.visibility === 'public') return json(playlistPublica);
+  }
+
   const user = await getUserFromRequest(request, env);
   if (!user) return json({ error: 'Não autenticado.' }, 401);
 
@@ -28,6 +37,14 @@ export async function onRequest(context) {
   const isAdminUser = isAdmin(activeProfile.email || user.email || '');
 
   if (request.method === 'GET') {
+    if (idParam) {
+      const playlist = await KV.get(idParam, { type: 'json' }).catch(() => null);
+      if (!playlist) return json({ error: 'Playlist não encontrada' }, 404);
+      if (!isAdminUser && playlist.ownerId !== activeProfile.id && playlist.visibility !== 'public') {
+        return json({ error: 'Sem permissão' }, 403);
+      }
+      return json(playlist);
+    }
     const list = await KV.list({ prefix: 'playlist:' });
     const items = await Promise.all(list.keys.map(k => KV.get(k.name, { type: 'json' })));
     const playlists = items.filter(Boolean).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
