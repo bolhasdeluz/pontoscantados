@@ -536,6 +536,13 @@ select option{background:#fff;color:#2a1a22}
 .playlist-item-actions{display:flex;gap:6px;flex-shrink:0}
 .playlist-item-actions button{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text-dim);cursor:pointer}
 .playlist-item-actions button:hover{border-color:var(--gold);color:var(--gold)}
+.vp-item{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:10px;cursor:pointer;transition:background .15s}
+.vp-item:hover{background:var(--gold-dim)}
+.vp-item-icon{flex-shrink:0;width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#c4396b,#e8688a);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff}
+.vp-item-info{flex:1;min-width:0}
+.vp-item-name{font-size:.86rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vp-item-sub{font-size:.72rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vp-empty{padding:20px 10px;text-align:center;color:var(--text-dim);font-style:italic;font-size:.85rem}
 .playlist-form{display:grid;gap:10px}
 .playlist-points{display:grid;gap:8px;max-height:220px;overflow:auto;padding-right:4px}
 .playlist-point-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(196,57,107,.12);border-radius:8px;background:#fcf8fa}
@@ -1038,6 +1045,14 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
   <div class="modal" style="max-width:560px">
     <button class="btn-close-modal" onclick="fecharModal('ov-detalhe')">✕</button>
     <div id="detalhe-body" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+</div>
+
+<!-- VER PLAYLIST (chegando de um link compartilhado, ou clicando numa playlist) -->
+<div class="overlay" id="ov-ver-playlist">
+  <div class="modal" style="max-width:520px">
+    <button class="btn-close-modal" onclick="fecharModal('ov-ver-playlist')">✕</button>
+    <div id="ver-playlist-body" style="display:flex;flex-direction:column;gap:14px"></div>
   </div>
 </div>
 
@@ -2544,11 +2559,92 @@ function renderPlaylists() {
         <div class="playlist-item-meta">${esc((p.items || []).length)} ponto(s) • ${p.visibility === 'public' ? 'Pública' : 'Privada'} • ${p.ownerName ? esc(p.ownerName) : (p.ownerEmail ? esc(p.ownerEmail) : 'Usuário')}</div>
       </div>
       <div class="playlist-item-actions">
+        <button onclick="verPlaylist('${p.id}')">Ver</button>
+        <button onclick="compartilharPlaylist('${p.id}')" title="Compartilhar">🔗</button>
         <button onclick="openPlaylistModal('${p.id}')">Editar</button>
         <button onclick="deletePlaylist('${p.id}')">Excluir</button>
       </div>
     </div>
   `).join('');
+}
+
+// ── ver/compartilhar playlist por link (#playlist-<id>) ──
+// playlist pública pode ser lida sem login (ver functions/api/playlists.js);
+// privada só abre pra quem já tem acesso (dona ou admin logados)
+let playlistEmVisualizacao = null;
+window.verPlaylist = async (id) => {
+  let playlist = playlists.find(pl => pl.id === id) || null;
+  if (!playlist) {
+    try {
+      const res = await fetch('/api/playlists?id=' + encodeURIComponent(id), authToken ? { headers: { Authorization: `Bearer ${authToken}` } } : {});
+      if (!res.ok) throw new Error('sem acesso');
+      playlist = await res.json();
+    } catch (e) {
+      toast('Não foi possível abrir essa playlist — ela pode ser privada ou ter sido removida.');
+      return;
+    }
+  }
+  playlistEmVisualizacao = playlist;
+  renderVerPlaylistModal(playlist);
+  abrirModal('ov-ver-playlist');
+};
+function renderVerPlaylistModal(playlist) {
+  const itens = (playlist.items || []).map(pid => pontos.find(p => p.id === pid)).filter(Boolean);
+  const body = document.getElementById('ver-playlist-body');
+  body.innerHTML = `
+    <div>
+      <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;color:#b02d5a;font-weight:600">${esc(playlist.name || 'Sem nome')}</h2>
+      ${playlist.description ? `<p style="color:var(--text-dim);font-size:.85rem;margin-top:4px">${esc(playlist.description)}</p>` : ''}
+      <p style="color:var(--text-dim);font-size:.76rem;margin-top:4px">${itens.length} ponto(s) • ${playlist.visibility === 'public' ? 'Pública' : 'Privada'}${playlist.ownerName ? ' • por ' + esc(playlist.ownerName) : ''}</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="detalhe-share-btn" onclick="tocarPlaylistView()">▶ Tocar tudo</button>
+      <button class="detalhe-share-btn" onclick="compartilharPlaylist('${playlist.id}')">🔗 Compartilhar</button>
+    </div>
+    <div>
+      ${itens.length ? itens.map(p => `
+        <div class="vp-item" onclick="fecharModal('ov-ver-playlist');abrirDetalhe('${p.id}')">
+          <div class="vp-item-icon">${p.audioUrl ? '🎙️' : extractYtId(p.yt) ? '📺' : '🎵'}</div>
+          <div class="vp-item-info">
+            <div class="vp-item-name">${esc(p.nome || '(sem nome)')}</div>
+            <div class="vp-item-sub">${esc([p.guia, p.linha].filter(Boolean).join(' · '))}</div>
+          </div>
+        </div>`).join('') : '<div class="vp-empty">Essa playlist ainda não tem pontos.</div>'}
+    </div>`;
+}
+window.tocarPlaylistView = () => {
+  const playlist = playlistEmVisualizacao;
+  if (!playlist) return;
+  const list = (playlist.items || [])
+    .map(pid => pontos.find(p => p.id === pid))
+    .filter(p => p && (p.audioUrl || extractYtId(p.yt)));
+  if (!list.length) { toast('Nenhum ponto com áudio nessa playlist.'); return; }
+  plList = list; plCurUrl = '';
+  document.getElementById('pl-bar').classList.add('open');
+  if (plShuffle) plBuildShuffleOrder(0);
+  plLoad(0);
+  plExpandFullscreen();
+  fecharModal('ov-ver-playlist');
+};
+window.compartilharPlaylist = async (id) => {
+  const p = playlists.find(pl => pl.id === id) || (playlistEmVisualizacao && playlistEmVisualizacao.id === id ? playlistEmVisualizacao : null);
+  if (!p) return;
+  if (p.visibility !== 'public') {
+    if (!confirm('Esta playlist é privada — o link só vai abrir pra quem já tem acesso a ela. Quer compartilhar mesmo assim?')) return;
+  }
+  const url = location.href.split('#')[0] + '#playlist-' + p.id;
+  const text = 'Playlist "' + (p.name || 'Sem nome') + '" — Pontos Cantados, Bolhas de Luz';
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Pontos Cantados', text, url }); } catch (e) { /* usuário cancelou */ }
+    return;
+  }
+  try { await navigator.clipboard.writeText(url); toast('Link copiado!'); }
+  catch (e) { toast('Não foi possível copiar o link'); }
+};
+function abrirPlaylistPeloHash() {
+  const m = (window.location.hash || '').match(/^#playlist-(.+)$/);
+  if (!m) return;
+  verPlaylist(decodeURIComponent(m[1]));
 }
 
 function populatePlaylistPointFilters() {
@@ -2804,6 +2900,7 @@ async function load() {
     syncFilhasFromData(); saveFilhas();
     renderCards();
     abrirPontoPeloHash();
+    abrirPlaylistPeloHash();
     await fetchAuthUser();
   } catch (e) {
     clearTimeout(timeout);
