@@ -3208,6 +3208,7 @@ function cardHtml(p) {
         style="${p.aprender ? 'color:#2a7a60;border-color:#b8ddd4;background:#e8f4f0' : ''}"
         onclick="toggleAprender('${p.id}',${!!p.aprender})">📚</button>
       <button class="icon-btn admin-only ${p.destaque ? 'star' : ''}" title="Sessão" onclick="toggleDestaque('${p.id}',${p.destaque})">★</button>
+      <button class="icon-btn" title="Compartilhar" onclick="event.stopPropagation();compartilharPonto('${p.id}')">🔗</button>
       <button class="icon-btn" title="Editar" onclick="openEdit('${p.id}')">✎</button>
       <button class="icon-btn admin-only del" title="Excluir" onclick="deletePonto('${p.id}')">✕</button>
     </div>
@@ -3273,6 +3274,7 @@ function makeListItem(p, i) {
     </div>
     <div class="li-actions">
       <button class="icon-btn admin-only ${p.destaque ? 'star' : ''}" style="width:26px;height:26px" title="Destaque" onclick="event.stopPropagation();toggleDestaque('${p.id}',${p.destaque})">★</button>
+      <button class="icon-btn" style="width:26px;height:26px" title="Compartilhar" onclick="event.stopPropagation();compartilharPonto('${p.id}')">🔗</button>
       <button class="icon-btn" style="width:26px;height:26px" title="Editar" onclick="event.stopPropagation();openEdit('${p.id}')">✎</button>
       <button class="icon-btn admin-only del" style="width:26px;height:26px" title="Excluir" onclick="event.stopPropagation();deletePonto('${p.id}')">✕</button>
     </div>`;
