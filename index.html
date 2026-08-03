@@ -635,6 +635,9 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 .ts-sel-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
 .ts-btn-usar{display:block;width:100%;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:10px 16px;border-radius:7px;cursor:pointer;border:none;background:var(--gold);color:#fff;transition:opacity .12s;box-shadow:0 2px 8px rgba(196,57,107,.2)}
 .ts-btn-usar:hover{opacity:.85}
+.ts-btn-cortar{display:block;width:100%;font-family:'Cinzel',serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:9px 16px;border-radius:7px;cursor:pointer;border:1px solid rgba(184,64,64,.3);background:var(--red-dim);color:var(--red);transition:all .12s;margin-top:8px}
+.ts-btn-cortar:hover{background:rgba(184,64,64,.16)}
+.ts-btn-cortar:disabled{opacity:.45;cursor:not-allowed}
 .ts-btn-ok-ol{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid #b8ddd4;background:transparent;color:#2a7a60;transition:all .12s}
 .ts-btn-ok-ol:hover{background:#2a7a60;color:#fff}
 .ts-sess-empty{font-size:13px;color:var(--text-dim);font-style:italic;padding:4px 0}
@@ -1321,6 +1324,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
           </div>
           <div class="ts-sel-text" id="ts-sel-text"></div>
           <button class="ts-btn-usar" id="ts-btn-usar">✦ Usar como Ponto</button>
+          <button class="ts-btn-cortar" id="ts-btn-cortar-fora" title="Remove esse trecho do áudio de verdade — o resto desloca pra trás. Precisa do arquivo local carregado.">🗑 Cortar trecho fora do áudio</button>
           <div class="ts-sel-actions">
             <button class="ts-btn-ok-ol" id="ts-btn-ouvir">▶ Ouvir trecho</button>
             <button class="ts-btn-ok-ol" id="ts-btn-dl-clip">⬇ Baixar áudio</button>
@@ -1503,6 +1507,51 @@ window.tsExtractClipBlob = async function (file, startSec, endSec, statusCb) {
     return { blob, ext, mime };
   } catch (e) {
     console.error('ffmpeg clip error:', e);
+    statusCb && statusCb('Erro: ' + e.message);
+    return null;
+  }
+};
+
+// Corta fora [cutStart, cutEnd) do arquivo — mantém o resto, concatenando (stream-copy,
+// sem recodificar) o pedaço antes do corte com o pedaço depois. Usado pra remover
+// silêncio/trechos sem interesse e encurtar a gravação.
+window.tsCutOut = async function (file, cutStart, cutEnd, statusCb) {
+  try {
+    statusCb && statusCb('Carregando motor de áudio (1ª vez)…');
+    const ff = await ensureFFmpeg();
+    const ext = (file.name.split('.').pop() || 'm4a').toLowerCase();
+    const inName = 'cut_in.' + ext, partAName = 'cut_a.' + ext, partBName = 'cut_b.' + ext,
+      outName = 'cut_out.' + ext, listName = 'cut_list.txt';
+
+    statusCb && statusCb('Lendo arquivo…');
+    const data = await fetchFile(file);
+    await ff.writeFile(inName, data);
+
+    const hasA = cutStart > 0.05;
+    if (hasA) {
+      statusCb && statusCb('Recortando parte antes do corte…');
+      await ff.exec(['-ss', '0', '-to', fmtFFTime(cutStart), '-i', inName, '-c', 'copy', partAName]);
+    }
+    statusCb && statusCb('Recortando parte depois do corte…');
+    await ff.exec(['-ss', fmtFFTime(cutEnd), '-i', inName, '-c', 'copy', partBName]);
+
+    statusCb && statusCb('Juntando as partes…');
+    const listContent = (hasA ? `file '${partAName}'\n` : '') + `file '${partBName}'\n`;
+    await ff.writeFile(listName, new TextEncoder().encode(listContent));
+    await ff.exec(['-f', 'concat', '-safe', '0', '-i', listName, '-c', 'copy', outName]);
+
+    const out = await ff.readFile(outName);
+    for (const n of [inName, hasA ? partAName : null, partBName, outName, listName]) {
+      if (!n) continue;
+      try { await ff.deleteFile(n); } catch {}
+    }
+
+    const mime = MIME_BY_EXT[ext] || 'audio/mpeg';
+    const blob = new Blob([out.buffer], { type: mime });
+    statusCb && statusCb('');
+    return { blob, ext, mime };
+  } catch (e) {
+    console.error('ffmpeg cut error:', e);
     statusCb && statusCb('Erro: ' + e.message);
     return null;
   }
@@ -4880,6 +4929,79 @@ g('ts-btn-usar').addEventListener('click',async ()=>{
     toast('Arraste o arquivo de áudio no estúdio pra anexar o som');
   }
 });
+
+// ── cortar um trecho fora do áudio de verdade (remove e desloca o resto pra trás) ──
+g('ts-btn-cortar-fora').addEventListener('click',()=>cortarTrechoAtual());
+async function cortarTrechoAtual(){
+  if(selS===null||selE===null){ toast('Selecione um trecho primeiro (I/O ou arrastar na waveform)'); return; }
+  if(!tsFile){ toast('Recarregue/arraste o arquivo de áudio local pra poder cortar — não dá pra cortar tocando só da nuvem'); return; }
+  const cutStart=selS, cutEnd=selE, cutDur=cutEnd-cutStart;
+  if(cutDur<=0.05){ toast('Trecho muito curto pra cortar'); return; }
+
+  const oldR2Url=r2url;
+  // pontos já publicados usando o MESMO áudio, com início depois do corte (deslocam) ou dentro dele (ficam inválidos)
+  const afetados = oldR2Url ? pontos.filter(p=>p.audioUrl===oldR2Url && p.audioStart!=null && p.audioStart>=cutEnd) : [];
+  const dentroDoCorte = oldR2Url ? pontos.filter(p=>p.audioUrl===oldR2Url && p.audioStart!=null && p.audioStart>=cutStart && p.audioStart<cutEnd) : [];
+
+  let msg='Cortar '+fmt(cutDur)+' (de '+fmt(cutStart)+' até '+fmt(cutEnd)+')?\n\nEssa parte do áudio será removida de verdade, e tudo que vem depois desloca '+fmt(cutDur)+' pra trás (marcações, partes da sessão e transcrição são ajustadas automaticamente).';
+  if(afetados.length) msg+='\n\n'+afetados.length+' Ponto(s) Cantado(s) já publicados usam esse áudio depois do corte — os tempos deles serão ajustados automaticamente.';
+  if(dentroDoCorte.length) msg+='\n\n⚠️ '+dentroDoCorte.length+' Ponto(s) Cantado(s) publicados começam DENTRO do trecho que você está cortando — o início deles vai ficar inválido. Confira/edite eles depois de cortar.';
+  if(!confirm(msg)) return;
+
+  const btn=g('ts-btn-cortar-fora'); btn.disabled=true;
+  toast('Cortando áudio…');
+  const result=await window.tsCutOut(tsFile,cutStart,cutEnd,s=>{ if(s) toast(s); });
+  if(!result){ toast('Falha ao cortar o áudio.'); btn.disabled=false; return; }
+
+  const {blob,ext,mime}=result;
+  const newFile=new File([blob],(tsFile.name.replace(/\.[^.]+$/,'')||'sessao')+'.'+ext,{type:mime});
+
+  if(lastBlobUrl){ try{URL.revokeObjectURL(lastBlobUrl);}catch{} }
+  tsFile=newFile;
+  lastBlobUrl=URL.createObjectURL(newFile);
+  audCloud=false;
+  aud.pause(); aud.src=lastBlobUrl; aud.load();
+  const goToCut=()=>{ try{aud.currentTime=cutStart;}catch{} };
+  aud.onloadedmetadata=goToCut;
+
+  // desloca marcações/seções/transcrição que já estavam carregadas nesta tela
+  const shift=t=> t>=cutEnd ? t-cutDur : (t>=cutStart ? cutStart : t);
+  markers = markers.filter(m=>!(m.t>=cutStart&&m.t<cutEnd)).map(m=>({...m,t:shift(m.t)}));
+  sections = sections.map(s=>({...s,start:shift(s.start),end:shift(s.end)})).filter(s=>s.end>s.start);
+  words = words.filter(w=>!(w.start>=cutStart&&w.start<cutEnd)).map(w=>({...w,start:shift(w.start),end:shift(w.end)}));
+  wfDur=Math.max(0,wfDur-cutDur);
+  activeSecIdx=-1;
+  clearSel();
+  renderSections(); updateSecFilterBar(); renderWords(); renderMarkers();
+  showNoWaveformHint();
+  drawAll();
+
+  // reenvia o áudio cortado pra nuvem e reaponta os pontos afetados pra ele
+  r2url='';
+  toast('Enviando áudio cortado…');
+  let newUrl='';
+  try{
+    const big=newFile.size>CF_BODY_LIMIT_MB*1024*1024;
+    newUrl = big ? await uploadChunkedToR2(newFile,p=>toast('Enviando… '+p+'%')) : await uploadAudioToR2(newFile);
+  }catch(e){ newUrl=''; }
+  if(newUrl){
+    r2url=newUrl;
+    if(loadedSessIdx>=0){ const l=getSess(); if(l[loadedSessIdx]){ l[loadedSessIdx].r2url=newUrl; l[loadedSessIdx].sections=sections; l[loadedSessIdx].markersData=markers; l[loadedSessIdx].data=words; putSess(l); } }
+
+    for(const p of [...afetados,...dentroDoCorte]){
+      const novoStart = p.audioStart>=cutEnd ? p.audioStart-cutDur : cutStart;
+      const novoEnd = p.audioEnd!=null ? (p.audioEnd>=cutEnd ? p.audioEnd-cutDur : (p.audioEnd>=cutStart?cutStart:p.audioEnd)) : p.audioEnd;
+      try{
+        const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:p.id,audioUrl:newUrl,audioStart:novoStart,audioEnd:novoEnd})});
+        if(res.ok){ const updated=await res.json(); const idx=pontos.findIndex(x=>x.id===p.id); if(idx>=0) pontos[idx]=updated; }
+      }catch(e){}
+    }
+    toast('Trecho removido ✓'+(afetados.length||dentroDoCorte.length?' — pontos publicados atualizados':''));
+  }else{
+    toast('Áudio cortado localmente, mas não deu pra reenviar pra nuvem agora — tenta usar "Usar como Ponto" de novo mais tarde pra subir.');
+  }
+  btn.disabled=false;
+}
 
 // ── busca ──
 g('ts-search').addEventListener('input',e=>{
