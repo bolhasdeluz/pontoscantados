@@ -10,12 +10,23 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh;display:flex;flex-direction:column}
 
-/* ── LINHA BOLHAS DE LUZ (dentro do próprio header rosa, sem quebrar o bloco) ── */
-.topo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-.topo-bdl-home{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.9);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:5px 12px;transition:background .18s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.topo-bdl-home:hover{background:rgba(255,255,255,.25)}
-#menu-hint-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.28);border-radius:20px;color:rgba(255,255,255,.9);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;padding:5px 12px;display:inline-flex;align-items:center;gap:6px;transition:background .18s}
-#menu-hint-btn:hover{background:rgba(255,255,255,.25)}
+/* ── TOPO PADRÃO DO SITE — boas-vindas + Ferramentas (mesmo visual do
+   homepage/Biblioteca Digital), igual em toda a casa ── */
+#boas-vindas{display:none;position:fixed;top:0;left:0;right:0;z-index:600;background:rgba(253,246,238,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(8px);padding:5px 16px;box-shadow:0 1px 8px rgba(196,90,30,.06)}
+#boas-vindas-inner{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;max-width:700px;margin:0 auto}
+#bv-emoji{font-size:.85rem}
+#bv-nome{font-family:'Cinzel',serif;font-size:.65rem;font-weight:700;letter-spacing:.05em;color:var(--text)}
+#bv-cargo{font-family:'Crimson Pro',serif;font-size:.78rem;color:var(--text-dim);font-style:italic}
+#bv-sep,#bv-sep2{color:rgba(196,90,30,.3);font-size:.65rem}
+#bv-tempo{font-family:'Crimson Pro',serif;font-size:.78rem;color:var(--gold);font-style:italic}
+#user-logout-btn{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.07em;color:var(--text-dim);background:rgba(253,246,238,.9);border:1px solid var(--border);border-radius:16px;padding:4px 10px;cursor:pointer;margin-left:8px}
+#user-logout-btn:hover{color:var(--gold);border-color:rgba(196,57,107,.3)}
+#bv-entrar{padding:5px 15px;font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.06em;background:var(--gold);color:#fff;border:none;border-radius:16px;cursor:pointer}
+
+#menu-hint{position:fixed;top:0;left:0;right:0;z-index:595;display:flex;align-items:center;justify-content:center;padding:10px 20px 11px;background:rgba(253,246,238,.96);border-bottom:1px solid rgba(196,90,30,.14);box-shadow:0 1px 8px rgba(196,90,30,.06);backdrop-filter:blur(8px);transition:top .25s ease}
+#menu-hint-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:9px;opacity:.85;transition:opacity .2s;padding:3px 4px}
+#menu-hint-btn:hover{opacity:1}
+#menu-hint-label{font-family:'Cinzel',serif;font-size:.66rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 #hint-arrow-svg{transition:transform .28s cubic-bezier(.4,0,.2,1)}
 #menu-hint-btn.open #hint-arrow-svg{transform:rotate(180deg)}
 
@@ -679,6 +690,54 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 </head>
 <body>
 
+<div id="boas-vindas">
+  <div id="boas-vindas-inner">
+    <div id="bv-logged" style="display:none;align-items:center;gap:7px;flex-wrap:wrap">
+      <span id="bv-emoji"></span>
+      <span id="bv-nome"></span>
+      <span id="bv-sep">·</span>
+      <span id="bv-cargo"></span>
+      <span id="bv-sep2">·</span>
+      <span id="bv-tempo"></span>
+      <button id="user-logout-btn" onclick="logout()">Sair</button>
+    </div>
+    <div id="bv-guest" style="display:none;align-items:center;gap:9px">
+      <span style="font-family:'Crimson Pro',Georgia,serif;font-size:.78rem;color:var(--text-dim);font-style:italic">✦ Bolhas de Luz</span>
+      <button id="bv-entrar" onclick="loginWithGoogle()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="menu-hint">
+  <button id="menu-hint-btn" onclick="toggleDrawer()">
+    <span id="menu-hint-label">Ferramentas</span>
+    <svg width="16" height="10" viewBox="0 0 20 12" fill="none" id="hint-arrow-svg"><path d="M1 1l9 9 9-9" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<script>
+// mostra a barra "✦ Bolhas de Luz" assim que a página carrega, sem esperar
+// o Firebase responder (mesma técnica usada no homepage/Biblioteca Digital)
+(function() {
+  try {
+    document.getElementById('bv-guest').style.display = 'flex';
+    document.getElementById('boas-vindas').style.display = 'block';
+    // ajusta a posição do "Ferramentas" já de cara — sem isso ele fica
+    // empilhado embaixo do boas-vindas (z-index maior) e rouba o clique
+    requestAnimationFrame(() => {
+      const banner = document.getElementById('boas-vindas');
+      const hint = document.getElementById('menu-hint');
+      const header = document.querySelector('header');
+      const alturaBanner = banner.offsetHeight;
+      hint.style.top = alturaBanner + 'px';
+      const alturaHint = hint.offsetHeight;
+      if (header) header.style.top = (alturaBanner + alturaHint) + 'px';
+      document.body.style.paddingTop = (alturaBanner + alturaHint) + 'px';
+    });
+  } catch (e) {}
+})();
+</script>
+
 <div id="drawer-overlay" onclick="closeDrawer()"></div>
 <div id="drawer">
   <div class="drawer-handle" onclick="closeDrawer()"><div class="drawer-handle-pill"></div></div>
@@ -700,7 +759,7 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
     <div class="drawer-section" id="drawer-corrente" style="display:none">
       <div class="drawer-section-label">Corrente</div>
       <a class="drawer-link" href="https://bolhasdeluz.ong.br/tesouraria"><span class="drawer-dot mem"></span>Tesouraria</a>
-      <a class="drawer-link" href="https://bolhasdeluz.ong.br/filhas"><span class="drawer-dot mem"></span>Filhas da Casa</a>
+      <a class="drawer-link" href="https://bolhasdeluz.ong.br/filhas"><span class="drawer-dot mem"></span>Corrente da Casa</a>
       <a class="drawer-link" href="https://regimentointerno.bolhasdeluz.workers.dev/" target="_blank"><span class="drawer-dot mem"></span>Regimento Interno</a>
     </div>
   </div>
@@ -708,27 +767,12 @@ input.ts-time-input{width:84px;flex:0 0 auto;background:#fff;border:1px solid va
 </div>
 
 <header>
-  <div class="topo-row">
-    <a class="topo-bdl-home" href="https://bolhasdeluz.ong.br" onclick="voltarParaHomepage('jogos');return false">✦ Bolhas de Luz</a>
-    <button id="menu-hint-btn" onclick="toggleDrawer()">
-      Ferramentas
-      <svg width="12" height="8" viewBox="0 0 20 12" fill="none" id="hint-arrow-svg"><path d="M1 1l9 9 9-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-  </div>
   <div class="hi">
     <div>
       <h1>Pontos</h1>
       <p id="subtitle">Bolhas de Luz</p>
     </div>
     <div class="hr">
-      <div class="header-user-pill is-guest" id="header-user-pill" onclick="handleHeaderPillClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')handleHeaderPillClick()">
-        <img class="header-user-avatar" id="header-user-avatar" src="https://placehold.co/40x40?text=U" alt="avatar">
-        <span class="header-user-text">
-          <span class="header-user-name" id="header-user-name">Entrar</span>
-          <span class="header-user-meta" id="header-user-meta">com Google</span>
-        </span>
-        <button class="header-logout-btn" id="header-logout-btn" type="button" onclick="event.stopPropagation();logout()" style="display:none">Sair</button>
-      </div>
       <div class="sw">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Buscar ponto…" oninput="renderCardsDebounced()">
@@ -1604,6 +1648,84 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 
+// empilha boas-vindas + Ferramentas + o <header> rosa (que é sticky) um
+// embaixo do outro, igual ao homepage/Biblioteca Digital — só que aqui tem
+// uma terceira camada (o header rosa) que também precisa saber onde parar
+function ajustarTopoFixoPontos() {
+  requestAnimationFrame(() => {
+    const banner = document.getElementById('boas-vindas');
+    const hint = document.getElementById('menu-hint');
+    const header = document.querySelector('header');
+    if (!banner || !hint || !header) return;
+    const alturaBanner = banner.style.display !== 'none' ? banner.offsetHeight : 0;
+    hint.style.top = alturaBanner + 'px';
+    const alturaHint = hint.offsetHeight;
+    header.style.top = (alturaBanner + alturaHint) + 'px';
+    document.body.style.paddingTop = (alturaBanner + alturaHint) + 'px';
+  });
+}
+window.addEventListener('resize', ajustarTopoFixoPontos);
+
+function calcTempoPontos(dataStr) {
+  if (!dataStr) return null;
+  const inicio = new Date(dataStr + 'T12:00:00');
+  const hoje = new Date();
+  let anos = hoje.getFullYear() - inicio.getFullYear();
+  let meses = hoje.getMonth() - inicio.getMonth();
+  let dias = hoje.getDate() - inicio.getDate();
+  if (dias < 0) { meses--; dias += new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate(); }
+  if (meses < 0) { anos--; meses += 12; }
+  const p = [];
+  if (anos > 0) p.push(anos + (anos === 1 ? ' ano' : ' anos'));
+  if (meses > 0) p.push(meses + (meses === 1 ? ' mês' : ' meses'));
+  if (dias > 0) p.push(dias + (dias === 1 ? ' dia' : ' dias'));
+  if (!p.length) return 'Recém chegada';
+  return p.length === 1 ? p[0] : p.slice(0, -1).join(', ') + ' e ' + p[p.length - 1];
+}
+
+// barra "✦ Bolhas de Luz" do topo — mesmo padrão do homepage/Biblioteca
+// Digital, mas a identidade (cargo, tempo de casa) vem do perfil do site
+// principal: aqui (Pontos Cantados) o login é o mesmo Firebase, mas o
+// perfil de dados (cargo, história) só existe lá, não duplicado aqui
+async function atualizarBoasVindasPontos() {
+  const banner = document.getElementById('boas-vindas');
+  const logged = document.getElementById('bv-logged');
+  const guest = document.getElementById('bv-guest');
+
+  if (!authUser || !authUser.email) {
+    logged.style.display = 'none';
+    guest.style.display = 'flex';
+    banner.style.display = 'block';
+    ajustarTopoFixoPontos();
+    return;
+  }
+
+  let perfil = {};
+  try {
+    const res = await fetch('https://bolhasdeluz.ong.br/api/perfil?email=' + encodeURIComponent(authUser.email));
+    perfil = await res.json();
+  } catch (e) { perfil = {}; }
+
+  const nomeCompleto = perfil.nome || authUser.name || '';
+  const cargo = perfil.cargo || '';
+  const emoji = perfil.emoji || '✦';
+  const tempo = calcTempoPontos(perfil.historia && perfil.historia.data_entrada);
+  const tempoTexto = tempo ? tempo + ' de casa' : '';
+
+  document.getElementById('bv-emoji').textContent = emoji;
+  document.getElementById('bv-nome').textContent = (nomeCompleto.split(' ')[0]) || authUser.email;
+  document.getElementById('bv-cargo').textContent = cargo;
+  document.getElementById('bv-tempo').textContent = tempoTexto;
+  document.getElementById('bv-sep').style.display = cargo ? '' : 'none';
+  document.getElementById('bv-sep2').style.display = tempoTexto ? '' : 'none';
+
+  guest.style.display = 'none';
+  logged.style.display = 'flex';
+  banner.style.display = 'block';
+  ajustarTopoFixoPontos();
+}
+window.atualizarBoasVindasPontos = atualizarBoasVindasPontos;
+
 // ── CONFIGURAÇÃO ──
 // Para trocar a senha: substitua o valor de ADMIN_HASH por btoa('nova_senha')
 const ADMIN_HASH = btoa('terreiro');
@@ -2369,6 +2491,7 @@ function renderProfileState() {
   const btn = document.getElementById('profile-login-btn');
   const input = document.getElementById('firebaseConfigInput');
   renderHeaderUserBadge();
+  atualizarBoasVindasPontos();
   syncAdminFromAuth();
   const drawerCorrente = document.getElementById('drawer-corrente');
   if (drawerCorrente) drawerCorrente.style.display = authUser ? 'block' : 'none';
