@@ -136,9 +136,10 @@ header p{color:rgba(255,255,255,.6);font-size:.7rem;margin-top:1px}
 .cplayer-controls{display:flex;align-items:center;gap:8px;margin-top:8px}
 .cplayer-btn{background:var(--gold);border:none;border-radius:8px;color:#fff;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all .18s}
 .cplayer-btn:hover{background:#b02d5a}
-.cplayer-segment{font-size:.7rem;color:#8c5a00;background:#fffbe8;border:1px solid #e8c860;border-radius:6px;padding:3px 8px;flex:1;text-align:center}
-.cplayer-loop{background:transparent;border:1.5px solid var(--gold);color:var(--gold)}
-.cplayer-loop:hover{background:var(--gold-dim);color:var(--gold)}
+.cplayer-segment{font-size:.7rem;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(196,57,107,.25);border-radius:6px;padding:3px 8px;flex:1;text-align:center}
+.cplayer-loop{background:transparent;border:1.5px solid var(--gold);color:var(--gold);padding:0}
+.cplayer-loop svg{width:16px;height:16px;display:block}
+.cplayer-loop:hover{background:var(--gold-dim)}
 .cplayer-loop.loop-on{background:var(--gold);color:#fff;border-color:var(--gold)}
 
 /* ── SEGMENTOS ── */
@@ -3260,7 +3261,7 @@ function buildAudioPlayer(p) {
     </div>
     <div class="cplayer-controls">
       <button class="cplayer-btn" onclick="cpToggle('${pid}',${start || 'null'})" id="${pid}-playbtn">▶</button>
-      <button class="cplayer-btn cplayer-loop" onclick="cpLoop('${pid}')" id="${pid}-loopbtn" title="Repetir o trecho">🔁</button>
+      <button class="cplayer-btn cplayer-loop" onclick="cpLoop('${pid}')" id="${pid}-loopbtn" title="Repetir o trecho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
       ${segLabel ? `<span class="cplayer-segment">${segLabel}</span>` : ''}
     </div>
   </div>`;
