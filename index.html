@@ -2598,33 +2598,25 @@ async function loginWithGoogle() {
     firebaseApp = window.firebase.initializeApp(cfg);
     firebaseAuth = window.firebase.auth();
   }
-  try {
-    await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
-  } catch (e) {
-    logAuth(`Aviso: falha ao definir persistência — ${e?.message || e}`);
-  }
+  // não dá "await" aqui antes do popup — no Safari/iOS, qualquer espera
+  // async antes de abrir o popup quebra a ligação com o toque que disparou
+  // tudo isso, e o Safari passa a tratar o popup como bloqueado/navegação
+  // cheia em vez de abrir normalmente
+  firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL)
+    .catch(e => logAuth(`Aviso: falha ao definir persistência — ${e?.message || e}`));
 
   const provider = new window.firebase.auth.GoogleAuthProvider();
   provider.addScope('profile');
   provider.addScope('email');
 
-  // No iOS, o "popup" do Google costuma virar uma navegação de página inteira
-  // (o Safari não sustenta uma janela separada), o que orfaniza a Promise do
-  // signInWithPopup sem lançar nenhum erro — dá a sensação de "não aconteceu
-  // nada". Por isso, em celular, vamos direto de redirect (fluxo desenhado
-  // pelo próprio Firebase pra esse cenário); no desktop usamos popup.
-  if (isMobileAuthDevice()) {
-    try {
-      logAuth('Chamando signInWithRedirect()…');
-      await firebaseAuth.signInWithRedirect(provider);
-      logAuth('signInWithRedirect() retornou sem erro (a página deve navegar agora).');
-      toast('Abrindo login do Google…');
-    } catch (e) {
-      showAuthError('abrir redirect do Google', e);
-    }
-    return;
-  }
-
+  // Testamos signInWithRedirect no celular (é o fluxo que o próprio Firebase
+  // recomenda pra iOS), mas na prática ele vem falhando no Safari com
+  // "missing initial state" — o iOS particiona/derruba o sessionStorage no
+  // domínio do firebaseapp.com durante a ida-e-volta do Google, e a pessoa
+  // fica travada numa página de erro do próprio Firebase, fora do nosso site,
+  // sem conseguir nem tentar de novo. Voltamos a usar popup em todo
+  // dispositivo — é o mesmo caminho que já funciona no site principal e na
+  // Biblioteca Digital.
   try {
     logAuth('Chamando signInWithPopup()…');
     const result = await firebaseAuth.signInWithPopup(provider);

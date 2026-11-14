@@ -312,7 +312,7 @@ header{background:linear-gradient(135deg,#c0405a,#d4607a 60%,#e07a90);padding:14
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, setDoc, increment, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
+import { getAuth, GoogleAuthProvider, signInWithPopup, getRedirectResult,
   signInWithCustomToken, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
@@ -404,12 +404,14 @@ onAuthStateChanged(auth, user => {
   try{ await getRedirectResult(auth); }catch(e){}
 })();
 
+// signInWithRedirect no celular vinha travando no Safari/iOS com "missing
+// initial state" (o iOS derruba o sessionStorage do domínio do Firebase no
+// meio da ida-e-volta do Google) — voltamos a usar popup em todo
+// dispositivo, igual ao catálogo (index.html) e ao resto do site
 window.jogoFazerLogin = async () => {
   const provider = new GoogleAuthProvider();
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   try{
-    if(isMobile) await signInWithRedirect(auth, provider);
-    else await signInWithPopup(auth, provider);
+    await signInWithPopup(auth, provider);
   }catch(e){ console.error('Login com Google falhou:', e); }
 };
 window.jogoLogout = () => signOut(auth).catch(() => {});
